@@ -1,6 +1,6 @@
 # Data and configuration
 
-All of Skylight's files use Java's standard **`.properties`** format (`key=value` lines), so no JSON library is needed. Java 8 reads and writes these files as ISO-8859-1, escaping other characters as `é`; Skylight's own code handles that, but keep it in mind when editing by hand.
+All of Skylight's files use Java's standard **`.properties`** format (`key=value` lines), so no JSON library is needed. Java 8 reads and writes these files as ISO-8859-1, escaping other characters as `\u00e9`; Skylight's own code handles that, but keep it in mind when editing by hand.
 
 ## apps/apps.txt
 

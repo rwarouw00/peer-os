@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The Web Browser: Swing's HTML viewer (HTML 3.2), in a gadget filled by app.py. -->
+<xul>
+	<vbox id="browser">
+		<hbox>
+			<button label="Back" command="back"/>
+			<button label="Reload" command="reload"/>
+			<textbox id="address" cols="40" flex="1"/>
+			<button label="Go" command="go"/>
+		</hbox>
+		<gadget id="page" flex="1"/>
+	</vbox>
+</xul>

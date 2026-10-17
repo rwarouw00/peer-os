@@ -25,4 +25,4 @@ App windows open centred over the desktop. The folder name may use only lowercas
 
 Manifests are read once per login. FXML and script files are read each time the app opens, so changes pushed to the store show up when you next open the app.
 
-Non-ASCII characters in `.properties` files must be written as `\u` escapes (for example `title=Café`), because Java 8 reads these files as ISO-8859-1. FXML and `.js` files are UTF-8.
+Non-ASCII characters in `.properties` files must be written as `\u` escapes (for example `title=Caf\u00e9`), because Java 8 reads these files as ISO-8859-1. FXML and `.js` files are UTF-8.

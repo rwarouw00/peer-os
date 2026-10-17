@@ -22,4 +22,4 @@ icon.64=icons/64.png
 
 App windows open centred over the desktop. The folder name may use only lowercase letters, digits and `-` (`apps/my-app/`). If the manifest is missing or incomplete, or the class can't be loaded, the user gets a "Cannot open app" notification explaining why.
 
-Non-ASCII characters in `.properties` files must be written as `\u` escapes (for example `title=Café`), because Java reads these files as ISO-8859-1.
+Non-ASCII characters in `.properties` files must be written as `\u` escapes (for example `title=Caf\u00e9`), because Java reads these files as ISO-8859-1.

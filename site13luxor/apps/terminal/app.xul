@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The Terminal: type Python, click Run. -->
+<xul>
+	<vbox id="terminal">
+		<hbox>
+			<button label="Run" command="run"/>
+			<button label="Clear output" command="clearOutput"/>
+			<spacer flex="1"/>
+			<label value="Jython 2.1. app is this app.  "/>
+		</hbox>
+		<textarea id="code" rows="10" cols="60" flex="3" style="font: 13 monospace;"/>
+		<textarea id="output" rows="6" cols="60" flex="2" style="font: 13 monospace; color: green;"/>
+	</vbox>
+</xul>

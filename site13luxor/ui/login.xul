@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The login window. Skylight uses the ids username, password and message,
+     and the commands logIn and quit. -->
+<xul>
+	<vbox id="login">
+		<label value="Skylight OS" style="font: 22 bold sans-serif;"/>
+		<spacer style="height: 12;"/>
+		<hbox>
+			<label value="Username:" style="width: 90;"/>
+			<textbox id="username" cols="18"/>
+		</hbox>
+		<spacer style="height: 6;"/>
+		<hbox>
+			<label value="Password:" style="width: 90;"/>
+			<password id="password" cols="18"/>
+		</hbox>
+		<label id="message" value="Enter your username and password." style="color: gray;"/>
+		<hbox>
+			<spacer flex="1"/>
+			<button label="Quit" command="quit"/>
+			<button label="Log In" command="logIn"/>
+		</hbox>
+	</vbox>
+</xul>
