@@ -1,0 +1,4 @@
+*.pyc
+*.pywc
+data/users.json
+data/users/
