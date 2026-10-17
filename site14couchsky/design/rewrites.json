@@ -1,0 +1,7 @@
+[
+	{ "from": "", "to": "index.html" },
+	{ "from": "system/apps.json", "to": "_view/apps" },
+	{ "from": "apps/:app/app.json", "to": "../../:app" },
+	{ "from": "apps/:app/*", "to": "../../:app/*" },
+	{ "from": "*", "to": "*" }
+]
