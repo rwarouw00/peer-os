@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?language javascript?>
+<!-- Web Browser: JavaFX's built-in WebView, with back, forward, reload and an address bar. -->
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.WebView?>
+<BorderPane xmlns:fx="http://javafx.com/fxml">
+	<top>
+		<ToolBar>
+			<Button text="◀" onAction="go(-1)"/>
+			<Button text="▶" onAction="go(1)"/>
+			<Button text="↻" onAction="view.getEngine().reload()"/>
+			<TextField fx:id="address" promptText="https://" HBox.hgrow="ALWAYS" onAction="openAddress(address.getText())"/>
+		</ToolBar>
+	</top>
+	<center>
+		<WebView fx:id="view"/>
+	</center>
+
+	<fx:script><![CDATA[
+		var engine = view.getEngine();
+		engine.loadContent("<html><body style='font-family: sans-serif; color: #444; margin: 40px'>" +
+			"<h2>Skylight Web Browser</h2><p>Type an address above and press Enter.</p></body></html>");
+
+		// Keep the address bar in step with links the user follows.
+		// (Naming the listener type picks between addListener's two versions.)
+		engine.locationProperty().addListener(new javafx.beans.value.ChangeListener(function (property, old, location) {
+			address.setText(location);
+		}));
+
+		function openAddress(url) {   // not "load": that name is taken by Nashorn
+			url = url.trim();
+			engine.load(/^[a-z]+:/i.test(url) ? url : 'http://' + url);
+		}
+
+		function go(step) {
+			var history = engine.getHistory();
+			var target = history.getCurrentIndex() + step;
+			if (target >= 0 && target < history.getEntries().size()) {
+				history.go(step);
+			}
+		}
+	]]></fx:script>
+</BorderPane>

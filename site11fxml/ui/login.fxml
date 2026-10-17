@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The login window. Its controller is the Desktop: #logIn and #quit are methods there. -->
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<GridPane xmlns:fx="http://javafx.com/fxml" hgap="10" vgap="10">
+	<padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+	<Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+	<TextField fx:id="username" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+	<Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+	<PasswordField fx:id="password" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+	<Label fx:id="loginError" wrapText="true" maxWidth="240" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+	<HBox spacing="8" alignment="CENTER_RIGHT" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2">
+		<Button text="Quit" cancelButton="true" onAction="#quit"/>
+		<Button text="Log In" defaultButton="true" onAction="#logIn"/>
+	</HBox>
+</GridPane>

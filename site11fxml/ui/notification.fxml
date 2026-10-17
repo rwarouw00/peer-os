@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- One notification: used in the home menu and, styled as "toast", for pop-ups. -->
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<HBox xmlns:fx="http://javafx.com/fxml" spacing="6">
+	<VBox spacing="2" HBox.hgrow="ALWAYS">
+		<Label fx:id="header" styleClass="notification-header"/>
+		<Label fx:id="body" wrapText="true"/>
+	</VBox>
+	<Button fx:id="close" text="×" styleClass="close-button"/>
+</HBox>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?language javascript?>
+<!-- Settings: desktop background, and how long notifications stay on screen. -->
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="10">
+	<padding><Insets top="14" right="14" bottom="14" left="14"/></padding>
+	<fx:define>
+		<ToggleGroup fx:id="backgrounds"/>
+	</fx:define>
+
+	<Label text="Background" styleClass="heading"/>
+	<TilePane hgap="8" vgap="8" prefColumns="3">
+		<ToggleButton toggleGroup="$backgrounds" userData="images/backgrounds/1.jpg" onAction="choose(event.source)">
+			<graphic><ImageView><Image url="@../../images/backgrounds/1.jpg" requestedWidth="128" requestedHeight="80" backgroundLoading="true"/></ImageView></graphic>
+		</ToggleButton>
+		<ToggleButton toggleGroup="$backgrounds" userData="images/backgrounds/2.jpg" onAction="choose(event.source)">
+			<graphic><ImageView><Image url="@../../images/backgrounds/2.jpg" requestedWidth="128" requestedHeight="80" backgroundLoading="true"/></ImageView></graphic>
+		</ToggleButton>
+		<ToggleButton toggleGroup="$backgrounds" userData="images/backgrounds/3.jpg" onAction="choose(event.source)">
+			<graphic><ImageView><Image url="@../../images/backgrounds/3.jpg" requestedWidth="128" requestedHeight="80" backgroundLoading="true"/></ImageView></graphic>
+		</ToggleButton>
+		<ToggleButton toggleGroup="$backgrounds" userData="images/backgrounds/4.jpg" onAction="choose(event.source)">
+			<graphic><ImageView><Image url="@../../images/backgrounds/4.jpg" requestedWidth="128" requestedHeight="80" backgroundLoading="true"/></ImageView></graphic>
+		</ToggleButton>
+		<ToggleButton toggleGroup="$backgrounds" userData="images/backgrounds/5.jpg" onAction="choose(event.source)">
+			<graphic><ImageView><Image url="@../../images/backgrounds/5.jpg" requestedWidth="128" requestedHeight="80" backgroundLoading="true"/></ImageView></graphic>
+		</ToggleButton>
+		<ToggleButton toggleGroup="$backgrounds" userData="images/backgrounds/6.jpg" onAction="choose(event.source)">
+			<graphic><ImageView><Image url="@../../images/backgrounds/6.jpg" requestedWidth="128" requestedHeight="80" backgroundLoading="true"/></ImageView></graphic>
+		</ToggleButton>
+	</TilePane>
+
+	<Label text="Notifications" styleClass="heading"/>
+	<HBox spacing="8" alignment="CENTER_LEFT">
+		<Label text="Show notifications for"/>
+		<Spinner fx:id="seconds" prefWidth="80">
+			<valueFactory><SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="60"/></valueFactory>
+		</Spinner>
+		<Label text="seconds"/>
+		<Button text="Save" onAction="saveTime()"/>
+	</HBox>
+
+	<fx:script><![CDATA[
+		// Show the current settings.
+		var settings = app.getSettings();
+		seconds.getValueFactory().setValue(settings.notificationTime / 1000 | 0);   // "| 0" makes it a whole number (an Integer for Java)
+		backgrounds.getToggles().forEach(function (choice) {
+			choice.setSelected(choice.getUserData() == settings.background);
+		});
+
+		function choose(choice) {
+			choice.setSelected(true);   // a choice stays chosen
+			app.setBackground(choice.getUserData());
+		}
+
+		function saveTime() {
+			var changed = app.getSettings();
+			changed.notificationTime = seconds.getValue() * 1000;
+			if (app.saveSettings(changed)) {
+				app.postNotification('Settings', 'Notifications now stay for ' + seconds.getValue() + ' seconds.');
+			}
+		}
+	]]></fx:script>
+</VBox>
