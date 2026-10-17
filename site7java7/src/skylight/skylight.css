@@ -1,0 +1,96 @@
+/*
+ * Skylight OS styles. Everything not listed here uses JavaFX's default
+ * "Modena" look. JavaFX CSS works like web CSS, with -fx- property names.
+ */
+
+/* The desktop background: the image itself is set in Desktop.applySettings() */
+.desktop-area {
+	-fx-background-color: #202020;
+	-fx-background-size: cover;
+	-fx-background-position: center;
+	-fx-background-repeat: no-repeat;
+}
+
+/* Desktop shortcuts: white labels with a shadow, readable on any background */
+.shortcut {
+	-fx-text-fill: white;
+	-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 4, 0.5, 0, 1);
+	-fx-padding: 4;
+	-fx-graphic-text-gap: 4;
+}
+
+/* The home menu */
+.home-menu {
+	-fx-background-color: -fx-background;
+	-fx-border-color: derive(-fx-background, -35%);
+	-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 16, 0, 0, 4);
+}
+
+.home-menu-footer {
+	-fx-padding: 8;
+	-fx-alignment: center-left;
+	-fx-border-color: derive(-fx-background, -20%) transparent transparent transparent;
+}
+
+.menu-app {
+	-fx-background-color: transparent;
+	-fx-pref-width: 96;
+	-fx-wrap-text: true;
+	-fx-text-alignment: center;
+	-fx-alignment: top-center;
+}
+
+.menu-app:hover {
+	-fx-background-color: derive(-fx-accent, 80%);
+}
+
+.flat-button {
+	-fx-background-color: transparent;
+}
+
+/* Notifications in the home menu, and toasts */
+.notification {
+	-fx-padding: 8 12 8 16;
+}
+
+.notification-header {
+	-fx-font-weight: bold;
+	-fx-font-size: 1.15em;
+}
+
+.toast {
+	-fx-padding: 10 8 10 16;
+	-fx-background-color: rgba(50, 50, 50, 0.92);
+	-fx-background-radius: 6;
+}
+
+.toast .label {
+	-fx-text-fill: white;
+}
+
+.close-button {
+	-fx-background-color: transparent;
+	-fx-font-size: 1.3em;
+	-fx-padding: 0 4;
+}
+
+.toast .close-button {
+	-fx-text-fill: white;
+}
+
+/* The Terminal */
+.terminal-code {
+	-fx-control-inner-background: black;
+	-fx-text-fill: white;
+	-fx-font-family: monospace;
+}
+
+.terminal-output {
+	-fx-control-inner-background: #1e1e1e;
+	-fx-text-fill: #9fe39f;
+	-fx-font-family: monospace;
+}
+
+.heading {
+	-fx-font-weight: bold;
+}
