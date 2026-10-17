@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The home menu. Skylight fills the gadget pages with the apps page and the
+     notifications page, and handles the commands below. -->
+<xul>
+	<icon id="POWER_ICON" ref="images/power.png"/>
+	<vbox id="menu">
+		<gadget id="pages" flex="1"/>
+		<hbox spacing="4" style="padding: 4; background: #e8ebf0;">
+			<button label="Apps" command="showApps"/>
+			<button label="Notifications" command="showNotifications"/>
+			<button label="Clear" command="clearNotifications" tooltip="Clear all notifications"/>
+			<spacer flex="1"/>
+			<button id="logout" icon="POWER_ICON" command="logout" tooltip="Log out"/>
+		</hbox>
+	</vbox>
+</xul>

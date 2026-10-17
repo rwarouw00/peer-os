@@ -1,0 +1,384 @@
+diff -ruN a/src/org/hecl/Interp.java b/src/org/hecl/Interp.java
+--- a/src/org/hecl/Interp.java
++++ b/src/org/hecl/Interp.java
+@@ -30,10 +30,6 @@
+ 
+ import java.util.LinkedList;
+ import java.util.List;
+-import jline.ArgumentCompletor;
+-import jline.ConsoleReader;
+-import jline.NullCompletor;
+-import jline.SimpleCompletor;
+ 
+ 
+ /**
+@@ -154,6 +150,7 @@
+         // Set up stack frame for globals.
+         stack.push(new Hashtable());
+         initInterp();
++	setDaemon(true); /* Skylight: an interpreter never keeps Java running */
+ 	start();
+     }
+ 
+@@ -185,49 +182,17 @@
+     public void readEvalPrint(InputStream in, PrintStream out, PrintStream err) {
+ 	String prompt = PROMPT;
+ 	StringBuffer sb = new StringBuffer();
+-        List completors = null;
+-	ConsoleReader reader = null;
+-	int oldsz = 0;
+-	int newsz = 0;
++	// Skylight: the J2ME version of this console, so Hecl needs no jline
++	InputStreamReader reader = new InputStreamReader(in);
+ 
+ 	while(true) {
+ 	    byte outbytes[] = null;
+ 
+ 	    String line = null;
+ 
+-	    Hashtable vars = getVarhash(-1);
+-	    newsz = commands.size() + vars.size();
+-
+-	    /* If the number of commands or variables has increased,
+-	     * reindex them in the command line completor.  Currently,
+-	     * it uses commands for the first completion, and variable
+-	     * names (with leading $) for subsequent completions. */
+-	    if (newsz > oldsz) {
+-		completors = new LinkedList();
+-		completors.add(
+-		    new SimpleCompletor(hashKeysToArray(commands)));
+-		completors.add(
+-		    new SimpleCompletor(hashKeysToArray(vars, "$")));
+-
+-		completors.add(new NullCompletor());
+-
+-		try {
+-		    reader = new ConsoleReader();
+-		    reader.addCompletor(new ArgumentCompletor(completors));
+-		} catch (IOException e) {
+-		    System.err.println(e);
+-		    return;
+-		}
+-
+-		oldsz = newsz;
+-	    }
+-
+-	    try {
+-		line = reader.readLine(prompt);
+-	    } catch (IOException e) {
+-		err.println(e);
+-		break;
+-	    }
++	    out.print(prompt);
++	    out.flush();
++	    line = readLine(reader);
+ 
+ 	    if(line == null)
+ 		break;
+diff -ruN a/src/org/hecl/java/JavaCmd.java b/src/org/hecl/java/JavaCmd.java
+--- a/src/org/hecl/java/JavaCmd.java
++++ b/src/org/hecl/java/JavaCmd.java
+@@ -148,7 +148,12 @@
+ 	    ip.addCommand(cmd, newjavacmd);
+ 	}
+ 	ip.addClassCmd(newjavacmd.getCmdClass(), newjavacmd);
+-	commands.add(newjavacmd);
++	if (cmd != null) {
++	    /* Skylight: only named commands are kept for unload(); the
++	     * automatic ones, made for every window's interpreter, made
++	     * this static list grow for as long as Java ran. */
++	    commands.add(newjavacmd);
++	}
+     }
+ 
+     public static void unload(Interp ip) {
+diff -ruN a/src/org/hecl/java/Reflector.java b/src/org/hecl/java/Reflector.java
+--- a/src/org/hecl/java/Reflector.java
++++ b/src/org/hecl/java/Reflector.java
+@@ -48,7 +48,9 @@
+     private Hashtable constnames;
+     private Hashtable fieldnames;
+ 
+-    private static Object[] return_value = new Object[1];
++    private static final ThreadLocal<Object[]> RV = new ThreadLocal<Object[]>() { protected Object[] initialValue() { return new Object[1]; } }; /* Skylight: was a shared static Object[1] - not thread safe */
++    /* Skylight: overload selection runs twice, exact types first, then with int->long/double widening */
++    private static final ThreadLocal<boolean[]> WIDEN = new ThreadLocal<boolean[]>() { protected boolean[] initialValue() { return new boolean[1]; } };
+ 
+     /**
+      * Creates a new <code>Reflector</code> instance.
+@@ -57,10 +59,53 @@
+      * (including package) of a Java class.
+      * @exception HeclException if an error occurs
+      */
++    /* Skylight: the class's public methods, each as declared by a public
++     * class or interface. Java refuses to call a method through a class
++     * that isn't public (a Path is really a private sun.nio.fs.UnixPath,
++     * and Luxor's labels are private subclasses of JLabel), so this uses
++     * the public declaration the method implements, and leaves out the
++     * methods that have none. */
++    private static Method[] publicMethods(Class c) {
++	Vector<Method> found = new Vector<Method>();
++	for (Method m : c.getMethods()) {
++	    Method p = publicDeclaration(c, m);
++	    if (p != null) {
++		found.add(p);
++	    }
++	}
++	return found.toArray(new Method[found.size()]);
++    }
++
++    private static Method publicDeclaration(Class c, Method m) {
++	if (Modifier.isPublic(m.getDeclaringClass().getModifiers())) {
++	    return m;
++	}
++	if (c == null) {
++	    return null;
++	}
++	if (Modifier.isPublic(c.getModifiers())) {
++	    try {
++		Method p = c.getMethod(m.getName(), m.getParameterTypes());
++		if (Modifier.isPublic(p.getDeclaringClass().getModifiers())) {
++		    return p;
++		}
++	    } catch (NoSuchMethodException e) {
++		/* not here */
++	    }
++	}
++	for (Class i : c.getInterfaces()) {
++	    Method p = publicDeclaration(i, m);
++	    if (p != null) {
++		return p;
++	    }
++	}
++	return publicDeclaration(c.getSuperclass(), m);
++    }
++
+     public Reflector(String classname) throws HeclException {
+ 	try {
+ 	    forclass = Class.forName(classname);
+-	    methods = forclass.getMethods();
++	    methods = publicMethods(forclass); /* Skylight: was forclass.getMethods() */
+ 	    constnames = new Hashtable();
+ 	    fieldnames = new Hashtable();
+ 
+@@ -138,6 +183,7 @@
+ 		throw new HeclException(forclass.toString() + " has no constructors!");
+ 	    }
+ 
++	    for (int pass = 0; pass < 2 && selected == null; pass++) { WIDEN.get()[0] = (pass == 1);
+ 	    for (Constructor c : constructors) {
+ 		Class[] javaparams = c.getParameterTypes();
+ 
+@@ -145,12 +191,13 @@
+ 		    continue;
+ 		}
+ 
+-		if (mapParams(return_value, javaparams, argv, 0)) {
+-		    args = (Object[])return_value[0];
++		if (mapParams(RV.get(), javaparams, argv, 0)) {
++		    args = (Object[])RV.get()[0];
+ 		    selected = c;
+ 		    break;
+ 		}
+ 	    }
++	    } WIDEN.get()[0] = false;
+ 	    if (selected == null) {
+ 		throw new HeclException("Couldn't find a constructor for class:" + forclass.getName());
+ 	    }
+@@ -238,10 +285,10 @@
+ 
+ 	try {
+ 	    Class type = f.getType();
+-	    if (!heclTypeToJavaType(return_value, type, newvalue)) {
++	    if (!heclTypeToJavaType(RV.get(), type, newvalue)) {
+ 		throw new HeclException("no match found for " + type);
+ 	    }
+-	    f.set(target, return_value[0]);
++	    f.set(target, RV.get()[0]);
+ 	} catch (Exception e) {
+ 	    e.printStackTrace();
+ 	    throw new HeclException("Problem setting field " + name + " to " +
+@@ -293,24 +340,26 @@
+ 	    Vector<Method> v = ((Vector)methodnames.get(cmd.toLowerCase()));
+ 
+ 	    if (v == null) {
+-		throw new HeclException("Method " + cmd + " not found for class" + forclass.toString());
++		throw new HeclException("Method " + cmd + " not found for class " + forclass.getName()); /* Skylight: a missing space */
+ 	    }
+ 
+ 	    Method[] methods = v.toArray(new Method[v.size()]);
+ 	    /* Match the signatures with the correct number first. */
+ 	    Class[] javaparams = null;
++	    for (int pass = 0; pass < 2 && selected == null; pass++) { WIDEN.get()[0] = (pass == 1);
+ 	    for (Method m : methods) {
+ 		javaparams = m.getParameterTypes();
+ 		if(javaparams.length != argv.length - 2) {
+ 		    continue;
+ 		}
+ 
+-		if (mapParams(return_value, javaparams, argv, 2)) {
+-		    args = (Object[])return_value[0];
++		if (mapParams(RV.get(), javaparams, argv, 2)) {
++		    args = (Object[])RV.get()[0];
+ 		    selected = m;
+ 		    break;
+ 		}
+ 	    }
++	    } WIDEN.get()[0] = false;
+ 	    if (selected == null) {
+ 		String msg = "No method matched " + cmd + " for class " + forclass.getName() +
+ 		    " last javaparams tried: ";
+@@ -323,18 +372,13 @@
+ 	    }
+ 	    Object retval = selected.invoke(o, args);
+ 	    return mapRetval(selected, retval);
++	} catch (HeclException e) {
++	    throw e; /* Skylight: was wrapped in "Reflector evaluate error" below */
+ 	} catch (InvocationTargetException e) {
+-	    String msg = "Problem invoking " + forclass.getName() + " " + cmd + "/" +
+-		selected.getName() + " with arguments: ";
+-	    for (Thing t : argv) {
+-		msg += t.toString() + " ";
+-	    }
+-	    msg += " (Translated to:) ";
+-	    for (Object eo : args) {
+-		msg += eo.toString() + " ";
+-	    }
+-	    msg += " " + e.getTargetException().toString();
+-	    throw new HeclException(msg);
++	    /* Skylight: the method's own error, briefly (this listed every
++	     * argument, and failed with a NullPointerException on a null one) */
++	    throw new HeclException(forclass.getSimpleName() + "." + selected.getName() + ": " +
++				    e.getTargetException().toString());
+ 	} catch (Exception e) {
+ 	    throw new HeclException("Reflector evaluate error :" + e.toString());
+ 	}
+@@ -373,16 +417,17 @@
+ 	     * been passed - if someone passes us a CONSTANT_NAME
+ 	     * that's in our table, we use its value. */
+ 	    String val = inparam.toString();
+-	    if (constnames.containsKey(val)) {
++	    if (constnames.containsKey(val) && outparam != String.class && outparam != CharSequence.class && outparam != Object.class) { /* Skylight: never turn a string argument for a String/Object parameter into a class constant */
+ 		inparam = (Thing)constnames.get(val);
+ 	    }
+ 	    String heclparmt = inparam.getVal().thingclass();
+ 
+-	    if (heclTypeToJavaType(return_value, outparam, inparam)) {
+-		outobjs[i] = return_value[0];
++	    if (heclTypeToJavaType(RV.get(), outparam, inparam)) {
++		outobjs[i] = RV.get()[0];
+ 		matched = true;
+ 	    } else {
+ 		matched = false;
++		break; /* Skylight: original kept looping, so only the LAST argument decided the match */
+ 	    }
+ 	}
+ 	retval[0] = outobjs;
+@@ -423,7 +468,7 @@
+ 	String javaclassname = rtype.getSimpleName();
+ 
+ 	/* null is always going to match. */
+-	if (heclparmt.equals("object") && ObjectThing.get(heclparm) == null) {
++	if (heclparmt.equals("object") && ObjectThing.get(heclparm) == null && !rtype.isPrimitive()) { /* Skylight: null no longer matches primitives */
+ 	    foundmatch = true;
+ 	    retval[0] = null;
+ 	} else if (rtype == boolean.class || rtype == Boolean.class) {
+@@ -436,24 +481,24 @@
+ 		retval[0] = IntThing.get(heclparm);
+ 		foundmatch = true;
+ 	    }
+-	} else if (rtype == long.class) {
+-	    if (heclparmt.equals("long")) {
++	} else if (rtype == long.class || rtype == Long.class) {
++	    if (heclparmt.equals("long") || (WIDEN.get()[0] && heclparmt.equals("int"))) { /* Skylight: int widens to long */
+ 		retval[0] = LongThing.get(heclparm);
+ 		foundmatch = true;
+ 	    }
+ 	} else if (rtype == float.class || rtype == Float.class) {
+-	    if (heclparmt.equals("double")) {
++	    if (heclparmt.equals("double") || (WIDEN.get()[0] && (heclparmt.equals("int") || heclparmt.equals("long")))) { /* Skylight: widening */
+ 		retval[0] = (float)DoubleThing.get(heclparm);
+ 		foundmatch = true;
+ 	    }
+ 	} else if (rtype == double.class || rtype == Double.class) {
+-	    if (heclparmt.equals("double")) {
++	    if (heclparmt.equals("double") || (WIDEN.get()[0] && (heclparmt.equals("int") || heclparmt.equals("long")))) { /* Skylight: widening */
+ 		retval[0] = DoubleThing.get(heclparm);
+ 		foundmatch = true;
+ 	    }
+ 	} else if (rtype == CharSequence.class ||
+ 		   rtype == String.class) {
+-	    if (heclparmt.equals("string")) {
++	    if (heclparmt.equals("string") || (WIDEN.get()[0] && !heclparmt.equals("object"))) { /* Skylight: a number or list also fits a String, as its text (after exact matches) */
+ 		retval[0] = heclparm.toString();
+ 		foundmatch = true;
+ 	    }
+@@ -494,12 +539,21 @@
+ 	    }
+ 	    retval[0] = objects;
+ 	    foundmatch = true;
++	} else if ((rtype == List.class || rtype == java.util.Collection.class) &&
++		   (heclparmt.equals("list") || heclparmt.equals("string"))) {
++	    /* Skylight: Hecl list -> java.util.ArrayList (String elements, or the Java object for object elements) */
++	    java.util.ArrayList al = new java.util.ArrayList();
++	    for (Thing t : ListThing.getArray(heclparm)) {
++		al.add(t.getVal().thingclass().equals("object") ? ObjectThing.get(t) : t.toString());
++	    }
++	    retval[0] = al;
++	    foundmatch = true;
+ 	} else if (rtype == Thing.class) {
+ 	    /* We can use this to pass Things around directly, to
+ 	     * classes that support it. */
+ 	    retval[0] = heclparm;
+ 	    foundmatch = true;
+-	} else if (heclparmt.equals("object")) {
++	} else if (heclparmt.equals("object") && rtype.isInstance(ObjectThing.get(heclparm))) { /* Skylight: check the object really fits the parameter type */
+ 	    /* We are getting an ObjectThing from Hecl... */
+ 	    retval[0] = ObjectThing.get(heclparm);
+ 	    foundmatch = true;
+@@ -507,7 +561,18 @@
+ 	    /* We're not getting an ObjectThing from Hecl, but Java
+ 	     * can take any Object. Give it Things directly.  This is
+ 	     * sort of a last resort as more specific is better. */
+-	    retval[0] = heclparm;
++	    /* Skylight: pass Hecl values as plain Java values (a string as
++	     * java.lang.String, a number as Integer, Long or Double) rather
++	     * than as Hecl's own Thing. */
++	    if (heclparmt.equals("int")) {
++		retval[0] = IntThing.get(heclparm);
++	    } else if (heclparmt.equals("long")) {
++		retval[0] = LongThing.get(heclparm);
++	    } else if (heclparmt.equals("double")) {
++		retval[0] = DoubleThing.get(heclparm);
++	    } else {
++		retval[0] = heclparm.toString();
++	    }
+ 	    foundmatch = true;
+ 	}
+ 	/* No match. */
+@@ -530,8 +595,14 @@
+ 	    return null;
+ 	} else if (rtype == void.class) {
+ 	    return null;
+-	} else if (rtype == int.class) {
+-	    return IntThing.create(((Integer)o).intValue());
++	} else if (rtype == int.class || o instanceof Integer || o instanceof Short || o instanceof Byte) { /* Skylight: boxed ints too */
++	    return IntThing.create(((Number)o).intValue());
++	} else if (o instanceof Long) { /* Skylight */
++	    return LongThing.create(((Long)o).longValue());
++	} else if (o instanceof Double || o instanceof Float) { /* Skylight: double/float came back as opaque objects */
++	    return DoubleThing.create(((Number)o).doubleValue());
++	} else if (o instanceof Boolean) { /* Skylight: boxed booleans -> 1/0 */
++	    return IntThing.create(((Boolean)o).booleanValue() ? 1 : 0);
+ 	} else if (rtype == boolean.class) {
+ 	    boolean val = ((Boolean)o).equals(Boolean.TRUE);
+ 	    return IntThing.create(val ? 1 : 0);
+@@ -544,7 +615,7 @@
+ 	    Vector v = new Vector();
+ 	    for (int j = 0; j < lo.size(); j++) {
+ 		Object elem = lo.get(j);
+-		v.add(javaTypeToHeclType(elem.getClass(), elem));
++		v.add(elem == null ? ObjectThing.create(null) : javaTypeToHeclType(elem.getClass(), elem)); /* Skylight: null elements crashed */
+ 	    }
+ 	    return ListThing.create(v);
+ 	} else if (rtypename.equals("String[]")) {

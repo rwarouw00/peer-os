@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The Terminal: type Hecl, click Run. -->
+<xul>
+	<vbox id="terminal" spacing="6" style="padding: 6;">
+		<hbox spacing="6">
+			<button label="Run" command="run" tooltip="Run the Hecl above in this window's interpreter"/>
+			<button label="Clear output" command="clearOutput"/>
+			<spacer flex="1"/>
+			<label value="Hecl, a Tcl-like language. $app is this app." style="color: #555555;"/>
+		</hbox>
+		<textarea id="code" rows="10" cols="60" flex="3" style="font: 13 monospaced;"/>
+		<textarea id="output" rows="6" cols="60" flex="2" readonly="true" style="font: 13 monospaced; color: #1b5e20; background: #f3f7f3;"/>
+	</vbox>
+</xul>

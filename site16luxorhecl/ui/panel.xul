@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The panel along the top of the desktop. Skylight uses the ids apps,
+     windowList (a gadget: Skylight adds a button per window) and clock, and
+     the command toggleMenu. -->
+<xul>
+	<icon id="HOME_ICON" ref="images/home.png"/>
+	<hbox id="panel" spacing="6" style="padding: 3 4; background: #e8ebf0;">
+		<button id="apps" label="Apps" icon="HOME_ICON" command="toggleMenu" tooltip="The home menu"/>
+		<gadget id="windowList" flex="1"/>
+		<label id="clock" value="" style="padding: 0 8; color: #333333;"/>
+	</hbox>
+</xul>
