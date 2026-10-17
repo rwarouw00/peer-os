@@ -1,157 +1,170 @@
 # Building your first app
 
-This tutorial builds **Greeter**, a small app that greets the user, reads their settings, sends a notification and asks a question with a dialog. It takes about ten minutes and uses only a text editor. Every file below was tested in `siteroot`.
+This tutorial builds **Notes**, a small app that keeps one note per user. It shows the main parts of the [App API](app-api.md): reading and saving the user's files, notifications, and asking before doing something with a dialog. Every file below was tested in `site3`.
 
-![The finished Greeter app](images/greeter.png)
+![The finished Notes app](images/notes.png)
 
-You'll need Skylight OS running; see [Getting started](getting-started.md).
+You need Skylight OS running and a user to log in with; see [Getting started](getting-started.md).
 
 ## 1. Create the folder
 
-An app is a folder of web files. Create it **three levels below the site root**, next to the built-in apps:
+An app is a folder of web files under `public/apps/`:
 
 ```
-siteroot/apps/default/greeter/
-├── appData.json
+site3/public/apps/notes/
+├── app.json
 ├── index.html
-├── css/custom.css
-├── js/greeter.js
-└── icons/icon@16.png, icon@32.png, icon@48.png, icon@64.png
+├── style.css
+├── notes.js
+└── icons/16.png, 32.png, 48.png, 64.png
 ```
 
-The depth matters: `App.saveFile` reaches the server by going up exactly three folders, and the paths in `index.html` below assume it too.
-
-For the icons, copy the four PNGs from `apps/default/settings/icons/` for now. They are 16, 32, 48 and 64 pixels square.
+For the icons, copy the four PNGs from `apps/settings/icons/` for now.
 
 ## 2. Describe the window
 
-`appData.json` is the [app manifest](app-manifest.md). It sets the window's title, size and icons:
+`app.json` is the [app manifest](app-manifest.md): title, size and icons. Icon paths are relative to the app's folder.
 
 ```json
 {
-	"title": "Greeter",
+	"title": "Notes",
 	"position": "centered",
-	"width": "360",
-	"height": "220",
-	"icons": {
-		"small": "apps/default/greeter/icons/icon@16.png",
-		"medium": "apps/default/greeter/icons/icon@32.png",
-		"large": "apps/default/greeter/icons/icon@48.png",
-		"Xlarge": "apps/default/greeter/icons/icon@64.png"
-	}
+	"width": 420,
+	"height": 320,
+	"icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "64": "icons/64.png" }
 }
 ```
 
-Icon paths are relative to the **site root**, not to your app, because the desktop page loads them.
-
 ## 3. Write the page
 
-`index.html` loads the shared styles (`ui.css`), the [App API](app-api.md) (`app.js`), and your own files:
+`index.html` loads the shared styles, `core.js` and `app.js` (in that order), then your own files:
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8"/>
-	<link href="../../../system/css/ui.css" rel="stylesheet"/>
-	<link href="css/custom.css" rel="stylesheet"/>
-	<script src="../../../system/js/app.js"></script>
+	<title>Notes</title>
+	<link href="../../system/css/ui.css" rel="stylesheet"/>
+	<link href="style.css" rel="stylesheet"/>
+	<script src="../../system/js/core.js"></script>
+	<script src="../../system/js/app.js"></script>
 </head>
 <body>
-	<h3 id="greeting"></h3>
-	<p id="background"></p>
-	<button id="hello">Say hello</button>
-	<button id="space">Space background</button>
-
-	<script src="js/greeter.js"></script>
+	<div class="toolbar">
+		<button id="save" class="default">Save</button>
+		<button id="clear">Clear</button>
+		<span id="status"></span>
+	</div>
+	<textarea id="note"></textarea>
+	<script src="notes.js"></script>
 </body>
 </html>
 ```
 
-`css/custom.css`:
+`style.css` makes the text box fill the window, whatever its size:
 
 ```css
 body {
-	margin: 15px;
+	margin: 0;
 }
 
-#background {
-	color: #555;
-	font-size: 10pt;
+.toolbar {
+	padding: 5px;
+}
+
+#status {
+	color: #666;
+	font-size: 9pt;
+}
+
+#note {
+	position: absolute;
+	top: 40px;
+	left: 6px;
+	width: calc(100% - 12px);
+	height: calc(100% - 46px);
+	box-sizing: border-box;
+	font: 11pt Arial, sans-serif;
 }
 ```
 
 ## 4. Add the code
 
-`js/greeter.js`:
+`notes.js`:
 
 ```javascript
-var user = App.getUsername();
+var note = document.getElementById('note');
+var statusLabel = document.getElementById('status');
+var FILE = 'notes.txt';
 
-// 1. Use the query string the desktop gave us.
-document.getElementById('greeting').textContent = 'Hello, ' + user + '!';
+// 1. Load the user's saved note. readFile returns null if there isn't one yet.
+note.value = App.readFile(FILE) || '';
+statusLabel.textContent = 'Hello, ' + App.getUsername();
 
-// 2. Read this user's settings file. Paths for openFile are relative to this page.
-var settings = App.parseXml(App.openFile('../../../system/settings/' + user + '.xml'));
-var background = settings.getElementsByTagName('background')[0].getAttribute('src');
-document.getElementById('background').textContent = 'Your background is ' + background;
-
-// 3. Send a notification.
-document.getElementById('hello').onclick = function () {
-	App.postNotification('Greeter', 'Hello from ' + user);
+// 2. Save it. writeFile returns { ok: true } or { ok: false, error: '...' }.
+document.getElementById('save').onclick = function () {
+	var reply = App.writeFile(FILE, note.value);
+	if (reply.ok) {
+		statusLabel.textContent = 'Saved';
+		App.postNotification('Notes', 'Your note was saved.');
+	} else {
+		App.openDialog('Could not save: ' + reply.error);
+	}
 };
 
-// 4. Ask first, then act. The OK code is a string and runs inside the Dialog window.
-document.getElementById('space').onclick = function () {
-	App.openDialog('Switch to the space background?',
-		"App.setBackground('system/images/desktop/desktop_3.jpg');");
+// 3. Ask before throwing work away. The function runs only if the user clicks OK.
+document.getElementById('clear').onclick = function () {
+	App.openDialog('Clear the note? This can\'t be undone.', function () {
+		note.value = '';
+		statusLabel.textContent = 'Cleared (not saved yet)';
+	});
 };
 ```
 
-What each part shows:
+1. [`App.readFile`](app-api.md#appreadfile) reads a file from the user's private storage on the server, returning `null` if it doesn't exist yet. Each user has their own `notes.txt`.
+2. [`App.writeFile`](app-api.md#appwritefile) saves it and returns `{ ok: true }` or an error you can show. Any text can be saved as it is: no encoding needed.
+3. [`App.openDialog`](app-api.md#appopendialog) asks first. The function runs in your app, only if the user clicks OK.
 
-1. **The query string.** The desktop opens your page with `?app-id=...&username=...`. [`App.getUsername()`](app-api.md#appgetusername) reads it.
-2. **Reading files.** [`App.openFile`](app-api.md#appopenfile) fetches a file and returns its text; paths are relative to your page, hence `../../../`. [`App.parseXml`](app-api.md#appparsexml) turns XML text into a document you can query.
-3. **Notifications.** [`App.postNotification`](app-api.md#apppostnotification) adds an entry to the Notifications tab and shows a toast.
-4. **Dialogs.** [`App.openDialog`](app-api.md#appopendialog) shows OK and Cancel. The second argument is **code in a string**, run in the Dialog's window when OK is clicked; it can use the `App` object there, but not your variables.
+> **Watch out for browser globals.** Top-level `var`s in ES5 become properties of `window`, and some names are already taken. A variable called `status` (or `name`) silently turns whatever you assign into a string, which is why this app uses `statusLabel`. If a variable behaves strangely, rename it or wrap your code in a function.
 
 ## 5. Run it
 
-Log in, open the **Terminal** from the home menu, type this and click **Run**:
+Log in, open the **Terminal** from the home menu, and run:
 
 ```
-App.openWindow('apps/default/greeter/');
+App.openWindow('apps/notes/');
 ```
 
-The path is relative to the site root and ends with `/`. The Greeter window opens; try both buttons.
+Type something, click **Save**, close the window and open it again: the note is still there.
 
 ## 6. Add it to the home menu
 
-Add a line to [`system/apps.xml`](configuration.md#appsxml):
+Add the folder to [`public/system/apps.json`](configuration.md#appsjson):
 
-```xml
-<apps>
-	<app path="apps/default/terminal/"/>
-	...
-	<app path="apps/default/greeter/"/>
-</apps>
+```json
+[
+	"apps/terminal/",
+	"apps/settings/",
+	"apps/web-browser/",
+	"apps/notes/"
+]
 ```
 
-Reload the page and log in again. Greeter's large icon now appears in the home menu.
+Reload the page. Notes now has an icon in the home menu, and you can put it on the desktop with `App.addShortcut('apps/notes/')`.
 
 ## Going further
 
-* **Saving data.** [`App.saveFile`](app-api.md#appsavefile) sends a file to the server's `saveFile.php` (see [Server API](server-api.md)). Encode the contents with `encodeURIComponent` first, and check the JSON reply.
-* **More than one page.** Move between pages with [`App.gotoLocation`](app-api.md#appgotolocation), never with plain links or `location.assign`, or the new page loses its AppID and username.
-* **Filling the window.** Windows have a fixed size and a 30px title bar. To fit your layout to the window, size it from `window.innerWidth` and `window.innerHeight`.
-* **Looks.** See [UI components](ui-components.md) for the styles `ui.css` provides.
-* **Examples.** The built-in apps in `apps/default/` are short and readable; the Settings app reads and saves XML.
+* **Several notes:** [`App.listFiles`](app-api.md#applistfiles) returns the names of the user's files.
+* **More than one page:** move between your pages with [`App.gotoLocation`](app-api.md#appgotolocation) so the window keeps its AppID and username.
+* **Settings:** [`App.getSettings`](app-api.md#appgetsettings) and [`App.saveSettings`](app-api.md#appsavesettings), as in the Settings app (`apps/settings/index.html`).
+* **Looks:** see [UI components](ui-components.md).
 
 ## Troubleshooting
 
 | Symptom | Likely cause |
 | --- | --- |
-| Nothing happens when the window should open | `appData.json` isn't valid JSON, or the path doesn't end in `/`. Check the browser's developer console. |
-| Window opens but icons are missing | Icon paths in `appData.json` aren't relative to the site root. |
-| `App is not defined` | The `app.js` path in `index.html` is wrong; the app may not be three levels deep. |
-| `App.getUsername()` returns `undefined` | The page was reached without the desktop's query string (opened directly, or via a link). |
+| "Cannot open app" notification | `app.json` is missing or isn't valid JSON, or the path doesn't end in `/` |
+| `App is not defined` or `Skylight is not defined` | Script paths in `index.html` are wrong, or `app.js` is loaded before `core.js` |
+| `readFile` returns `null` and `writeFile` says you aren't logged in | The session ended; log in again |
+| Missing icons | Icon paths in `app.json` must be relative to the app's folder |

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<link href="../css/ui.css" rel="stylesheet"/>
+	<style>
+		#message { margin: 20px 15px; }
+		.buttons { position: absolute; right: 15px; bottom: 10px; }
+	</style>
+	<script src="../js/core.js"></script>
+</head>
+<body>
+<p id="message"></p>
+<div class="buttons">
+	<button id="ok" class="default">OK</button>
+	<button id="cancel">Cancel</button>
+</div>
+<script>
+// The desktop passes the message in the query string and waits for the answer.
+document.getElementById('message').textContent = Skylight.parseQuery(location.search).message;
+
+function answer(confirmed) {
+	parent.postMessage(JSON.stringify({ eventType: 'dialogAnswer', confirmed: confirmed }), Skylight.origin);
+}
+
+document.getElementById('ok').onclick = function () { answer(true); };
+document.getElementById('cancel').onclick = function () { answer(false); };
+</script>
+</body>
+</html>

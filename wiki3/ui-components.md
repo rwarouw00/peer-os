@@ -2,48 +2,48 @@
 
 ## Styles
 
-Include the shared stylesheet in your app so it matches the rest of the system:
+Load the shared stylesheet in every app page:
 
 ```html
-<link href="../../../system/css/ui.css" rel="stylesheet"/>
+<link href="../../system/css/ui.css" rel="stylesheet"/>
 ```
 
-[`ui.css`](../siteroot/system/css/ui.css) sets the font to Arial and styles the following. No classes are needed for buttons and text boxes.
+[`ui.css`](../site3/public/system/css/ui.css) sets the font to Arial and styles:
 
 | Element | Look |
 | --- | --- |
-| `<button>`, `<input type="button">`, `submit`, `reset` | Light grey gradient, 1px grey border, rounded corners, 10pt text. The gradient flips while pressed. |
-| `<input type="text">`, `<input type="password">` | Grey rounded border with a slight inner shadow. |
-| `.barEndLeft`, `.barMiddle`, `.barEndRight` | Joined into a segmented button bar (see below). |
-
-![Buttons in a dialog](images/dialog.png)
-
-### Button bar
-
-Put the classes on adjacent inline elements, with no whitespace between them:
+| `<button>` and button-type `<input>`s | Light grey gradient, grey border, rounded corners; the gradient flips while pressed |
+| `.default` on a button | Bold text: use it for the main action, such as **Save** or **OK** |
+| `<input type="text">`, `<input type="password">` | Grey rounded border with a slight inner shadow |
+| `.bar` containing `.bar-button`s | Buttons joined into one segmented bar |
 
 ```html
-<span class="barEndLeft" onclick="history.go(-1);">&lt;</span><span class="barMiddle">Home</span><span class="barEndRight" onclick="history.go(1);">&gt;</span>
+<button class="default">Save</button> <button>Cancel</button>
+
+<span class="bar"><button class="bar-button">Day</button><button class="bar-button">Week</button><button class="bar-button">Month</button></span>
 ```
 
-There are no other components: no lists, tabs or menus for apps. Use your own CSS for anything else.
-
-## Dialogs
-
-Ask the user to confirm something with [`App.openDialog`](app-api.md#appopendialog). The dialog is a 300×200 window with your message (HTML allowed) and **OK** and **Cancel**. Only OK runs your code, which is given as a string and runs in the dialog's window. It isn't modal: the user can keep using other windows while it is open.
-
-## Notifications
-
-Tell the user something happened with [`App.postNotification`](app-api.md#apppostnotification). Use a short header (20 characters show in the toast) and a body (110 characters show). The full text is kept in the home menu's Notifications tab until the user removes it or reloads. The toast stays on screen for the time in the user's settings (7 seconds by default).
-
-![The Notifications tab](images/notification-tray.png)
+![OK and Cancel in a dialog](images/dialog.png)
 
 ## Windows
 
-Your app's page fills the window below the 30px title bar. The window's size comes from your [manifest](app-manifest.md) and can only change when the user maximizes it, in which case the page grows to the screen's size. Handle `window.onresize` if your layout depends on size:
+Your page fills the window below the 30px title bar, and is resized when the user maximizes the window. Size things with percentages or `calc()` so they follow the window, as the Terminal does:
 
-```javascript
-window.onresize = function () {
-	editor.style.height = window.innerHeight - 70 + 'px';
-};
+```css
+#code {
+	position: absolute;
+	top: 38px;
+	width: calc(100% - 12px);
+	height: calc(100% - 44px);
+}
 ```
+
+## Dialogs
+
+Use [`App.openDialog`](app-api.md#appopendialog) to confirm something before doing it. Write the message as a question the buttons answer ("Delete this note?"), and put the action in the `onOK` function. The dialog isn't modal: the user can keep using other windows while it is open.
+
+## Notifications
+
+Use [`App.postNotification`](app-api.md#apppostnotification) to report something that happened, especially when your window may be hidden. Keep the header short (it's one line in the toast) and the body to a sentence or two (the toast shows three lines; the Notifications tab shows all of it).
+
+![Toasts](images/toast.png)

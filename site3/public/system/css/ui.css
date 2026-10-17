@@ -1,0 +1,58 @@
+/* Skylight OS controls: buttons, text boxes and button bars. Used by the desktop and by apps. */
+
+html {
+	font-family: Arial, sans-serif;
+}
+
+button, input[type="button"], input[type="submit"], input[type="reset"], .bar-button {
+	min-width: 50px;
+	min-height: 25px;
+	margin: 3px;
+	padding: 1px 6px;
+	border: 1px solid gray;
+	border-radius: 4px;
+	color: #000;
+	font-size: 10pt;
+	vertical-align: middle;
+	background-image: linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230));
+}
+
+button:active, input[type="button"]:active, input[type="submit"]:active, input[type="reset"]:active, .bar-button:active {
+	background-image: linear-gradient(rgb(230, 230, 230), rgb(255, 255, 255));
+}
+
+/* The main action in a group of buttons */
+button.default, input.default {
+	font-weight: bold;
+}
+
+input[type="text"], input[type="password"] {
+	padding: 1px 3px;
+	border: 1px solid gray;
+	border-radius: 4px;
+	box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.3) inset;
+	background-color: #fff;
+}
+
+/* A row of joined buttons: <span class="bar"><button class="bar-button">...</button>...</span> */
+.bar {
+	display: inline-block;
+	margin: 3px;
+}
+
+.bar .bar-button {
+	margin: 0;
+	border-radius: 0;
+}
+
+.bar .bar-button:first-child {
+	border-radius: 4px 0 0 4px;
+}
+
+.bar .bar-button:last-child {
+	border-radius: 0 4px 4px 0;
+}
+
+.bar .bar-button + .bar-button {
+	border-left: none;
+}

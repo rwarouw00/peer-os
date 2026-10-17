@@ -1,42 +1,24 @@
-# App manifest (`appData.json`)
+# App manifest (`app.json`)
 
-Every app folder must contain an `appData.json` file. The desktop reads it each time the app's window opens, and at login to build the home menu.
-
-## Example
+Every app folder needs an `app.json`. The desktop reads it to build the home menu and each time the app's window opens.
 
 ```json
 {
 	"title": "Terminal",
 	"position": "centered",
-	"height": "300",
-	"width": "500",
-	"icons": {
-		"small": "apps/default/terminal/icons/icon@16.png",
-		"medium": "apps/default/terminal/icons/icon@32.png",
-		"large": "apps/default/terminal/icons/icon@48.png",
-		"Xlarge": "apps/default/terminal/icons/icon@64.png"
-	}
+	"width": 500,
+	"height": 300,
+	"icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "64": "icons/64.png" }
 }
 ```
 
-## Fields
+| Field | Required | Description |
+| --- | --- | --- |
+| `title` | yes | Shown in the title bar, as the tooltip on the taskbar and home-menu icons, and under a desktop shortcut. Shown as text, so any characters are safe. |
+| `width`, `height` | yes | Window size in pixels. `height` includes the 30px title bar. Numbers or numeric strings. |
+| `position` | no | `"centered"` centers the window; otherwise it opens 100px from the top and left. |
+| `icons` | yes | PNG paths **relative to the app's folder**, keyed by size: `16` (title bar), `32` (taskbar), `48` (home menu), `64` (desktop shortcut). |
 
-| Field | Required | Type | Description |
-| --- | --- | --- | --- |
-| `title` | yes | string | Shown in the title bar, as the tooltip on the taskbar and home-menu icons, and under a desktop shortcut. Also used in HTML element ids, so it should be unique and is best kept to letters, digits and spaces. |
-| `width` | yes | number or numeric string | Window width in pixels, without `px`. |
-| `height` | yes | number or numeric string | Window height in pixels, **including** the 30px title bar. The app's page gets `height - 30`. |
-| `position` | no | string | `"centered"` centers the window on the screen. Anything else, or leaving it out, opens it 100px from the top and left. |
-| `icons.small` | yes | path | 16×16 icon in the window's title bar. |
-| `icons.medium` | yes | path | 32×32 icon on the taskbar. |
-| `icons.large` | yes | path | 48×48 icon in the home menu. |
-| `icons.Xlarge` | if you use shortcuts | path | 64×64 icon for a desktop shortcut. Note the capital `X`. |
+The file must be valid JSON. If it can't be read, the window doesn't open and the user gets a "Cannot open app" notification.
 
-Icon paths are relative to the **site root** (for example `apps/default/myapp/icons/icon@16.png`), because the desktop page loads them, not your app.
-
-Other fields are ignored. Manifests written for later Skylight OS releases may contain `UI` and `permissions` sections; this release doesn't read them (see [Version notes](version-notes.md)).
-
-## Rules
-
-* The file must be strict JSON: double quotes, no comments, no trailing commas. If it can't be parsed, the window doesn't appear and an empty slot is left on the taskbar.
-* The user can't resize windows, so choose a size that fits your content.
+The app's folder name is used in its path (`apps/my-app/`), which may contain only letters, digits, `_`, `-` and `/`. Use lowercase with hyphens.

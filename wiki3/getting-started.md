@@ -1,39 +1,44 @@
 # Getting started
 
-## What you need
+## Requirements
 
-* A web server with PHP. The code is written in a PHP 5 style and also runs on current PHP 8 (tested with 8.3), which logs a few harmless warnings.
-* A modern browser.
-* Write access for the web server to `system/LoggedInUsers.xml`, `system/settings/` and `system/server/shortcuts.xml`.
+* **PHP 5.3.7 or later**, with a web server that runs it (Apache, nginx with PHP-FPM, or PHP's built-in server for trying it out). Tested on PHP 8.3.
+* **A browser.** The code is plain ES5 and was tested in Chromium. The styles use `calc()`, gradients and transitions, so browsers older than about 2013 (Internet Explorer 9 and earlier) won't look right.
 
-Two requirements come from how the code is written:
+## Install
 
-* Serve Skylight OS from the **root** of a website (`http://localhost/`, not `http://localhost/skylight/`). Logout builds its save address in a way that only works there.
-* Use the **standard port** (80 for HTTP, 443 for HTTPS). On an address like `http://localhost:8000`, `auth.php` sets a cookie the browser rejects: you can log in and use apps, but nothing can be saved. To use another port, change `$_SERVER['HTTP_HOST']` to `''` in the `setcookie` call in `system/server/auth.php`.
+1. Copy the `site3` folder to the server.
+2. Point the web server's document root at `site3/public/`. The `lib/`, `data/` and `tools/` folders must **not** be inside the document root.
+3. Give the web server's user write access to `site3/data/`.
+4. Create a user from the command line:
 
-**Don't expose it to a network.** The server scripts let anyone write files on the server without logging in; see [Security](security.md).
+   ```
+   php tools/add-user.php admin choose-a-password
+   ```
 
-## Run it locally
+   Run the same command again to change a password. Usernames may use letters, digits, `-` and `_`.
 
-With PHP's built-in web server, from inside `siteroot`:
+Unlike the original, Skylight OS can now run on any port and in a subfolder of a website.
+
+## Try it locally
 
 ```
-cd siteroot
-sudo php -S localhost:80
+cd site3
+php tools/add-user.php admin choose-a-password
+cd public
+php -S localhost:8000
 ```
 
-(`sudo` is needed on Linux and macOS to use port 80.) Then open <http://localhost/>.
-
-If you can't use port 80, run `php -S localhost:8000` instead: everything works except saving (the Settings background, logout).
+Open <http://localhost:8000/>.
 
 ## Log in
 
 ![The login screen](images/login.png)
 
-Enter the username **admin**, leave the password empty, and click **Log In** (Enter doesn't submit the form). Accounts are listed in `system/settings/users.xml`; to add one, see [Configuration](configuration.md#usersxml).
+Enter the username and password and press Enter or click **Log In**. If you reload the page while logged in, you stay logged in until you use the power button or close the browser.
 
 ## Next steps
 
-* Take the [user guide](user-guide.md) tour of the desktop.
-* Open the **Terminal** from the home menu and try a command such as `App.postNotification('Hello', 'It works');`.
+* Take the [user guide](user-guide.md) tour.
+* Open the **Terminal** from the home menu and try `App.postNotification('Hello', 'It works');`.
 * [Build your first app](building-apps.md).

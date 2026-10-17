@@ -9,14 +9,14 @@
 | **Home button** (grid, top left) | Opens the home menu. Click it again, or anywhere else, to close it. |
 | **Taskbar** (top, next to the home button) | An icon for each open window. |
 | **Clock** (bottom right) | The time and the logged-in user. |
-| **Shortcuts** (top left of the desktop) | App icons placed on the desktop by apps. Double-click to open (a harmless error message also appears). They aren't kept after a reload. |
-| **Toasts** (top right) | Notifications pop up here for a few seconds. |
+| **Shortcuts** | App icons on the desktop. Double-click to open; drag to move. They are saved with your settings. |
+| **Toasts** (top right) | Notifications pop up here. |
 
 ### Home menu
 
-* **Apps** (the default tab): click an icon to open the app. Hover to see its name.
-* **Notifications**: every notification received since you logged in. Click **×** to remove one or **Clear** to remove all.
-* **Power button** (red, bottom right): logs you out. The desktop stays visible afterwards; reload the page to get back to the login screen.
+* **Apps**: click an icon to open the app. Hover to see its name.
+* **Notifications**: everything you've been notified about since you logged in, newest first. Click **×** to remove one, or **Clear** to remove all.
+* **Power button** (red): logs you out and returns to the login screen.
 
 ![The notifications tab](images/notification-tray.png)
 
@@ -24,52 +24,45 @@
 
 ![A window](images/terminal.png)
 
-* **Move** a window by dragging its title bar.
-* **Maximize** with the square button; click it again to restore. A maximized window can't be moved.
+* **Move** a window by dragging its title bar. Clicking anywhere in a window brings it to the front.
+* **Maximize** with the square button; click it again to restore.
 * **Close** with the × button. The app isn't asked first, so unsaved work is lost.
-* **Minimize** by clicking the window's taskbar icon; click again to bring it back.
-* **Right-click** a taskbar icon for a menu. Only **Close** works; **Pin/Unpin** isn't finished.
+* **Minimize** by clicking the window's taskbar icon; click it again to bring the window back.
+* **Right-click** a taskbar icon for a **Close** menu.
 
 ![The taskbar menu](images/taskbar-context-menu.png)
 
-Windows can't be resized, and clicking a window doesn't bring it in front of the others. Opening an app that is already open opens a second copy.
+Windows can't be resized except by maximizing.
 
 ## Notifications
 
-Apps send notifications to tell you something happened. Each one appears briefly as a toast at the top right and stays in the home menu's Notifications tab until you remove it or reload the page. Toasts show a shortened version of the text. Because of a layout bug, most of the toast is off the edge of the screen, so read the full text in the Notifications tab.
+Apps send notifications to tell you something happened. Each one appears as a toast at the top right for a few seconds (you choose how long in Settings), and stays in the home menu's Notifications tab until you remove it, reload the page or log out. Click a toast's × to dismiss it early.
 
-![A toast](images/toast.png)
+![Toasts](images/toast.png)
 
 ## Built-in apps
 
 ### Terminal
 
-Runs JavaScript. Type code and click **Run**. Every [App function](app-api.md) is available, which makes it the quickest way to try them out:
+Runs JavaScript. Type code and click **Run**; every [App function](app-api.md) is available:
 
 ```
-App.openWindow('apps/default/web browser/');
-App.openDialog('Are you sure?');
-App.addShortcut('apps/default/settings/');
+App.openWindow('apps/web-browser/');
+App.openDialog('Are you sure?', function () { App.postNotification('OK', 'You clicked OK'); });
+App.addShortcut('apps/settings/');
 ```
 
-If the code fails, the error is added to the end of the text as a comment. **Save Script** isn't finished.
+If the code fails, the error is added to the end of the text as a comment.
 
 ### Settings
 
 ![Settings](images/settings.png)
 
-Click a picture to make it your desktop background. The change is immediate and is saved for next time, provided saving works (see [Getting started](getting-started.md#what-you-need)). The notification time box and the **Add User** page aren't finished.
+* **Background**: click a picture. The desktop changes at once and remembers it.
+* **Notifications**: how many seconds toasts stay on screen (1 to 60). Click **Save**.
 
 ### Web Browser
 
 ![The Web Browser](images/web-browser.png)
 
-Type an address, including `https://`, and press Enter. Many websites refuse to load inside another page and show up blank. The back and forward arrows only work for pages on the same site as Skylight OS.
-
-### Dialog and Save File
-
-These are parts of the system that appear in the home menu by mistake. **Dialog** is the window apps use to ask questions; opened on its own it is empty.
-
-![The Save File dialog](images/save-file.png)
-
-**Save File** is an unfinished file browser. You can browse the server's folders (click a folder to open it, **<** and **>** to go back and forward) and click a file to copy its name, but **Save** and **Cancel** do nothing.
+Type an address and press Enter (`http://` is added if you leave it out). Many websites refuse to load inside another page and show up blank. Back and forward only work for pages on the same site as Skylight OS; for others a notification explains why nothing happened.

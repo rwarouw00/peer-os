@@ -1,105 +1,83 @@
 # Server API
 
-The server side is four small PHP scripts in [`system/server/`](../siteroot/system/server/), written in PHP 5-style procedural code with no framework. They read and write XML files with PHP's `DOMDocument`.
+The server is four small PHP scripts in [`public/api/`](../site3/public/api/) and one shared library, [`lib/skylight.php`](../site3/lib/skylight.php), which sits outside the web root. The code avoids PHP features newer than 5.3 (no short array syntax, no `??`), and needs 5.3.7 for bcrypt password hashes.
 
-| Script | Called by | Purpose |
-| --- | --- | --- |
-| [`auth.php`](#authphp) | Login screen | Check a password and start a login |
-| [`saveFile.php`](#savefilephp) | `App.saveFile`, Settings, logout | Write a file for a logged-in user |
-| [`shortcuts.php`](#shortcutsphp) | `App.addShortcut`, shortcut clicks | Record desktop shortcuts |
-| [`functions.php`](#save-file-dialog-helpers) | Save File dialog | Look up a file's MIME type |
+## Conventions
 
-Every request is a synchronous `POST` with `Content-Type: application/x-www-form-urlencoded`. The scripts open their data files with relative paths (`../settings/users.xml`), so PHP must run with the script's folder as its working directory, which is the default for Apache's PHP module and PHP's built-in server.
+* **Replies** are always JSON objects with an `ok` field: `{"ok": true, ...}` or `{"ok": false, "error": "A sentence for the user."}`. They are built with `json_encode`.
+* **Changes** must be `POST` requests carrying the header `X-Requested-With: Skylight`. Browsers won't add a custom header to a request from another site without asking the server first, so a malicious page can't make the user's browser change anything. `Skylight.post` in `core.js` adds the header.
+* **Logins** are PHP sessions. The session cookie is called `skylight` and is `HttpOnly`.
+* **Input** is read with `input($name)`, which only ever returns a string and undoes magic quotes on old PHP 5 installs.
 
-> **The scripts are not safe on a shared network.** Anyone can write any file, including PHP code, without logging in. See [Security](security.md).
+From the browser, call these through `Skylight.get(name, fields)` and `Skylight.post(name, fields)`, or through the [App API](app-api.md).
 
-## Login flow
+## login.php
 
-```mermaid
-sequenceDiagram
-    participant B as Browser
-    participant A as auth.php
-    participant F as saveFile.php
-    participant X as LoggedInUsers.xml
-    B->>A: username, password
-    A->>A: compare with settings/users.xml
-    A->>X: append an element holding the token
-    A-->>B: Set-Cookie Skylight_OS_Auth=token, {"error": "none"}
-    B->>F: file, contents, user + cookie
-    F->>X: read first token for user
-    F->>F: token == cookie ? write file
-    F-->>B: {"error": "none"}
-```
+`POST username, password` → `{ ok, user, settings }`
 
-## auth.php
+Checks the password against the bcrypt hash in `data/users.json`, starts a new session (`session_regenerate_id`) and returns the user's settings. On failure: `"Either the username or password is incorrect."` (the same message whether the user exists or not).
 
-**Request:** `username`, `password`
+## logout.php
 
-**Response:** `{"error": "none"}` on success; `{"error": "true"}` for an unknown user or wrong password.
+`POST` → `{ ok }`
 
-On success the script:
+Ends the session. The desktop then reloads, which brings back the login screen.
 
-1. creates a token, `sha1(time())`;
-2. sets the cookie `Skylight_OS_Auth` to the token (path `/`, domain = the request's `Host` header, expires when the browser closes, not `HttpOnly`);
-3. appends `<username>token</username>` to `system/LoggedInUsers.xml`.
+## settings.php
 
-Things to know:
+`GET` → `{ ok, user, settings }`
 
-* Passwords in `system/settings/users.xml` are plain text and compared with `==`.
-* **On an address with a port number the cookie is rejected.** The domain includes the port (`localhost:8000`), which browsers don't accept. Login still succeeds, but saving won't. Use port 80/443, or pass `''` as the domain to `setcookie`.
-* Every login appends a new token; nothing removes old ones except logout. `saveFile.php` checks only the first, so only a user's oldest session can save.
-* Usernames become XML element names in `LoggedInUsers.xml`, so they must be valid ones.
-* With `display_errors` on, PHP warnings are printed before the JSON and the login screen hangs.
+Returns the logged-in user and their settings, or `{ ok: false }` if nobody is logged in. The desktop calls it on page load to skip the login screen when a session is still active.
 
-## saveFile.php
+`POST changes` → `{ ok, user, settings }`
 
-**Request:** `file` (path relative to the site root), `contents`, `user`, and the `Skylight_OS_Auth` cookie.
+`changes` is a JSON object of settings to change. Each one is checked by `clean_setting()`, and an unknown name or a bad value rejects the whole request:
 
-**Response:** `{"error": "none"}`, or `{"error": "Operation not performed by a logged in user"}` when the cookie doesn't match.
-
-The script reads the first element named `user` in `LoggedInUsers.xml`; if its token `==` the cookie, it writes `contents` to `../../` + `file`.
-
-Things to know:
-
-* If `user` isn't logged in **and** no cookie is sent, both values are `null` and compare as equal, so the write goes ahead.
-* `file` isn't checked: `../` and `.php` are allowed.
-* Success is reported even if the write fails, for example because the folder doesn't exist.
-* `contents` is stored exactly as PHP decoded it; apps should send it through `encodeURIComponent`.
-
-## shortcuts.php
-
-**Request:** `contents`, URL-encoded JSON:
-
-```json
-{"action": "add", "path": "apps/default/web browser/", "top": "30px", "left": "0px"}
-```
-
-**Response:** `NO ERROR` on success; nothing on failure.
-
-* `add` appends `<shortcut top="30px" left="0px">apps/default/web browser/</shortcut>` to `system/server/shortcuts.xml`.
-* `edit` (same fields) updates the position of every shortcut with that path, printing `NO ERROR` once per match.
-
-No login is required and all users share one list. The desktop never reads the list back, and its drag code sends `[object Object]` instead of an `edit` request, so clicking a shortcut always ends in an error dialog. `shortcuts.json` next to it is unused test data.
-
-## Save File dialog helpers
-
-`system/components/save dialog/index.php` uses:
-
-| File | Role |
+| Setting | Rule |
 | --- | --- |
-| `functions.php` | `get_mime_type($filename, $mimePath = 'mime.types')`: finds the extension's MIME type in `mime.types`, or `false`. Rereads the file on every call. |
-| `mime.types` | Apache's MIME table (~1,000 types) plus a custom `application/php php` line. |
-| `mime-types.xml` | `<mime value="application/pdf" icon="pdf.png"/>`: 46 MIME types mapped to 14 icons in `system/images/mime/`. |
+| `background` | Image path relative to the site root: letters, digits, `_`, `-`, `/`, ending in `.jpg`, `.jpeg`, `.png` or `.gif` |
+| `notificationTime` | Milliseconds, 1000 to 60000 |
+| `shortcuts` | Up to 50 `{ path, left, top }` objects; `path` must look like `apps/name/` |
 
-Folders get `folder.png`, executables `executable.png`, everything else without a match `file.png`.
+## files.php
 
-## Data the scripts keep
+The logged-in user's own files, stored in `data/users/<name>/files/`.
 
-| File | Contents | Publicly readable? |
-| --- | --- | --- |
-| `system/settings/users.xml` | Accounts and plain-text passwords | yes |
-| `system/LoggedInUsers.xml` | Every active login token | yes |
-| `system/server/shortcuts.xml` | Shortcuts | yes |
-| `system/settings/<user>.xml` | User settings | yes |
+| Request | Reply |
+| --- | --- |
+| `GET` | `{ ok, files: ["notes.txt", ...] }` |
+| `GET name` | `{ ok, contents }`, or `ok: false` if there's no such file |
+| `POST name, contents` | `{ ok }` |
 
-All of them sit inside the website, so the web server serves them to anyone. The web server user needs write access to the first three and to any file users should be able to save.
+Names may use letters, digits, spaces, `-`, `_` and `.`, up to 100 characters, and may not start with `.`. There are no folders, so a name can't point outside the user's own folder. Files are limited to 1 MB.
+
+## lib/skylight.php
+
+| Function | Purpose |
+| --- | --- |
+| `reply($data)`, `fail($message)` | Send a JSON reply and stop |
+| `input($name)`, `is_post()`, `require_post()` | Read requests safely |
+| `start_session()`, `current_user()`, `require_user()` | Sessions; `require_user` replies with an error if nobody is logged in |
+| `read_json($path, $default)`, `write_json($path, $data)` | Data files; writes are locked and folders are created as needed |
+| `is_valid_username()`, `load_users()`, `user_folder()` | Users |
+| `hash_password()`, `check_password()` | bcrypt through `crypt()` with a random salt |
+| `default_settings()`, `load_settings()`, `clean_setting()` | Settings |
+| `user_file($user, $name)` | Checks a file name and returns its path |
+
+A new endpoint is a few lines:
+
+```php
+<?php
+require dirname(__FILE__) . '/../../lib/skylight.php';
+
+$user = require_user();
+reply(array('ok' => true, 'message' => 'Hello, ' . $user));
+```
+
+## tools/add-user.php
+
+```
+php tools/add-user.php <username> <password>
+```
+
+Adds a user to `data/users.json`, or changes the password of an existing one. It refuses to run from the web.

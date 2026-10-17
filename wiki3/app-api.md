@@ -1,243 +1,192 @@
 # App API
 
-The `App` object is how an app works with Skylight OS. Load it in every page of your app:
+Every page of an app loads two scripts, in this order:
 
 ```html
-<script src="../../../system/js/app.js"></script>
+<script src="../../system/js/core.js"></script>
+<script src="../../system/js/app.js"></script>
 ```
+
+(The paths assume the app is in `apps/<name>/`; adjust them if it lives elsewhere. Nothing else depends on the folder depth.)
 
 ## Summary
 
-| Function | Returns | Goes through the desktop |
-| --- | --- | --- |
-| [`App.openWindow(path)`](#appopenwindow) | nothing | yes |
-| [`App.closeWindow(appID)`](#appclosewindow) | nothing | yes |
-| [`App.openDialog(message, onOK)`](#appopendialog) | nothing | yes |
-| [`App.postNotification(header, body)`](#apppostnotification) | nothing | yes |
-| [`App.setBackground(path)`](#appsetbackground) | nothing | yes |
-| [`App.addShortcut(path)`](#appaddshortcut) | nothing | yes |
-| [`App.getAppID()`](#appgetappid) | string | no |
-| [`App.getUsername()`](#appgetusername) | string | no |
-| [`App.getQueryStringArgs()`](#appgetquerystringargs) | object | no |
-| [`App.gotoLocation(path, queryString)`](#appgotolocation) | nothing | no |
-| [`App.openFile(path)`](#appopenfile) | string | no |
-| [`App.saveFile(path, contents)`](#appsavefile) | string | no (server) |
-| [`App.parseXml(xml)`](#appparsexml) | XML document | no |
-| [`App.serializeXml(doc)`](#appserializexml) | string | no |
+| Function | Returns |
+| --- | --- |
+| [`App.openWindow(path)`](#appopenwindow) | nothing |
+| [`App.closeWindow([appID])`](#appclosewindow) | nothing |
+| [`App.openDialog(message[, onOK])`](#appopendialog) | nothing |
+| [`App.postNotification(header[, body])`](#apppostnotification) | nothing |
+| [`App.getSettings()`](#appgetsettings) | object |
+| [`App.saveSettings(changes)`](#appsavesettings) | nothing |
+| [`App.setBackground(path)`](#appsetbackground) | nothing |
+| [`App.addShortcut(path)`](#appaddshortcut) | nothing |
+| [`App.getAppID()`](#appgetappid) | string |
+| [`App.getUsername()`](#appgetusername) | string |
+| [`App.getQueryStringArgs()`](#appgetquerystringargs) | object |
+| [`App.gotoLocation(path[, queryString])`](#appgotolocation) | nothing |
+| [`App.openFile(url)`](#appopenfile) | string or `null` |
+| [`App.readFile(name)`](#appreadfile) | string or `null` |
+| [`App.writeFile(name, contents)`](#appwritefile) | `{ ok, error }` |
+| [`App.listFiles()`](#applistfiles) | array or `null` |
+| [`App.parseXml(text)`](#appparsexml) | document or `null` |
+| [`App.serializeXml(doc)`](#appserializexml) | string |
 
-Functions that go through the desktop send it a message and return immediately; they can't report success or failure (see [Architecture](architecture.md#how-apps-talk-to-the-desktop)). Their arguments must be plain data: functions are dropped.
+Functions that return nothing send a message to the desktop and return at once (see [Architecture](architecture.md#messages-between-apps-and-the-desktop)). Their arguments must be plain data, except `onOK`. Functions that return a value call the server or the browser directly and wait for the answer.
 
-**Paths.** Window and image paths (`openWindow`, `setBackground`, `addShortcut`, `saveFile`) are relative to the **site root**. `openFile` and `gotoLocation` paths are relative to **your page**, like links.
+**Paths:** app and image paths (`openWindow`, `addShortcut`, `setBackground`) are relative to the site root. `openFile` and `gotoLocation` take ordinary links, relative to your page. `readFile`, `writeFile` and `listFiles` use plain file names in the user's private storage.
 
 ## Windows
 
 ### App.openWindow
 
 ```javascript
-App.openWindow(path)
+App.openWindow('apps/web-browser/');
 ```
 
-Opens an app in a new window.
-
-| Parameter | Description |
-| --- | --- |
-| `path` | The app's folder, relative to the site root, ending in `/`. The folder must contain `appData.json` and an `index.html`. |
-
-```javascript
-App.openWindow('apps/default/web browser/');
-```
-
-Each call opens a new window, even if the app is already open. The new window's AppID isn't returned.
+Opens the app in the given folder (site root relative, ending in `/`) in a new window. Each call opens a new window. If the folder isn't an app, the user gets a notification.
 
 ### App.closeWindow
 
 ```javascript
-App.closeWindow(appID)
+App.closeWindow();           // close this app's own window
+App.closeWindow(someAppID);  // close another window
 ```
-
-Closes the window with the given AppID, and removes its taskbar icon. To close your own window:
-
-```javascript
-App.closeWindow(App.getAppID());
-```
-
-Any window can be closed if you know its AppID. Passing an AppID that doesn't exist causes an error on the desktop.
 
 ## Dialogs and notifications
 
 ### App.openDialog
 
 ```javascript
-App.openDialog(message, onOK)
+App.openDialog('Delete this file?', function () {
+	App.writeFile('notes.txt', '');
+});
 ```
 
-Shows a dialog window with a message and **OK** and **Cancel** buttons. Both buttons close it.
-
-| Parameter | Description |
-| --- | --- |
-| `message` | Text to show. HTML is allowed. |
-| `onOK` | Optional. JavaScript **source code, as a string**, to run when OK is clicked. |
+Shows a dialog with the message and **OK** and **Cancel** buttons. `onOK`, if given, is a function in your app that runs only when OK is clicked; it runs in your app with all your variables available. The message is plain text: HTML tags are shown as typed.
 
 ![A dialog](images/dialog.png)
 
-The `onOK` code runs with `eval` inside the dialog's own window, which has its own `App` object. It can't see your app's variables, and your app isn't told which button was clicked.
-
-```javascript
-App.openDialog('Switch to the space background?',
-	"App.setBackground('system/images/desktop/desktop_3.jpg');");
-```
-
-Button labels can't be changed. See also [UI components](ui-components.md#dialogs).
-
 ### App.postNotification
-
-```javascript
-App.postNotification(header, body)
-```
-
-Shows a toast at the top right of the screen and adds the notification to the home menu's Notifications tab.
-
-| Parameter | Description |
-| --- | --- |
-| `header` | Title. The toast shows the first 20 characters. |
-| `body` | Message. The toast shows the first 110 characters. **Always pass a body**, even `''`: without one, no toast appears. |
-
-Both are inserted as HTML. Never include text from untrusted sources. A third parameter, `action`, exists in the code but can't be used from apps.
 
 ```javascript
 App.postNotification('Download complete', 'report.pdf was saved.');
 ```
 
-## Desktop
+Shows a toast and adds the notification to the home menu's Notifications tab. `body` is optional. Both are plain text. Long headers are cut short with "…" in the toast; the Notifications tab shows everything.
+
+## Settings and the desktop
+
+### App.getSettings
+
+```javascript
+var settings = App.getSettings();
+// { background: "system/images/backgrounds/3.jpg", notificationTime: 7000, shortcuts: [...] }
+```
+
+Returns the user's settings, or `null` if the session has ended. See [Configuration and data](configuration.md#settings) for the fields.
+
+### App.saveSettings
+
+```javascript
+App.saveSettings({ notificationTime: 3000 });
+```
+
+Asks the desktop to save and apply settings. Only the known settings with valid values are accepted; if the server refuses, the user gets a notification.
 
 ### App.setBackground
 
 ```javascript
-App.setBackground(path)
+App.setBackground('system/images/backgrounds/2.jpg');
 ```
 
-Changes the desktop background image until the next login. `path` is relative to the site root. To keep the change, also update the user's settings file, as the Settings app does:
-
-```javascript
-var file = 'system/settings/' + App.getUsername() + '.xml';
-var settings = App.parseXml(App.openFile('../../../' + file));
-settings.getElementsByTagName('background')[0].setAttribute('src', path);
-App.saveFile(file, App.serializeXml(settings));
-App.setBackground(path);
-```
+Shorthand for `App.saveSettings({ background: path })`. The change is saved, so it lasts.
 
 ### App.addShortcut
 
 ```javascript
-App.addShortcut(path)
+App.addShortcut('apps/settings/');
 ```
 
-Puts an icon for the app in folder `path` (site root relative, ending in `/`) on the desktop, using the manifest's `Xlarge` icon and title. Double-clicking it opens the app.
-
-![A desktop shortcut](images/shortcut.png)
-
-Shortcuts aren't restored after a reload, all appear at the same spot (drag them apart), and two apps with the same title can't both have one. The desktop also posts the shortcut to `shortcuts.php` ([Server API](server-api.md#shortcutsphp)), which stores it but never gives it back. Because of a desktop bug, clicking a shortcut shows an error dialog ("There was an error creating the shortcut"); see [Known issues](known-issues.md#shortcuts).
+Puts a shortcut to the app on the desktop, using its 64px icon. Shortcuts are saved in the user's settings; adding one that already exists does nothing.
 
 ## Identity and navigation
 
 ### App.getAppID
 
-```javascript
-App.getAppID()  // → "0.8566454929483042"
-```
-
-Returns this window's AppID, a random number between 0 and 1 assigned when the window opened, **as a string**. Use it to close your own window.
+Returns this window's AppID (a string of digits). Rarely needed: `App.closeWindow()` closes your own window without it.
 
 ### App.getUsername
 
-```javascript
-App.getUsername()  // → "admin"
-```
-
-Returns the logged-in user's name. Like the AppID, it comes from the page's query string, so it is only correct on pages the desktop opened (or reached with `gotoLocation`), and it isn't proof of identity.
+Returns the logged-in user's name, as passed in the window's address. Use it for display. The server never trusts it: every server call checks the session instead.
 
 ### App.getQueryStringArgs
 
 ```javascript
-App.getQueryStringArgs()
-// → { "app-id": "0.8566454929483042", "username": "admin", "undefined": "undefined" }
+App.getQueryStringArgs();  // { "app-id": "7453540744585879", "username": "admin" }
 ```
 
-Returns the page's query string as an object of decoded names and values. The `"undefined"` entry is a desktop bug and can be ignored.
+Returns the page's query string as an object of decoded values.
 
 ### App.gotoLocation
-
-```javascript
-App.gotoLocation(path, queryString)
-```
-
-Moves your window to another page while keeping the query string, so `getAppID` and `getUsername` keep working. Use it instead of links or `location.assign`.
-
-| Parameter | Description |
-| --- | --- |
-| `path` | Page to load, relative to the current page. |
-| `queryString` | Extra values to add, such as `'tab=2'`. Pass `''` if there are none, or `&undefined` is added. |
-
-The new address is `path + current query string + '&' + queryString`. Values are added each time and never removed; when a name repeats, `getQueryStringArgs` returns the last value.
 
 ```javascript
 App.gotoLocation('details.html', 'item=42');
 ```
 
-## Files and XML
+Moves your window to another page, keeping `app-id` and `username` (and any other values) in the address. Values in `queryString` replace existing ones with the same name. Use it instead of plain links when moving between your app's pages.
+
+## Files
+
+There are two kinds of file:
+
+* **Site files**: anything under `public/`, readable by anyone, never writable by apps. Use `openFile`.
+* **User files**: private to the logged-in user, in `data/users/<name>/files/`. Use `readFile`, `writeFile` and `listFiles`.
 
 ### App.openFile
 
 ```javascript
-App.openFile(path)  // → file contents as a string
+var list = JSON.parse(App.openFile('../../system/apps.json'));
 ```
 
-Downloads a file from the web server and returns its text. `path` is relative to **your page**, so files elsewhere on the site start with `../../../`:
+Downloads a site file and returns its text, or `null` if it can't be loaded. `url` is relative to your page.
+
+### App.readFile
 
 ```javascript
-var xml = App.openFile('../../../system/apps.xml');
+var text = App.readFile('notes.txt');  // null if there is no such file
 ```
 
-The call blocks until the file arrives. Errors aren't reported: a missing file returns the server's error page. Only files the web server publishes can be read.
-
-### App.saveFile
+### App.writeFile
 
 ```javascript
-App.saveFile(path, contents)  // → the server's reply
-```
-
-Sends a file to the server script `system/server/saveFile.php` ([Server API](server-api.md#savefilephp)) and returns its reply, a JSON string: `{"error": "none"}` when saved, otherwise an error message. Saving needs the login cookie, which browsers only keep when the site runs on the standard port (see [Getting started](getting-started.md#what-you-need)).
-
-| Parameter | Description |
-| --- | --- |
-| `path` | Where to save, relative to the **site root**, for example `'system/settings/admin.xml'`. |
-| `contents` | The text to save. **Encode it with `encodeURIComponent` first**; the function doesn't, and `&`, `+` or `%` in the text would corrupt it. |
-
-```javascript
-var reply = JSON.parse(App.saveFile('system/notes/' + App.getUsername() + '.txt', encodeURIComponent(text)));
-if (reply.error != 'none') {
+var reply = App.writeFile('notes.txt', text);
+if (!reply.ok) {
 	App.openDialog('Could not save: ' + reply.error);
 }
 ```
 
-The current username is sent along with the file. The folder must already exist. Only works for apps three folders below the site root.
+Saves text to the user's storage, replacing any file with that name. Names may use letters, digits, spaces, `-`, `_` and `.` (up to 100 characters, not starting with `.`); files are limited to 1 MB. Any text can be saved; there's no need to encode it.
+
+`App.saveFile` is another name for `writeFile`, kept for apps written for earlier releases.
+
+### App.listFiles
+
+```javascript
+App.listFiles();  // ["notes.txt", "todo.txt"]
+```
+
+## XML
 
 ### App.parseXml
 
 ```javascript
-App.parseXml(xmlString)  // → XML document
+var doc = App.parseXml('<list><item>One</item></list>');
+if (doc) { doc.getElementsByTagName('item').length; }
 ```
 
-Parses XML text into a document you can query with `getElementsByTagName`, `getAttribute` and so on. If the XML is invalid, the user sees an error dialog and the document contains a `<parsererror>` element.
+Returns an XML document, or `null` if the text isn't valid XML.
 
 ### App.serializeXml
 
-```javascript
-App.serializeXml(xmlDocument)  // → string
-```
-
-Turns an XML document back into text, ready for `saveFile`.
-
-## Not in this release
-
-Functions documented for later releases, such as `App.speak`, `App.registerError`, `App.selectFileForOpen` and `App.loadTheme`, don't exist here. See [Version notes](version-notes.md).
+Turns an XML document back into text.
