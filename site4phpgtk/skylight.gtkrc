@@ -1,0 +1,25 @@
+# Skylight OS styles. GTK+ 2 resource files work much like CSS: a style is a set
+# of colours and fonts, and "widget" lines apply it to widgets by name.
+#
+# To use a whole GTK theme, uncomment the next line and name a theme installed
+# with your GTK runtime (for example "Clearlooks", the GNOME 2 default):
+# gtk-theme-name = "Clearlooks"
+
+style "skylight-panel" {
+	bg[NORMAL] = "#e8e6e1"
+}
+
+style "skylight-toast" {
+	bg[NORMAL] = "#4a4a4a"
+	fg[NORMAL] = "#ffffff"
+	fg[PRELIGHT] = "#ffffff"
+	bg[PRELIGHT] = "#5a5a5a"
+}
+
+style "skylight-shortcut" {
+	fg[NORMAL] = "#ffffff"
+}
+
+widget "skylight-panel*" style "skylight-panel"
+widget "skylight-toast*" style "skylight-toast"
+widget "*skylight-shortcut*" style "skylight-shortcut"
