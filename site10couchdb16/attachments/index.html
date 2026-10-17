@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Skylight OS</title>
+	<link href="system/css/ui.css" rel="stylesheet"/>
+	<link href="system/css/desktop.css" rel="stylesheet"/>
+</head>
+<body>
+
+<form id="login" class="login">
+	<div class="login-box">
+		<p>Log In:</p>
+		<p><input type="text" name="username" placeholder="Username" autofocus/></p>
+		<p><input type="password" name="password" placeholder="Password"/></p>
+		<p><button type="submit">Log In</button></p>
+		<p id="login-error" class="login-error"></p>
+	</div>
+	<span class="login-brand">Skylight OS</span>
+</form>
+
+<div id="desktop" class="desktop hidden">
+	<div id="taskbar" class="taskbar">
+		<img class="home-button" src="system/images/home.png" alt="Home" title="Home" data-action="toggleMenu"/>
+	</div>
+	<div id="shortcuts"></div>
+	<div id="windows"></div>
+
+	<div id="menu" class="menu hidden" data-menu="home">
+		<div id="menu-apps" class="menu-page"></div>
+		<div id="menu-notifications" class="menu-page hidden">
+			<div class="menu-toolbar"><button data-action="clearNotifications">Clear</button></div>
+			<div id="notification-list"></div>
+		</div>
+		<div class="menu-footer">
+			<button data-action="showApps">Apps</button>
+			<button data-action="showNotifications">Notifications</button>
+			<img class="logout-button" src="system/images/power.png" alt="Log out" title="Log out" data-action="logout"/>
+		</div>
+	</div>
+
+	<div id="clock" class="clock"></div>
+	<div id="toasts" class="toasts"></div>
+</div>
+
+<script src="system/js/core.js"></script>
+<script src="system/js/desktop.js"></script>
+</body>
+</html>

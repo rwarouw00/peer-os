@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Terminal</title>
+	<link href="../../system/css/ui.css" rel="stylesheet"/>
+	<style>
+		body { margin: 0; }
+		#code {
+			position: absolute;
+			top: 38px;
+			left: 6px;
+			width: calc(100% - 12px);
+			height: calc(100% - 44px);
+			box-sizing: border-box;
+			padding: 5px;
+			border: 1px solid #000;
+			color: #fff;
+			background-color: #000;
+			font: 10pt 'Courier New', monospace;
+		}
+	</style>
+	<script src="../../system/js/core.js"></script>
+	<script src="../../system/js/app.js"></script>
+</head>
+<body>
+<button id="run">Run</button>
+<textarea id="code" spellcheck="false"></textarea>
+<script>
+var code = document.getElementById('code');
+
+// Running typed-in JavaScript is the whole point of the Terminal.
+document.getElementById('run').onclick = function () {
+	try {
+		eval(code.value);
+	} catch (error) {
+		code.value += '\n/* ' + error + ' */\n';
+		code.focus();
+	}
+};
+</script>
+</body>
+</html>

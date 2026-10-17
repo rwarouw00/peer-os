@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Settings</title>
+	<link href="../../system/css/ui.css" rel="stylesheet"/>
+	<style>
+		body { margin: 10px 15px; }
+		h3 { margin: 10px 0 8px 0; font-size: 11pt; }
+		.background { width: 80px; height: 50px; margin: 3px; border: 3px solid transparent; cursor: pointer; }
+		.background.selected { border-color: #3a7bd5; }
+		#seconds { width: 25px; }
+	</style>
+	<script src="../../system/js/core.js"></script>
+	<script src="../../system/js/app.js"></script>
+</head>
+<body>
+<h3>Background</h3>
+<div id="backgrounds"></div>
+
+<h3>Notifications</h3>
+Show notifications for <input type="text" id="seconds" maxlength="2"/> seconds
+<button id="save-seconds">Save</button>
+
+<script>
+var settings = App.getSettings();
+var backgrounds = document.getElementById('backgrounds');
+var seconds = document.getElementById('seconds');
+
+for (var i = 1; i <= 6; i++) {
+	var image = document.createElement('img');
+	var path = 'system/images/backgrounds/' + i + '.jpg';
+	image.src = Skylight.root + path;
+	image.className = 'background' + (path === settings.background ? ' selected' : '');
+	image.setAttribute('data-path', path);
+	backgrounds.appendChild(image);
+}
+
+backgrounds.onclick = function (event) {
+	var path = event.target.getAttribute('data-path');
+	if (path) {
+		App.setBackground(path);
+		for (var i = 0; i < backgrounds.childNodes.length; i++) {
+			backgrounds.childNodes[i].className = 'background' + (backgrounds.childNodes[i] === event.target ? ' selected' : '');
+		}
+	}
+};
+
+seconds.value = settings.notificationTime / 1000;
+
+document.getElementById('save-seconds').onclick = function () {
+	var value = parseInt(seconds.value, 10);
+	if (!(value >= 1 && value <= 60)) {
+		App.openDialog('Enter a number of seconds from 1 to 60.');
+		return;
+	}
+	App.saveSettings({ notificationTime: value * 1000 });
+	App.postNotification('Settings', 'Notifications now stay for ' + value + ' seconds.');
+};
+</script>
+</body>
+</html>
