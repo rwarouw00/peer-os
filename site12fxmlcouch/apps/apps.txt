@@ -1,0 +1,3 @@
+apps/terminal/
+apps/settings/
+apps/web-browser/

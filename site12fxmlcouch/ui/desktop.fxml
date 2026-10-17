@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The desktop window: the panel along the top, and the desktop area (background and shortcuts). -->
+<?import javafx.geometry.Orientation?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml">
+	<top>
+		<ToolBar fx:id="panel">
+			<Button text="Apps" onAction="#toggleMenu">
+				<graphic><ImageView fitWidth="22" fitHeight="22" preserveRatio="true" smooth="true"><Image url="@../images/home.png"/></ImageView></graphic>
+			</Button>
+			<Separator orientation="VERTICAL"/>
+			<HBox fx:id="windowList" spacing="4"/>
+			<Region HBox.hgrow="ALWAYS"/>
+			<Label fx:id="clock"/>
+		</ToolBar>
+	</top>
+	<center>
+		<Pane fx:id="area" styleClass="desktop-area"/>
+	</center>
+</BorderPane>

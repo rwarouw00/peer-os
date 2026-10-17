@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The home menu, shown in a Popup. The app icons are added to #appsPage from apps/apps.txt. -->
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml" styleClass="home-menu" prefWidth="430" prefHeight="470">
+	<StackPane VBox.vgrow="ALWAYS">
+		<TilePane fx:id="appsPage" hgap="8" vgap="8" prefColumns="4">
+			<padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+		</TilePane>
+		<VBox fx:id="notificationsPage" visible="false">
+			<HBox alignment="CENTER_RIGHT">
+				<padding><Insets top="6" right="6" bottom="6" left="6"/></padding>
+				<Button text="Clear" onAction="#clearNotifications"/>
+			</HBox>
+			<ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+				<VBox fx:id="notificationList"/>
+			</ScrollPane>
+		</VBox>
+	</StackPane>
+	<HBox spacing="6" styleClass="home-menu-footer">
+		<Button text="Apps" onAction="#showAppsPage"/>
+		<Button text="Notifications" onAction="#showNotificationsPage"/>
+		<Region HBox.hgrow="ALWAYS"/>
+		<Button styleClass="flat-button" onAction="#logout">
+			<graphic><ImageView fitWidth="20" fitHeight="20" preserveRatio="true" smooth="true"><Image url="@../images/power.png"/></ImageView></graphic>
+		</Button>
+	</HBox>
+</VBox>

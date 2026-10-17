@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?language javascript?>
+<!--
+  Terminal: runs JavaScript. Typed code runs in this window's script engine,
+  where app is this app, so app.postNotification('Hi') and the rest of the
+  App API work. The logic is in terminal.js.
+-->
+<?import javafx.geometry.Orientation?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml">
+	<top>
+		<ToolBar>
+			<Button text="Run" onAction="run()"/>
+			<Button text="Clear output" onAction="output.clear()"/>
+			<Region HBox.hgrow="ALWAYS"/>
+			<Label text="JavaScript. app is this app."/>
+		</ToolBar>
+	</top>
+	<center>
+		<SplitPane orientation="VERTICAL" dividerPositions="0.6">
+			<TextArea fx:id="code" styleClass="terminal-code"/>
+			<TextArea fx:id="output" styleClass="terminal-output" editable="false"/>
+		</SplitPane>
+	</center>
+	<fx:script source="terminal.js"/>
+</BorderPane>
