@@ -1,0 +1,5 @@
+Skylight.exe
+AddUser.exe
+apps/*/app.dll
+data/users.json
+data/users/
