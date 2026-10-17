@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Settings: desktop background, and how long notifications stay on screen. -->
+<xul>
+	<icon id="BACKGROUND_1" ref="images/backgrounds/thumbs/1.jpg"/>
+	<icon id="BACKGROUND_2" ref="images/backgrounds/thumbs/2.jpg"/>
+	<icon id="BACKGROUND_3" ref="images/backgrounds/thumbs/3.jpg"/>
+	<icon id="BACKGROUND_4" ref="images/backgrounds/thumbs/4.jpg"/>
+	<icon id="BACKGROUND_5" ref="images/backgrounds/thumbs/5.jpg"/>
+	<icon id="BACKGROUND_6" ref="images/backgrounds/thumbs/6.jpg"/>
+	<vbox id="settings" spacing="6" style="padding: 12;">
+		<label value="Background" style="font: 13 bold;"/>
+		<hbox spacing="6">
+			<button id="background1" icon="BACKGROUND_1" command="choose 1" tooltip="Waterfall"/>
+			<button id="background2" icon="BACKGROUND_2" command="choose 2" tooltip="Coast"/>
+			<button id="background3" icon="BACKGROUND_3" command="choose 3" tooltip="Planet"/>
+		</hbox>
+		<hbox spacing="6">
+			<button id="background4" icon="BACKGROUND_4" command="choose 4" tooltip="Palace"/>
+			<button id="background5" icon="BACKGROUND_5" command="choose 5" tooltip="Castle"/>
+			<button id="background6" icon="BACKGROUND_6" command="choose 6" tooltip="Forest"/>
+		</hbox>
+		<label value="Notifications" style="font: 13 bold; padding: 8 0 0 0;"/>
+		<hbox spacing="6">
+			<label value="Show notifications for"/>
+			<textbox id="seconds" cols="3" style="max-width: 50;"/>
+			<label value="seconds"/>
+			<button label="Save" command="saveTime"/>
+			<spacer flex="1"/>
+		</hbox>
+		<spacer flex="1"/>
+	</vbox>
+</xul>

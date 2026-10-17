@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- One notification, in the home menu and as a toast. Skylight sets the
+     labels header and body; the button's command closes it. -->
+<xul>
+	<hbox id="notification" spacing="8" style="padding: 6 8;">
+		<vbox flex="1" spacing="2">
+			<label id="header" value="" style="font: 13 bold; color: #1f3a5f;"/>
+			<label id="body" value=""/>
+		</vbox>
+		<button label="×" command="close" tooltip="Close"/>
+	</hbox>
+</xul>

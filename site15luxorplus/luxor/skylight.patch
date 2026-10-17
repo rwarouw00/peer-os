@@ -1,0 +1,775 @@
+diff -ruN a/src/luxor/core/XulTag.java b/src/luxor/core/XulTag.java
+--- a/src/luxor/core/XulTag.java	2026-10-17 21:47:30.868778820 +0000
++++ b/src/luxor/core/XulTag.java	2026-10-17 21:50:02.222759967 +0000
+@@ -24,6 +24,7 @@
+ 
+ import java.awt.Color;
+ import java.awt.Font;
++import java.awt.Insets;
+ import java.io.*;
+ import java.util.*;
+ import javax.swing.*;
+@@ -196,6 +197,11 @@
+       if( value == null )
+          return null;
+ 
++      // Skylight: #rgb, #rrggbb and rgb(r, g, b), read from the inline style
++      Color skylightColor = parseColor( getInlineStyle( Css.Property.BACKGROUND ) );
++      if( skylightColor != null )
++         return skylightColor;
++
+       if( value.getType() == CssValue.IDENT )
+       {
+          // todo: check why getType is IDENT and not STRING
+@@ -239,6 +245,102 @@
+ 
+    public Border getBorder()
+    {
++      // Skylight: padding goes inside the border, margin outside it
++      Border border = getCssBorder();
++      Insets padding = parseInsets( getInlineStyle( "padding" ) );
++      Insets margin = parseInsets( getInlineStyle( "margin" ) );
++      if( padding != null )
++         border = border == null ? new EmptyBorder( padding ) : new CompoundBorder( border, new EmptyBorder( padding ) );
++      if( margin != null )
++         border = border == null ? new EmptyBorder( margin ) : new CompoundBorder( new EmptyBorder( margin ), border );
++      return border;
++   }
++
++   /**
++    *  Skylight: the value of one property in this element's style attribute
++    *  (style="color: #336699; padding: 4 8"), or null.
++    */
++   public String getInlineStyle( String property )
++   {
++      String style = getAttribute( Xul.Attribute.STYLE );
++      if( style == null )
++         return null;
++      String found = null;
++      StringTokenizer declarations = new StringTokenizer( style, ";" );
++      while( declarations.hasMoreTokens() )
++      {
++         String declaration = declarations.nextToken();
++         int colon = declaration.indexOf( ':' );
++         if( colon > 0 && declaration.substring( 0, colon ).trim().equalsIgnoreCase( property ) )
++            found = declaration.substring( colon + 1 ).trim();
++      }
++      return found;
++   }
++
++   /** Skylight: #rgb, #rrggbb or rgb(r, g, b); null for anything else. */
++   static Color parseColor( String text )
++   {
++      if( text == null )
++         return null;
++      text = text.trim();
++      try
++      {
++         if( text.matches( "#[0-9a-fA-F]{3}" ) )
++            return new Color( Integer.parseInt( text.substring( 1, 2 ), 16 ) * 17,
++                  Integer.parseInt( text.substring( 2, 3 ), 16 ) * 17,
++                  Integer.parseInt( text.substring( 3, 4 ), 16 ) * 17 );
++         if( text.matches( "#[0-9a-fA-F]{6}" ) )
++            return new Color( Integer.parseInt( text.substring( 1 ), 16 ) );
++         if( text.toLowerCase().startsWith( "rgb(" ) && text.endsWith( ")" ) )
++         {
++            String[] parts = text.substring( 4, text.length() - 1 ).split( "," );
++            if( parts.length == 3 )
++               return new Color( Integer.parseInt( parts[0].trim() ), Integer.parseInt( parts[1].trim() ),
++                     Integer.parseInt( parts[2].trim() ) );
++         }
++      }
++      catch( IllegalArgumentException ex )
++      {
++         // not a colour we understand: Luxor's own checks report it
++      }
++      return null;
++   }
++
++   /** Skylight: CSS-style "4", "4 8", "4 8 2" or "4 8 2 6" (px optional); null if missing or wrong. */
++   static Insets parseInsets( String text )
++   {
++      if( text == null )
++         return null;
++      String[] parts = text.trim().split( "\\s+" );
++      int[] n = new int[parts.length];
++      try
++      {
++         for( int i = 0; i < parts.length; i++ )
++            n[i] = Integer.parseInt( parts[i].replaceAll( "px$", "" ) );
++      }
++      catch( NumberFormatException ex )
++      {
++         Xul.syntax( "unsupported value '" + text + "' for css property padding/margin" );
++         return null;
++      }
++      switch ( n.length )
++      {
++         case 1:
++            return new Insets( n[0], n[0], n[0], n[0] );
++         case 2:
++            return new Insets( n[0], n[1], n[0], n[1] );
++         case 3:
++            return new Insets( n[0], n[1], n[2], n[1] );
++         case 4:
++            return new Insets( n[0], n[1], n[2], n[3] );
++         default:
++            Xul.syntax( "unsupported value '" + text + "' for css property padding/margin" );
++            return null;
++      }
++   }
++
++   private Border getCssBorder()
++   {
+       StyleSheet style = getStyle();
+       CssValue value = style.lookup( Css.Property.BORDER );
+       if( value == null )
+@@ -372,6 +474,11 @@
+       if( value == null )
+          return null;
+ 
++      // Skylight: #rgb, #rrggbb and rgb(r, g, b), read from the inline style
++      Color skylightColor = parseColor( getInlineStyle( Css.Property.COLOR ) );
++      if( skylightColor != null )
++         return skylightColor;
++
+       if( value.getType() == CssValue.IDENT )
+       {
+          // todo: check why getType is IDENT and not STRING
+@@ -435,6 +542,7 @@
+          return null;
+ 
+       CssFontDef fontDef = new CssFontDef();
++      String javaFamily = null;   // Skylight
+ 
+       do
+       {
+@@ -470,9 +578,15 @@
+             }
+             else
+             {
+-               Xul.SyntaxError.UNKNOWN_CSS_PROPERTY_VALUE( stringValue, Css.Property.FONT );
++               // Skylight: any other name is a Java font family (monospaced, Dialog, DejaVu Sans, ...)
++               javaFamily = stringValue;
+             }
+          }
++         else if( value.getType() == CssValue.STRING )
++         {
++            // Skylight: a quoted family name, "DejaVu Sans"
++            javaFamily = ( ( CssString ) value ).getStringValue();
++         }
+          else
+          {
+             Xul.SyntaxError.UNSUPPORTED_CSS_PROPERTY_VALUE_TYPE( value.getType(), Css.Property.FONT );
+@@ -496,7 +610,11 @@
+          if( fontDef.getWeight() == Css.FontWeight.Id.BOLD )
+             fontStyle |= Font.BOLD;
+ 
+-      if( fontDef.getFamily() == Css.FontFamily.Id.SERIF )
++      if( javaFamily != null )
++      {
++         return new Font( javaFamily, fontStyle, size );
++      }
++      else if( fontDef.getFamily() == Css.FontFamily.Id.SERIF )
+       {
+          font = new Font( "serif", fontStyle, size );
+          return font;
+@@ -513,8 +631,8 @@
+       }
+       else
+       {
+-         Xul.syntax( "unsupported font-family for css property" );
+-         return null;
++         // Skylight: no family given (font: 13 bold), so keep Swing's usual one
++         return new Font( "Dialog", fontStyle, size );
+       }
+    }
+ 
+diff -ruN a/src/luxor/swing/AbstractBoxPeer.java b/src/luxor/swing/AbstractBoxPeer.java
+--- a/src/luxor/swing/AbstractBoxPeer.java	2026-10-17 21:47:30.866365441 +0000
++++ b/src/luxor/swing/AbstractBoxPeer.java	2026-10-17 22:18:23.683191643 +0000
+@@ -38,9 +38,12 @@
+ {
+    static Logger T = Logger.getLogger( AbstractBoxPeer.class );
+ 
++   private XulTag _boxDef;   // Skylight: for the spacing attribute
++
+    public AbstractBoxPeer( XulTag def )
+    {
+       super( def );
++      _boxDef = def;
+    }
+ 
+    protected void setup( JPanel panel, int orient, List compDefs, JComponentResolver resolver, XulContext ctx )
+@@ -85,185 +88,63 @@
+       }
+ 
+       Iterator compIt = comps.iterator();
++      int spacing = _boxDef.getIntAttribute( "spacing", 0 );   // Skylight
+       while( compIt.hasNext() )
+       {
+-         NComponent comp = ( NComponent ) compIt.next();
+-
+-         JComponent jcomp = comp.getJComponent();
+-
+-         Dimension min = jcomp.getMinimumSize();
+-         Dimension pref = jcomp.getPreferredSize();
+-         Dimension max = jcomp.getMaximumSize();
+-
+-         if( orient == SwingConstants.VERTICAL )
++         final NComponent comp = ( NComponent ) compIt.next();
++         final JComponent jcomp = comp.getJComponent();
++         final int finalOrient = orient;
++         final int finalMaxWidth = maxWidth;
++         final int finalMaxHeight = maxHeight;
++         final int finalFlexTotal = flexTotal;
++
++         fit( comp, jcomp, orient, maxWidth, maxHeight, flexTotal );
++
++         // Skylight: every child is named after its id, so code can find any of them
++         //  (Luxor named only some controls: not password fields, lists or boxes)
++         String id = comp.getId();
++         if( jcomp.getName() == null && id != null && !id.equals( "anonymous" ) )
++            jcomp.setName( id );
++
++         // Skylight: when a label's or button's text, icon or font changes, size it
++         //  again, and the boxes around it (Luxor used to keep the size of a
++         //  label's first text, cutting longer ones off with "...")
++         jcomp.putClientProperty( REFIT, new Runnable()
+          {
+-            // top-to-bottom
+-
+-            jcomp.setAlignmentX( Component.LEFT_ALIGNMENT );
+-
+-            // set maximum width to width of broadest component
+-
+-            // check for flex(ibility) of height
+-            int flex = comp.getFlex();
+-            if( flex == 0 )
++            public void run()
+             {
+-               // min height == preferred height == max height
+-
+-               if( XulDebug.debugLayout() )
+-               {
+-                  String clazzName = jcomp.getClass().getName();
+-                  T.debug( "[" + clazzName + "] min.height=" + min.height + ", min.width=" + min.width );
+-                  T.debug( "[" + clazzName + "] pref.height=" + pref.height + ", pref.width=" + pref.width );
+-                  T.debug( "[" + clazzName + "] max.height=" + max.height + ", max.width=" + max.width );
+-                  T.debug( "[" + clazzName + "] maxWidth=" + maxWidth );
+-               }
+-
+-               // check for height in xul def
+-               int height = comp.getHeight();
+-               if( height == -1 )
+-               {
+-                  // no height defined; use component's preferred height
+-
+-                  if( comp.useMinHeight() )
+-                  {
+-                     // preserve min.width, pref.width
+-                     min.setSize( min.width, pref.height );
+-                     pref.setSize( pref.width, pref.height );
+-                     max.setSize( maxWidth, pref.height );
+-                  }
+-                  else
+-                  {
+-                     // preserve min, pref, max.height
+-                     max.setSize( maxWidth, max.height );
+-                  }
+-               }
+-               else
+-               {
+-                  // preserve min.width, pref.width
+-                  min.setSize( min.width, height );
+-                  pref.setSize( pref.width, height );
+-                  max.setSize( maxWidth, height );
+-               }
++               jcomp.invalidate();   // a box's layout keeps its children's old sizes until invalidated
++               jcomp.setMinimumSize( null );
++               jcomp.setPreferredSize( null );
++               jcomp.setMaximumSize( null );
++               // the box's width (or height) was taken from its children as they
++               //  were built, so let this one have at least what it needs now
++               Dimension need = jcomp.getPreferredSize();
++               fit( comp, jcomp, finalOrient, Math.max( finalMaxWidth, need.width ),
++                     Math.max( finalMaxHeight, need.height ), finalFlexTotal );
+             }
+-            else
+-            {
+-               int minHeight = comp.getMinHeight();
+-               if( minHeight == -1 )
+-               {
+-                  // preserve min.width
+-                  if( comp.useMinHeight() )
+-                     min.setSize( min.width, pref.height );
+-               }
+-               else
+-               {
+-                  // only set minHeight if supplied by user (in xul file)
+-                  // preserve min.width
+-                  min.setSize( min.width, minHeight );
+-               }
+-
+-               // note: if maxHeight is set in xul
+-               //  we loose the proper flex setting
+-               //  as BoxLayout models the flex(ibility) using maxHeight
+-               int flexMaxHeight = comp.getMaxHeight();
+-               if( flexMaxHeight == -1 )
+-                  flexMaxHeight = Integer.MAX_VALUE / flexTotal * flex;
+-
+-               T.debug( "flexMaxHeight=" + flexMaxHeight );
+-
+-               // todo: should I set pref.height using getHeight?
+-
+-               // preserve pref
+-               // pref.setSize( pref.width, pref.height );
+-               max.setSize( maxWidth, flexMaxHeight );
+-            }
+-         }
+-         else
++         } );
++         jcomp.addPropertyChangeListener( new java.beans.PropertyChangeListener()
+          {
+-            // left-to-right
+-
+-            jcomp.setAlignmentY( Component.CENTER_ALIGNMENT );
+-
+-            // set maximum height to height of highest component
+-
+-            // check for flex(ibility) of height
+-            int flex = comp.getFlex();
+-            if( flex == 0 )
+-            {
+-               // min width == preferred width == max width
+-
+-               if( XulDebug.debugLayout() )
+-               {
+-                  String clazzName = jcomp.getClass().getName();
+-                  T.debug( "[" + clazzName + "] min.width=" + min.width + ", min.height=" + min.height );
+-                  T.debug( "[" + clazzName + "] pref.width=" + pref.width + ", pref.height=" + pref.height );
+-                  T.debug( "[" + clazzName + "] max.width=" + max.width + ", max.height=" + max.height );
+-                  T.debug( "[" + clazzName + "] maxHeight=" + maxHeight );
+-               }
+-
+-               int width = comp.getWidth();
+-               if( width == -1 )
+-               {
+-                  if( comp.useMinWidth() )
+-                  {
+-                     // preserve min.height, pref.height
+-                     min.setSize( pref.width, min.height );
+-                     pref.setSize( pref.width, pref.height );
+-                     max.setSize( pref.width, maxHeight );
+-                  }
+-                  else
+-                  {
+-                     // preserve min, pref, max.width
+-                     max.setSize( max.width, maxHeight );
+-                  }
+-               }
+-               else
+-               {
+-                  // preserve min.height, pref.height
+-                  min.setSize( width, min.height );
+-                  pref.setSize( width, pref.height );
+-                  max.setSize( width, maxHeight );
+-               }
+-            }
+-            else
++            public void propertyChange( java.beans.PropertyChangeEvent ev )
+             {
+-               int minWidth = comp.getMinWidth();
+-               if( minWidth == -1 )
+-               {
+-                  // preserve min.height
+-                  if( comp.useMinWidth() )
+-                     min.setSize( pref.width, min.height );
+-               }
+-               else
+-               {
+-                  // only set minWidth if supplied by user (in xul file)
+-                  // preserve min.height
+-                  min.setSize( minWidth, min.height );
+-               }
+-
+-               // note: if maxWidth is set in xul
+-               //  we loose the proper flex setting
+-               //  as BoxLayout models the flex(ibility) using maxWidth
+-               int flexMaxWidth = comp.getMaxWidth();
+-               if( flexMaxWidth == -1 )
+-                  flexMaxWidth = Integer.MAX_VALUE / flexTotal * flex;
+-
+-               T.debug( "flexMaxWidth=" + flexMaxWidth );
+-
+-               // todo: should I set pref.width using getWidth?
+-
+-               // preserve pref
+-               // pref.setSize( pref.width, pref.height );
+-               max.setSize( flexMaxWidth, maxHeight );
++               String name = ev.getPropertyName();
++               if( "text".equals( name ) || "icon".equals( name ) || "font".equals( name ) )
++                  refit( jcomp );
+             }
+-         }
+-
+-         jcomp.setMinimumSize( min );
+-         jcomp.setPreferredSize( pref );
+-         jcomp.setMaximumSize( max );
++         } );
+ 
+          panel.add( jcomp );
+-
+          addComponent( comp );
++
++         // Skylight: spacing="6" puts a gap between a box's children
++         if( spacing > 0 && compIt.hasNext() )
++         {
++            if( orient == SwingConstants.VERTICAL )
++               panel.add( Box.createVerticalStrut( spacing ) );
++            else
++               panel.add( Box.createHorizontalStrut( spacing ) );
++         }
+       }
+ 
+       resolveReferences();
+@@ -303,5 +184,249 @@
+             panel.setBorder( new CompoundBorder( debugBorder, currentBorder ) );
+       }
+    }
+-}
+ 
++   /** Skylight: the client property holding a child's "size me again" action. */
++   private static final String REFIT = "skylight.refit";
++
++   /**
++    *  Skylight: sizes a component again, then each box around it that Luxor
++    *  built, so a longer text makes room for itself all the way up.
++    */
++   static void refit( JComponent jcomp )
++   {
++      java.awt.Container c = jcomp;
++      JComponent top = jcomp;
++      while( c instanceof JComponent )
++      {
++         Object action = ( ( JComponent ) c ).getClientProperty( REFIT );
++         if( action instanceof Runnable )
++         {
++            ( ( Runnable ) action ).run();
++            top = ( JComponent ) c;
++         }
++         c = c.getParent();
++      }
++      java.awt.Container parent = top.getParent();
++      if( parent instanceof JComponent )
++      {
++         ( ( JComponent ) parent ).revalidate();
++         parent.repaint();
++      }
++   }
++
++   /**
++    *  Sets a child's minimum, preferred and maximum size for this box: Luxor's
++    *  original rules, moved into a method (Skylight) so they can run again.
++    */
++   private void fit( NComponent comp, JComponent jcomp, int orient, int maxWidth, int maxHeight, int flexTotal )
++   {
++         Dimension min = jcomp.getMinimumSize();
++      Dimension pref = jcomp.getPreferredSize();
++      Dimension max = jcomp.getMaximumSize();
++
++      if( orient == SwingConstants.VERTICAL )
++      {
++         // top-to-bottom
++
++         jcomp.setAlignmentX( Component.LEFT_ALIGNMENT );
++
++         // set maximum width to width of broadest component
++
++         // check for flex(ibility) of height
++         int flex = comp.getFlex();
++         if( flex == 0 )
++         {
++            // min height == preferred height == max height
++
++            if( XulDebug.debugLayout() )
++            {
++               String clazzName = jcomp.getClass().getName();
++               T.debug( "[" + clazzName + "] min.height=" + min.height + ", min.width=" + min.width );
++               T.debug( "[" + clazzName + "] pref.height=" + pref.height + ", pref.width=" + pref.width );
++               T.debug( "[" + clazzName + "] max.height=" + max.height + ", max.width=" + max.width );
++               T.debug( "[" + clazzName + "] maxWidth=" + maxWidth );
++            }
++
++            // check for height in xul def
++            int height = comp.getHeight();
++            if( height == -1 )
++            {
++               // no height defined; use component's preferred height
++
++               if( comp.useMinHeight() )
++               {
++                  // preserve min.width, pref.width
++                  min.setSize( min.width, pref.height );
++                  pref.setSize( pref.width, pref.height );
++                  max.setSize( maxWidth, pref.height );
++               }
++               else
++               {
++                  // preserve min, pref, max.height
++                  max.setSize( maxWidth, max.height );
++               }
++            }
++            else
++            {
++               // preserve min.width, pref.width
++               min.setSize( min.width, height );
++               pref.setSize( pref.width, height );
++               max.setSize( maxWidth, height );
++            }
++            // Skylight: min-height and max-height apply here too
++            int userMaxHeight = comp.getMaxHeight();
++            if( userMaxHeight != -1 )
++            {
++               max.setSize( max.width, userMaxHeight );
++               pref.setSize( pref.width, Math.min( pref.height, userMaxHeight ) );
++               min.setSize( min.width, Math.min( min.height, userMaxHeight ) );
++            }
++            int userMinHeight = comp.getMinHeight();
++            if( userMinHeight != -1 )
++            {
++               min.setSize( min.width, userMinHeight );
++               pref.setSize( pref.width, Math.max( pref.height, userMinHeight ) );
++            }
++         }
++         else
++         {
++            int minHeight = comp.getMinHeight();
++            if( minHeight == -1 )
++            {
++               // preserve min.width
++               if( comp.useMinHeight() )
++                  min.setSize( min.width, pref.height );
++            }
++            else
++            {
++               // only set minHeight if supplied by user (in xul file)
++               // preserve min.width
++               min.setSize( min.width, minHeight );
++            }
++
++            // note: if maxHeight is set in xul
++            //  we loose the proper flex setting
++            //  as BoxLayout models the flex(ibility) using maxHeight
++            int flexMaxHeight = comp.getMaxHeight();
++            if( flexMaxHeight == -1 )
++               flexMaxHeight = Integer.MAX_VALUE / flexTotal * flex;
++
++            T.debug( "flexMaxHeight=" + flexMaxHeight );
++
++            // todo: should I set pref.height using getHeight?
++
++            // preserve pref
++            // pref.setSize( pref.width, pref.height );
++            max.setSize( maxWidth, flexMaxHeight );
++         }
++      }
++      else
++      {
++         // left-to-right
++
++         jcomp.setAlignmentY( Component.CENTER_ALIGNMENT );
++
++         // set maximum height to height of highest component
++
++         // check for flex(ibility) of height
++         int flex = comp.getFlex();
++         if( flex == 0 )
++         {
++            // min width == preferred width == max width
++
++            if( XulDebug.debugLayout() )
++            {
++               String clazzName = jcomp.getClass().getName();
++               T.debug( "[" + clazzName + "] min.width=" + min.width + ", min.height=" + min.height );
++               T.debug( "[" + clazzName + "] pref.width=" + pref.width + ", pref.height=" + pref.height );
++               T.debug( "[" + clazzName + "] max.width=" + max.width + ", max.height=" + max.height );
++               T.debug( "[" + clazzName + "] maxHeight=" + maxHeight );
++            }
++
++            int width = comp.getWidth();
++            if( width == -1 )
++            {
++               if( comp.useMinWidth() )
++               {
++                  // preserve min.height, pref.height
++                  min.setSize( pref.width, min.height );
++                  pref.setSize( pref.width, pref.height );
++                  max.setSize( pref.width, maxHeight );
++               }
++               else
++               {
++                  // preserve min, pref, max.width
++                  max.setSize( max.width, maxHeight );
++               }
++            }
++            else
++            {
++               // preserve min.height, pref.height
++               min.setSize( width, min.height );
++               pref.setSize( width, pref.height );
++               max.setSize( width, maxHeight );
++            }
++            // Skylight: min-width and max-width apply here too
++            int userMaxWidth = comp.getMaxWidth();
++            if( userMaxWidth != -1 )
++            {
++               max.setSize( userMaxWidth, max.height );
++               pref.setSize( Math.min( pref.width, userMaxWidth ), pref.height );
++               min.setSize( Math.min( min.width, userMaxWidth ), min.height );
++            }
++            int userMinWidth = comp.getMinWidth();
++            if( userMinWidth != -1 )
++            {
++               min.setSize( userMinWidth, min.height );
++               pref.setSize( Math.max( pref.width, userMinWidth ), pref.height );
++            }
++         }
++         else
++         {
++            int minWidth = comp.getMinWidth();
++            if( minWidth == -1 )
++            {
++               // preserve min.height
++               if( comp.useMinWidth() )
++                  min.setSize( pref.width, min.height );
++            }
++            else
++            {
++               // only set minWidth if supplied by user (in xul file)
++               // preserve min.height
++               min.setSize( minWidth, min.height );
++            }
++
++            // note: if maxWidth is set in xul
++            //  we loose the proper flex setting
++            //  as BoxLayout models the flex(ibility) using maxWidth
++            int flexMaxWidth = comp.getMaxWidth();
++            if( flexMaxWidth == -1 )
++               flexMaxWidth = Integer.MAX_VALUE / flexTotal * flex;
++
++            T.debug( "flexMaxWidth=" + flexMaxWidth );
++
++            // todo: should I set pref.width using getWidth?
++
++            // preserve pref
++            // pref.setSize( pref.width, pref.height );
++            max.setSize( flexMaxWidth, maxHeight );
++         }
++      }
++
++      // Skylight: keep the sizes consistent, so a max-width or max-height also
++      //  limits a flexible control's preferred size
++      pref.setSize( Math.min( pref.width, max.width ), Math.min( pref.height, max.height ) );
++      min.setSize( Math.min( min.width, pref.width ), Math.min( min.height, pref.height ) );
++      jcomp.setMinimumSize( min );
++      jcomp.setPreferredSize( pref );
++      jcomp.setMaximumSize( max );
++
++      // Skylight: a text field with cols="..." ignores the preferred size set
++      //  above (Swing works it out from the columns), so drop the columns
++      //  when the box has made it narrower
++      if( jcomp instanceof JTextField && ( ( JTextField ) jcomp ).getColumns() > 0
++             && jcomp.getPreferredSize().width > pref.width )
++         ( ( JTextField ) jcomp ).setColumns( 0 );
++   }
++}
+diff -ruN a/src/luxor/swing/AbstractComponent.java b/src/luxor/swing/AbstractComponent.java
+--- a/src/luxor/swing/AbstractComponent.java	2026-10-17 21:47:30.866755677 +0000
++++ b/src/luxor/swing/AbstractComponent.java	2026-10-17 21:58:57.363173318 +0000
+@@ -117,7 +117,7 @@
+ 
+    public int getMaxWidth()
+    {
+-      return _def.getMaxHeight();
++      return _def.getMaxWidth();   // Skylight: was getMaxHeight(), so max-width never worked
+    }
+ 
+    public int getMinHeight()
+diff -ruN a/src/luxor/swing/IFramePeer.java b/src/luxor/swing/IFramePeer.java
+--- a/src/luxor/swing/IFramePeer.java	2026-10-17 21:47:30.865856715 +0000
++++ b/src/luxor/swing/IFramePeer.java	2026-10-17 21:50:02.231069280 +0000
+@@ -55,6 +55,7 @@
+       _browser = new JEditorPane();
+       _browser.setEditable( false );
+       _browser.setContentType( "text/html" );
++      setName( _browser );   // Skylight: so scripts can find it by its id
+ 
+       // add browser window/widget to browser registry
+       //  use id as target
+@@ -64,7 +65,7 @@
+ 
+       if( src == null )
+       {
+-         Xul.SyntaxError.REQUIRED_ATTRIBUTE_MISSING( Xul.Attribute.SRC, Xul.Tag.IFRAME );
++         // Skylight: no src is an empty page, for scripts to fill with setPage
+       }
+       else
+       {
+diff -ruN a/src/luxor/swing/input/XButton.java b/src/luxor/swing/input/XButton.java
+--- a/src/luxor/swing/input/XButton.java	2026-10-17 21:47:30.866192337 +0000
++++ b/src/luxor/swing/input/XButton.java	2026-10-17 21:50:02.235384792 +0000
+@@ -76,13 +76,20 @@
+ 
+       String label = def.getLabel();
+ 
++      // Skylight: a button without a label (a picture button) has no text,
++      //  instead of showing its id
+       if( label == null )
+-         label = getId();
++         label = "";
+ 
+       T.debug( "  label=" + label );
+ 
+       _button.setText( label );
+ 
++      // Skylight: tooltip="..." (Luxor documented it, but buttons ignored it)
++      String tooltip = def.getTooltip();
++      if( tooltip != null )
++         _button.setToolTipText( tooltip );
++
+       ImageIcon icon = def.getIcon( ctx );
+       if( icon != null )
+          _button.setIcon( icon );
+diff -ruN a/src/luxor/swing/input/XLabel.java b/src/luxor/swing/input/XLabel.java
+--- a/src/luxor/swing/input/XLabel.java	2026-10-17 21:47:30.866076761 +0000
++++ b/src/luxor/swing/input/XLabel.java	2026-10-17 22:10:55.841604490 +0000
+@@ -100,6 +100,7 @@
+       _label.setLocation( def.getLeft( 0 ), def.getTop( 0 ) );
+ 
+       setName( _label );
++      setBorder( _label );   // Skylight: so padding, margin and border work on labels too
+ 
+       _label.setText( value );
+ 
+diff -ruN a/src/luxor/swing/input/XTextArea.java b/src/luxor/swing/input/XTextArea.java
+--- a/src/luxor/swing/input/XTextArea.java	2026-10-17 21:47:30.866138580 +0000
++++ b/src/luxor/swing/input/XTextArea.java	2026-10-17 21:50:02.239858391 +0000
+@@ -47,6 +47,17 @@
+       setColor( _textArea );
+       setBackgroundColor( _textArea );
+ 
++      // Skylight: named after its id like other controls, and wrap="true" and
++      //  readonly="true" attributes
++      setName( _textArea );
++      if( def.getBooleanAttribute( "wrap", false ) )
++      {
++         _textArea.setLineWrap( true );
++         _textArea.setWrapStyleWord( true );
++      }
++      if( def.getBooleanAttribute( "readonly", false ) )
++         _textArea.setEditable( false );
++
+       // wrap textArea into a scroll pane
+       _component = new JScrollPane( _textArea );
+    }

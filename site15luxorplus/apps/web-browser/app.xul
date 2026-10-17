@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The Web Browser: Luxor's <iframe> (Swing's HTML 3.2 viewer), steered by app.tcl. -->
+<xul>
+	<vbox id="browser" spacing="4" style="padding: 4;">
+		<hbox spacing="4">
+			<button label="Back" command="back" tooltip="The page before"/>
+			<button label="Reload" command="reload" tooltip="Load this page again"/>
+			<textbox id="address" cols="40" flex="1"/>
+			<button label="Go" command="go"/>
+		</hbox>
+		<iframe id="page" flex="1"/>
+	</vbox>
+</xul>
