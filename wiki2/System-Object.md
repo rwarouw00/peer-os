@@ -31,7 +31,7 @@ Because apps are served from the same site as the desktop, an app *can* call `pa
 | `postNotification(header, body, action)` | Adds a notification to the tray and shows a toast. `action`, if a function, runs when the tray entry is clicked. **`body` must be given**: without it the tray entry appears but the toast fails with an error. |
 | `toast.send(header, text)` | Shows a toast only. A `null` argument reuses the previous toast's text. Set `toast.autoHide = false` to keep toasts on screen. |
 | `renderContextMenu(event, xmlString)` | Shows a menu built from context menu XML at the mouse position. See [Context Menus](Context-Menus.md). |
-| `logoutUser()` | Removes the user from `LoggedInUsers.xml` and clears `Skylight.user`. See [Users and Login](Users-and-Login.md). |
+| `logoutUser()` | Removes the user's first token from `LoggedInUsers.xml`, saves it, and clears `Skylight.user`. See [Users and Login](Users-and-Login.md). |
 | `handleAppEvent(event)` | Receives messages from apps and dispatches them. See [Architecture](Architecture.md). |
 
 ## Files and XML
@@ -49,3 +49,5 @@ The context menu files call functions that don't exist in `system.js`, so those 
 ---
 
 _New page, written from the `siteroot` code. Not on the SourceForge wiki._
+
+_Updated after the `system/server` scripts were added to `siteroot`._

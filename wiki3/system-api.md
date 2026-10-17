@@ -25,7 +25,7 @@
 | `addAppIcon(path)` | Adds an app's icon to the home menu. |
 | `addShortcut(path)` | Adds a desktop shortcut and posts it to `shortcuts.php`. |
 | `renderContextMenu(event, xmlString)` | Shows a menu defined in [context menu XML](configuration.md#context-menus) at the mouse position. |
-| `logoutUser()` | Removes the user from `LoggedInUsers.xml` and clears `Skylight.user`. Doesn't change the screen. |
+| `logoutUser()` | Removes the user's first token from `LoggedInUsers.xml`, saves the file, and clears `Skylight.user`. Doesn't change the screen or delete the cookie. |
 | `openFile(path)` | Synchronous GET, path relative to the site root. |
 | `saveFile(path, contents)` | Posts to `saveFile.php`, using a `../../../` address that only works when Skylight OS is at the root of the website. |
 | `parseXml(xml)`, `serializeXml(doc)` | XML helpers, as in `App`. |

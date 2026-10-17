@@ -25,7 +25,7 @@ This documentation describes the code in [`../siteroot`](../siteroot), which ide
 * [Architecture](architecture.md): the desktop page, apps, and how they talk to each other
 * [System API](system-api.md): the desktop's own `System` object
 * [Configuration](configuration.md): `apps.xml`, user settings and other files
-* [Server API](server-api.md): the PHP scripts the browser code expects
+* [Server API](server-api.md): the PHP scripts for login, saving and shortcuts
 
 **Status**
 
@@ -41,4 +41,5 @@ This documentation describes the code in [`../siteroot`](../siteroot), which ide
 | Written in | Plain JavaScript, HTML and CSS; no libraries or build step |
 | App model | Each app is a folder with an `appData.json` and a web page, shown in an iframe |
 | Data | XML and JSON files on the server, read over HTTP |
-| Missing from `siteroot` | The server scripts in `system/server/` (login, saving files) |
+| Server | Four PHP scripts in `system/server/` for login, saving and shortcuts |
+| Status | Prototype. Not safe on a shared network; see [Security](security.md) |

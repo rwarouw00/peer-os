@@ -15,7 +15,7 @@ Skylight OS is a desktop environment that runs in a web browser. The desktop is 
 * [Desktop](Desktop.md): the login screen, taskbar, home menu, clock and desktop shortcuts
 * [Users and Login](Users-and-Login.md): how logging in and out works, and where user settings live
 * [Configuration Files](Configuration-Files.md): `apps.xml`, per-user settings and the other XML files
-* [Server Endpoints](Server-Endpoints.md): the PHP scripts the desktop expects the server to provide
+* [Server Endpoints](Server-Endpoints.md): the PHP scripts that handle login, saving and shortcuts
 * [System Object](System-Object.md): the desktop-side API that `App` calls end up in
 * [Built-in Apps](Built-in-Apps.md): Terminal, Settings, Web Browser, Dialog and Save File
 * [Context Menus](Context-Menus.md): the right-click menus and their XML format

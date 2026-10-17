@@ -2,43 +2,35 @@
 
 ## What you need
 
-* A web server with PHP. Skylight OS is mostly static files, but the Save File dialog and the server scripts are PHP. The test stand-in below needs PHP 8 or later.
-* Skylight OS must be served from the **root** of the website (for example `http://localhost:8000/`, not `http://localhost:8000/skylight/`): logging out builds the save address in a way that only works there.
+* A web server with PHP. The code is written in a PHP 5 style and also runs on current PHP 8 (tested with 8.3), which logs a few harmless warnings.
 * A modern browser.
-* The server scripts in `system/server/`. **They aren't included in `siteroot`**, so you need to provide them (see [Server API](server-api.md)) or use the test stand-in below.
+* Write access for the web server to `system/LoggedInUsers.xml`, `system/settings/` and `system/server/shortcuts.xml`.
+
+Two requirements come from how the code is written:
+
+* Serve Skylight OS from the **root** of a website (`http://localhost/`, not `http://localhost/skylight/`). Logout builds its save address in a way that only works there.
+* Use the **standard port** (80 for HTTP, 443 for HTTPS). On an address like `http://localhost:8000`, `auth.php` sets a cookie the browser rejects: you can log in and use apps, but nothing can be saved. To use another port, change `$_SERVER['HTTP_HOST']` to `''` in the `setcookie` call in `system/server/auth.php`.
+
+**Don't expose it to a network.** The server scripts let anyone write files on the server without logging in; see [Security](security.md).
 
 ## Run it locally
 
-The stand-in below answers the three server scripts the desktop calls. It accepts any username and password and doesn't save anything, so use it only for trying things out.
+With PHP's built-in web server, from inside `siteroot`:
 
-1. Save this as `router.php` **outside** the `siteroot` folder:
+```
+cd siteroot
+sudo php -S localhost:80
+```
 
-   ```php
-   <?php
-   // Test stand-in for system/server/*.php. Accepts any login; saves nothing.
-   $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-   if (str_starts_with($uri, '/system/server/')) {
-       if (str_ends_with($uri, 'auth.php')) { echo json_encode(['error' => 'none']); return true; }
-       echo 'NO ERROR';
-       return true;
-   }
-   return false; // serve everything else from siteroot as normal
-   ```
+(`sudo` is needed on Linux and macOS to use port 80.) Then open <http://localhost/>.
 
-2. Start PHP's built-in web server from inside `siteroot`:
-
-   ```
-   cd siteroot
-   php -S localhost:8000 ../router.php
-   ```
-
-3. Open <http://localhost:8000/> in your browser.
+If you can't use port 80, run `php -S localhost:8000` instead: everything works except saving (the Settings background, logout).
 
 ## Log in
 
 ![The login screen](images/login.png)
 
-Enter the username **admin**, leave the password empty, and click **Log In** (Enter doesn't submit the form). With the stand-in any password works, but the username must be `admin`: it is the only user with a settings file, and without one the desktop doesn't load. To add another user, see [Configuration](configuration.md#user-settings).
+Enter the username **admin**, leave the password empty, and click **Log In** (Enter doesn't submit the form). Accounts are listed in `system/settings/users.xml`; to add one, see [Configuration](configuration.md#usersxml).
 
 ## Next steps
 

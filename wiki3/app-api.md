@@ -136,7 +136,7 @@ Puts an icon for the app in folder `path` (site root relative, ending in `/`) on
 
 ![A desktop shortcut](images/shortcut.png)
 
-Shortcuts aren't restored after a reload, all appear at the same spot (drag them apart), and two apps with the same title can't both have one. The desktop also posts the shortcut to `shortcuts.php` ([Server API](server-api.md#shortcutsphp)) and shows a dialog if that fails.
+Shortcuts aren't restored after a reload, all appear at the same spot (drag them apart), and two apps with the same title can't both have one. The desktop also posts the shortcut to `shortcuts.php` ([Server API](server-api.md#shortcutsphp)), which stores it but never gives it back. Because of a desktop bug, clicking a shortcut shows an error dialog ("There was an error creating the shortcut"); see [Known issues](known-issues.md#shortcuts).
 
 ## Identity and navigation
 
@@ -206,7 +206,7 @@ The call blocks until the file arrives. Errors aren't reported: a missing file r
 App.saveFile(path, contents)  // → the server's reply
 ```
 
-Sends a file to the server script `system/server/saveFile.php` ([Server API](server-api.md#savefilephp)) and returns its reply. That script isn't included in `siteroot`.
+Sends a file to the server script `system/server/saveFile.php` ([Server API](server-api.md#savefilephp)) and returns its reply, a JSON string: `{"error": "none"}` when saved, otherwise an error message. Saving needs the login cookie, which browsers only keep when the site runs on the standard port (see [Getting started](getting-started.md#what-you-need)).
 
 | Parameter | Description |
 | --- | --- |
@@ -214,10 +214,13 @@ Sends a file to the server script `system/server/saveFile.php` ([Server API](ser
 | `contents` | The text to save. **Encode it with `encodeURIComponent` first**; the function doesn't, and `&`, `+` or `%` in the text would corrupt it. |
 
 ```javascript
-App.saveFile('system/notes/' + App.getUsername() + '.txt', encodeURIComponent(text));
+var reply = JSON.parse(App.saveFile('system/notes/' + App.getUsername() + '.txt', encodeURIComponent(text)));
+if (reply.error != 'none') {
+	App.openDialog('Could not save: ' + reply.error);
+}
 ```
 
-The current username is sent along with the file. Only works for apps three folders below the site root.
+The current username is sent along with the file. The folder must already exist. Only works for apps three folders below the site root.
 
 ### App.parseXml
 

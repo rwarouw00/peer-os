@@ -16,7 +16,7 @@ To use it, load `system/js/app.js` in your app's page (see [How to build a Skyli
 | [App.getAppID](App.getAppID.md) | Gets the app id | yes |
 | [App.getUsername](App.getUsername.md) | Retrieves the username of the current user | yes |
 | [App.openFile](App.openFile.md) | Opens a file | yes |
-| [App.saveFile](App.saveFile.md) | Saves a file | yes (needs the server's `saveFile.php`) |
+| [App.saveFile](App.saveFile.md) | Saves a file | yes (see [Server Endpoints](Server-Endpoints.md)) |
 | [App.parseXml](App.parseXml.md) | Parses an XML string into a DOMDocument | yes |
 | [App.serializeXml](App.serializeXml.md) | Serializes a DOMDocument into an XML string | yes |
 | [App.gotoLocation](App.gotoLocation.md) | Moves the window location, while preserving the query string.  This is required to be used instead of location.assign. | yes |
@@ -36,3 +36,5 @@ The links for App.selectFileForOpen and App.loadTheme point at SourceForge pages
 _Source: [App Object](https://sourceforge.net/p/skylightos/wiki/App%20Object/) on the SourceForge wiki · Labels: app object · Last modified 2014-08-26_
 
 _Updated after reviewing the `siteroot` code._
+
+_Updated after the `system/server` scripts were added to `siteroot`._

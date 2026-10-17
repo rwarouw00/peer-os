@@ -1,13 +1,15 @@
 # Configuration
 
-Skylight OS keeps its configuration in files under `system/`. The browser reads them over HTTP, so they must be published by the web server, and changes made to them by the system go through `saveFile.php` ([Server API](server-api.md)).
+Skylight OS keeps its configuration in files under `system/`. The browser reads them over HTTP, so they must be published by the web server; changes go through the [server scripts](server-api.md), so the web server must be able to write them.
 
 | File | Purpose | Read |
 | --- | --- | --- |
 | [`system/apps.xml`](#appsxml) | Apps in the home menu | At login |
 | [`system/settings/<username>.xml`](#user-settings) | Each user's background and toast time | At login; by the Settings app |
-| [`system/LoggedInUsers.xml`](#loggedinusersxml) | Users currently logged in | At logout |
-| [`system/settings/users.xml`](#usersxml) | Old user list | Not used by the browser code |
+| [`system/settings/users.xml`](#usersxml) | Accounts and passwords | By `auth.php` at login |
+| [`system/LoggedInUsers.xml`](#loggedinusersxml) | Login tokens | By `auth.php`, `saveFile.php` and logout |
+| [`system/server/shortcuts.xml`](#shortcutsxml) | Desktop shortcuts | Written by `shortcuts.php`; never read |
+| `system/server/mime.types`, `mime-types.xml` | File-type icons | By the Save File dialog ([Server API](server-api.md#save-file-dialog-helpers)) |
 | [`system/components/context menus/*.xml`](#context-menus) | Right-click menus | On right-click |
 | `<app>/appData.json` | Each app's window | See [App manifest](app-manifest.md) |
 
@@ -45,18 +47,9 @@ Each user needs `system/settings/<username>.xml`. Without it, the desktop doesn'
 | `background` | `src` | Background image, relative to the site root. The Settings app updates it. |
 | `displayNotificationsFor` | `value` | How long toasts show, in milliseconds. |
 
-Both elements are required. To add a user, copy `admin.xml` to `<username>.xml` and make sure your `auth.php` accepts them.
+Both elements are required. To add a user, see [users.xml](#usersxml).
 
 Backgrounds supplied with the system are `system/images/desktop/desktop_1.jpg` to `desktop_6.jpg`. (`desktop_4` is named `desktop_4.JPG` on disk; rename it to `.jpg` for case-sensitive servers.)
-
-## LoggedInUsers.xml
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<users></users>
-```
-
-Holds one empty element per logged-in user, named after them (for example `<admin/>`). Logout removes it. Nothing in the browser code adds it, so the server's `auth.php` must; otherwise logout fails.
 
 ## users.xml
 
@@ -66,7 +59,29 @@ Holds one empty element per logged-in user, named after them (for example `<admi
 </users>
 ```
 
-A list of users with **plain-text** passwords, left over from an earlier version that checked passwords in the browser. The current code doesn't read it. Because it sits in a published folder, anyone can download it; see [Security](security.md).
+The accounts `auth.php` checks at login. Passwords are **plain text**, the shipped `admin` password is empty, and anyone can download the file; see [Security](security.md).
+
+To add a user:
+
+1. Add `<user username="alice" password="..."/>`. The username must be a valid XML element name (letters, digits, `-`, `_`, `.`; not starting with a digit), because it is also used as an element name in `LoggedInUsers.xml`.
+2. Copy `system/settings/admin.xml` to `system/settings/alice.xml`.
+
+## LoggedInUsers.xml
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<users><admin>6e91a3f72bec281fcb2fdfe9b26b01acf0aa5cb8</admin></users>
+```
+
+One element per login, named after the user and holding their token (the same value as their `Skylight_OS_Auth` cookie). `auth.php` appends; `saveFile.php` checks the user's first element; logout removes the first element. Ship it empty: `<users></users>`.
+
+## shortcuts.xml
+
+```xml
+<shortcuts><shortcut top="30px" left="0px">apps/default/settings/</shortcut></shortcuts>
+```
+
+In `system/server/`. Shared by all users and never read by the desktop. The shipped copy contains three identical test entries.
 
 ## Context menus
 

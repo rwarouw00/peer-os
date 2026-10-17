@@ -11,7 +11,7 @@ Skylight OS is a desktop environment that runs in the browser. Everything the us
 | `App` object | [`system/js/app.js`](../siteroot/system/js/app.js) | each app's iframe | The API apps call. See [App Object](App-Object.md) |
 | Desktop styles | [`system/css/system.css`](../siteroot/system/css/system.css) | desktop page | Windows, taskbar, home menu, toasts, context menus |
 | UI styles | [`system/css/ui.css`](../siteroot/system/css/ui.css) | desktop and apps | Buttons, text boxes and button bars. See [UI elements](UI-elements.md) |
-| Server scripts | `system/server/*.php` | web server | Login, saving files, shortcuts. **Not included in `siteroot`**; see [Server Endpoints](Server-Endpoints.md) |
+| Server scripts | [`system/server/*.php`](../siteroot/system/server/) | web server | Login, saving files, shortcuts. See [Server Endpoints](Server-Endpoints.md) |
 
 ## How an app talks to the desktop
 
@@ -64,16 +64,22 @@ siteroot/
 │   └── panels/hello world/     unfinished panel example (see Panels)
 └── system/
     ├── apps.xml                apps listed in the home menu
-    ├── LoggedInUsers.xml       users currently logged in
-    ├── settings/               users.xml and one <username>.xml per user
+    ├── LoggedInUsers.xml       login tokens of users currently logged in
+    ├── settings/               users.xml (accounts) and one <username>.xml per user
     ├── components/             system windows: dialog, save dialog, context menus, login prototype
     ├── css/                    system.css, ui.css
     ├── js/                     system.js, app.js (+ two unused search scripts)
-    └── images/                 desktop backgrounds, window buttons, file-type icons
+    ├── images/                 desktop backgrounds, window buttons, file-type icons
+    └── server/                 PHP: auth.php, saveFile.php, shortcuts.php, functions.php,
+                                MIME tables, shortcuts.xml
 ```
 
-`system/server/` is referenced throughout the code but is not part of `siteroot`.
+## Login and saving
+
+`auth.php` checks the password against `system/settings/users.xml`, then sends the browser a `Skylight_OS_Auth` cookie and records the same token in `system/LoggedInUsers.xml`. Each save sends the cookie back, and `saveFile.php` compares it with the stored token. See [Users and Login](Users-and-Login.md) and [Server Endpoints](Server-Endpoints.md).
 
 ---
 
 _New page, written from the `siteroot` code. Not on the SourceForge wiki._
+
+_Updated after the `system/server` scripts were added to `siteroot`._

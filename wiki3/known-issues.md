@@ -1,6 +1,6 @@
 # Known issues
 
-Bugs and unfinished features in Skylight OS Arctic Eagle v1.00.00, with the place to fix each one. Security problems are listed separately in [Security](security.md). *Tested* means the problem was reproduced in a browser.
+Bugs and unfinished features in Skylight OS Arctic Eagle v1.00.00, including the PHP scripts, with the place to fix each one. Security problems are listed separately in [Security](security.md). *Tested* means the problem was reproduced in a browser.
 
 ## Desktop
 
@@ -9,7 +9,7 @@ Bugs and unfinished features in Skylight OS Arctic Eagle v1.00.00, with the plac
 | Toasts are mostly off screen at every screen size; about 115 of 300 pixels show (*tested*) | `.toastAnimState0`, `.toastAnimState1` in `system/css/system.css` (`margin-left: 77%`) | Remove the margin and position `#toastContainer` with `right` and a fixed width |
 | A toast's × does nothing | `System.toast.send` | Add a click handler that removes the toast |
 | A notification without a body shows no toast and throws an error (*tested*) | `System.toast.send` reads `text.length` | Default `header` and `text` to `''` |
-| Logout leaves the desktop on screen, and throws if the user isn't in `LoggedInUsers.xml` (*tested*) | `System.logoutUser` | Check the element exists; reload the page after saving |
+| Logout leaves the desktop on screen and doesn't delete the cookie; throws if the user isn't in `LoggedInUsers.xml` (*tested*) | `System.logoutUser` | Check the element exists; add a `logout.php` that ends the session; reload the page |
 | A user without a settings file gets a broken desktop (*tested*) | `init` in `index.html` | Fall back to default settings |
 | Enter doesn't submit the login form (*tested*) | `index.html` | Wrap the fields in a `<form>` and handle `submit` |
 | Login fields aren't URL-encoded; a non-JSON reply leaves the screen stuck | Login handler in `index.html` | `encodeURIComponent` each value; wrap `JSON.parse` in `try` |
@@ -41,9 +41,23 @@ Bugs and unfinished features in Skylight OS Arctic Eagle v1.00.00, with the plac
 
 | Issue | Where | Suggested fix |
 | --- | --- | --- |
-| Clicking or dropping a shortcut posts `[object Object]` to `shortcuts.php`, with a stale `path` | `mouseup` case of `handleDragEvent` in `index.html` | Read the path from the shortcut's hidden `.shortcutPath` element and `JSON.stringify` the object |
-| Shortcuts aren't restored after a reload | Nothing reads them back | Load them from the server at login |
+| Clicking a shortcut always shows "There was an error creating the shortcut" (*tested*): every `mouseup` posts `[object Object]`, with a stale `path`, and `shortcuts.php` replies with nothing | `mouseup` case of `handleDragEvent` in `index.html` | Read the path from the shortcut's hidden `.shortcutPath` element, set `action: 'edit'`, and `JSON.stringify` the object; only post after an actual drag |
+| Shortcuts aren't restored after a reload, and one list is shared by all users | Nothing reads `shortcuts.xml`; it isn't per user | Return the list from `shortcuts.php` and load it at login; store it in the user's settings file |
 | All shortcuts start at the same position; two apps with the same title clash | `System.addShortcut` | Offset each new shortcut; build ids from the path, not the title |
+
+## Server
+
+| Issue | Where | Suggested fix |
+| --- | --- | --- |
+| Saving fails on any address with a port number (*tested*) | `setcookie(..., $_SERVER['HTTP_HOST'], ...)` in `auth.php` includes the port, which browsers reject | Pass `''` as the domain |
+| A second login for the same user can't save (*tested*) | `auth.php` appends a token per login; `saveFile.php` checks only the first | Replace the user's token on login, or use PHP sessions |
+| Failed writes are reported as success; callers ignore the reply anyway | `saveFile.php` doesn't check `file_put_contents`; Settings and logout don't read the reply | Return an error when the write fails; check the reply in the callers |
+| PHP warnings corrupt the JSON replies when `display_errors` is on | `$_POST`/`$_COOKIE` read without `isset` | Check inputs with `isset`; build replies with `json_encode` |
+| In edge cases the login reply is invalid: two JSON objects when a username appears twice in `users.xml`, nothing at all when the file has no users | The loop and `$error` flag in `auth.php` | Return as soon as a user matches; default `$error` to 1 |
+| Usernames must be valid XML element names | `createElement($username, ...)` in `auth.php` | Store `<user name="...">token</user>` instead |
+| `shortcuts.php` prints `NO ERROR` once per matching shortcut | `edit` loop | `break` after the first match |
+| The Save File dialog rereads the 1,000-line `mime.types` for every file it lists | `get_mime_type` in `functions.php` | Read the table once into an array |
+| `system/server/shortcuts.json` is unused | | Delete it |
 
 ## Built-in apps
 

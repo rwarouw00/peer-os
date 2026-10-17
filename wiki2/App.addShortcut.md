@@ -10,17 +10,19 @@ The shortcut shows the app's `Xlarge` icon with its title underneath (see [appDa
 
 ![A desktop shortcut for the Web Browser](images/siteroot/shortcut.png)
 
-The desktop also sends the shortcut to the server script `system/server/shortcuts.php` (see [Server Endpoints](Server-Endpoints.md)). If the script doesn't reply `NO ERROR`, a dialog reports the problem.
+The desktop also sends the shortcut to the server script `system/server/shortcuts.php`, which appends it to `system/server/shortcuts.xml` (see [Server Endpoints](Server-Endpoints.md#shortcutsphp)). If the script doesn't reply `NO ERROR`, a dialog reports the problem.
 
 Limitations in `siteroot`:
 
-* Shortcuts aren't loaded again at login, so they disappear when the page is reloaded.
+* The server saves shortcuts, but the desktop never loads them again, so they disappear when the page is reloaded. The saved list is shared by all users.
 * Every shortcut is placed at the same spot, so a second shortcut covers the first until it is dragged away.
 * Two apps with the same title can't both have a shortcut, because the shortcut's element id is built from the title.
-* Releasing the mouse over a shortcut (a click, or the end of a drag) sends broken data to `shortcuts.php`; if the server rejects it, an error dialog appears. See [Known Issues](Known-Issues.md).
+* Clicking a shortcut (or finishing a drag) sends broken data to `shortcuts.php`, so an error dialog, "There was an error creating the shortcut", appears every time (tested). See [Known Issues](Known-Issues.md).
 
 This function isn't mentioned on the original wiki.
 
 ---
 
 _New page, written from the `siteroot` code. Not on the SourceForge wiki._
+
+_Updated after the `system/server` scripts were added to `siteroot`._

@@ -9,7 +9,7 @@
 | **Home button** (grid, top left) | Opens the home menu. Click it again, or anywhere else, to close it. |
 | **Taskbar** (top, next to the home button) | An icon for each open window. |
 | **Clock** (bottom right) | The time and the logged-in user. |
-| **Shortcuts** (top left of the desktop) | App icons placed on the desktop by apps. Double-click to open. They aren't kept after a reload. |
+| **Shortcuts** (top left of the desktop) | App icons placed on the desktop by apps. Double-click to open (a harmless error message also appears). They aren't kept after a reload. |
 | **Toasts** (top right) | Notifications pop up here for a few seconds. |
 
 ### Home menu
@@ -58,7 +58,7 @@ If the code fails, the error is added to the end of the text as a comment. **Sav
 
 ![Settings](images/settings.png)
 
-Click a picture to make it your desktop background. The change is immediate and is saved for next time (if the server supports saving). The notification time box and the **Add User** page aren't finished.
+Click a picture to make it your desktop background. The change is immediate and is saved for next time, provided saving works (see [Getting started](getting-started.md#what-you-need)). The notification time box and the **Add User** page aren't finished.
 
 ### Web Browser
 
@@ -68,4 +68,8 @@ Type an address, including `https://`, and press Enter. Many websites refuse to 
 
 ### Dialog and Save File
 
-These are parts of the system that appear in the home menu by mistake. **Dialog** is the window apps use to ask questions; opened on its own it is empty. **Save File** is an unfinished file browser. Neither is useful when opened from the menu.
+These are parts of the system that appear in the home menu by mistake. **Dialog** is the window apps use to ask questions; opened on its own it is empty.
+
+![The Save File dialog](images/save-file.png)
+
+**Save File** is an unfinished file browser. You can browse the server's folders (click a folder to open it, **<** and **>** to go back and forward) and click a file to copy its name, but **Save** and **Cancel** do nothing.

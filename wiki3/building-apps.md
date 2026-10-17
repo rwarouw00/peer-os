@@ -141,7 +141,7 @@ Reload the page and log in again. Greeter's large icon now appears in the home m
 
 ## Going further
 
-* **Saving data.** [`App.saveFile`](app-api.md#appsavefile) sends a file to the server's `saveFile.php` (see [Server API](server-api.md)). Encode the contents with `encodeURIComponent` first.
+* **Saving data.** [`App.saveFile`](app-api.md#appsavefile) sends a file to the server's `saveFile.php` (see [Server API](server-api.md)). Encode the contents with `encodeURIComponent` first, and check the JSON reply.
 * **More than one page.** Move between pages with [`App.gotoLocation`](app-api.md#appgotolocation), never with plain links or `location.assign`, or the new page loses its AppID and username.
 * **Filling the window.** Windows have a fixed size and a 30px title bar. To fit your layout to the window, size it from `window.innerWidth` and `window.innerHeight`.
 * **Looks.** See [UI components](ui-components.md) for the styles `ui.css` provides.

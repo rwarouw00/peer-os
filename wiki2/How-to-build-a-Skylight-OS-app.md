@@ -91,7 +91,7 @@ To give your app an icon in the home menu, add a line for it to `system/apps.xml
 #### Things to Know
 
 * If your app has more than one page, switch between them with [App.gotoLocation](App.gotoLocation.md), not links or `location.assign`, or the app loses its [AppID](AppID.md) and username.
-* Files are read with [App.openFile](App.openFile.md), using paths relative to your page; saving uses [App.saveFile](App.saveFile.md), which needs the server scripts (see [Server Endpoints](Server-Endpoints.md)).
+* Files are read with [App.openFile](App.openFile.md), using paths relative to your page; saving uses [App.saveFile](App.saveFile.md), which needs the user to be logged in (see [Server Endpoints](Server-Endpoints.md)) and whose reply you should check.
 * The window can't be resized by the user, so design for the size in `appData.json`. If you want your content to fill the window, size it from `window.innerWidth` and `window.innerHeight` like the Terminal does.
 
 That's about it!  Check out our [JavaScript API's](App-Object.md), the [built-in apps](Built-in-Apps.md) for working examples, and our [other tutorials](Tutorials.md) to learn how to create more advanced apps.  Have fun coding!
@@ -101,3 +101,5 @@ That's about it!  Check out our [JavaScript API's](App-Object.md), the [built-in
 _Source: [How to build a Skylight OS app](https://sourceforge.net/p/skylightos/wiki/How%20to%20build%20a%20Skylight%20OS%20app/) on the SourceForge wiki · Labels: building apps · Last modified 2014-03-13_
 
 _Updated after reviewing the `siteroot` code._
+
+_Updated after the `system/server` scripts were added to `siteroot`._

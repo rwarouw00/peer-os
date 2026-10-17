@@ -8,7 +8,7 @@ The `siteroot` code identifies itself as **Skylight OS Arctic Eagle v1.00.00** (
 
 > **In `siteroot`:** what the Arctic Eagle code actually does.
 
-Pages that only exist because of the code review are marked **new** below.
+Pages that only exist because of the code review are marked **new** below. The review covers the PHP scripts in `siteroot/system/server/` as well as the browser code.
 
 ## Pages
 
@@ -19,7 +19,7 @@ Pages that only exist because of the code review are marked **new** below.
 | [Desktop](Desktop.md) | **new** |
 | [Users and Login](Users-and-Login.md) | **new** |
 | [Configuration Files](Configuration-Files.md) | **new** |
-| [Server Endpoints](Server-Endpoints.md) | **new** |
+| [Server Endpoints](Server-Endpoints.md) | **new**, rewritten from the `system/server` code |
 | [System Object](System-Object.md) | **new** |
 | [Built-in Apps](Built-in-Apps.md) | **new** |
 | [Context Menus](Context-Menus.md) | **new** |

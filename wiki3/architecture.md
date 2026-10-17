@@ -6,7 +6,7 @@ Skylight OS has three layers:
 
 1. **The desktop page**, [`index.html`](../siteroot/index.html), plus the `System` object in [`system/js/system.js`](../siteroot/system/js/system.js). It draws the login screen, desktop, windows, taskbar and menus, and owns all shared state.
 2. **Apps**, each a folder of web files loaded into an `<iframe>` inside a window. Apps load [`system/js/app.js`](../siteroot/system/js/app.js), which gives them the `App` object.
-3. **The server**: a web server that publishes the files, plus PHP scripts in `system/server/` for logging in and saving. The scripts aren't included in `siteroot`.
+3. **The server**: a web server that publishes the files, plus PHP scripts in [`system/server/`](../siteroot/system/server/) for logging in, saving and shortcuts. See [Server API](server-api.md).
 
 ```mermaid
 flowchart LR
@@ -25,7 +25,7 @@ flowchart LR
     end
     subgraph Server
         Files["Static files<br/>apps/, system/*.xml, images"]
-        PHP["system/server/*.php<br/>(not in siteroot)"]
+        PHP["system/server/*.php<br/>auth, saveFile, shortcuts"]
     end
     System -- "GET" --> Files
     A1 -- "GET" --> Files
@@ -44,7 +44,8 @@ sequenceDiagram
     participant S as Server
     User->>D: username + password, click Log In
     D->>S: POST system/server/auth.php
-    S-->>D: {"error": "none"}
+    S->>S: check settings/users.xml, record token in LoggedInUsers.xml
+    S-->>D: login cookie + {"error": "none"}
     D->>S: GET system/settings/USERNAME.xml
     D->>D: set background and toast time
     D->>S: GET system/apps.xml
@@ -54,7 +55,7 @@ sequenceDiagram
     end
 ```
 
-The username is stored in `System.username` and in the browser's `localStorage` (`Skylight.user`). There is no server session or token in the browser code; see [Security](security.md).
+The username is stored in `System.username` and in the browser's `localStorage` (`Skylight.user`). The login itself is the `Skylight_OS_Auth` cookie, which the browser sends with every later save; the server compares it with the token in `LoggedInUsers.xml`. See [Server API](server-api.md#login-flow) and [Security](security.md).
 
 ## Opening a window
 
@@ -117,8 +118,8 @@ siteroot/
 │   └── panels/hello world/       sample for the unfinished panels feature
 └── system/
     ├── apps.xml                  apps in the home menu
-    ├── LoggedInUsers.xml         users currently logged in
-    ├── settings/                 users.xml and <username>.xml per user
+    ├── LoggedInUsers.xml         login tokens of users currently logged in
+    ├── settings/                 users.xml (accounts) and <username>.xml per user
     ├── components/
     │   ├── dialog/               the Dialog window
     │   ├── save dialog/          the Save File window (PHP)
@@ -127,5 +128,6 @@ siteroot/
     ├── css/                      system.css (desktop), ui.css (controls)
     ├── js/                       system.js, app.js, two unused search scripts
     ├── images/                   backgrounds, window buttons, file-type icons
-    └── server/                   PHP scripts: NOT INCLUDED
+    └── server/                   auth.php, saveFile.php, shortcuts.php, functions.php,
+                                  MIME tables, shortcuts.xml
 ```
