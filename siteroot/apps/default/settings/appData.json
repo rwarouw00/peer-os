@@ -1,0 +1,12 @@
+{
+	"title": "Settings",
+	"position": "centered",
+	"height": "400",
+	"width": "500",
+	"icons": {
+		"small": "apps/default/settings/icons/icon@16.png",
+		"medium": "apps/default/settings/icons/icon@32.png",
+		"large": "apps/default/settings/icons/icon@48.png",
+		"Xlarge": "apps/default/settings/icons/icon@64.png"
+	}
+}

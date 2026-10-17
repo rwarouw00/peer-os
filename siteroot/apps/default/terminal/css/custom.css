@@ -1,0 +1,19 @@
+#terminalContainer {
+	position: absolute;
+	top: 40px;
+	left: 10px;
+	width: 93%;
+	height: 78%;
+	font-family: 'Courier New', monospace;
+	border: 1px solid black;
+	padding: 5px;
+	color: white;
+	background-color: black;
+	font-size: 10pt;
+}
+
+#terminalButtonContainer {
+	position: absolute;
+	top: 8px;
+	left: 10px;
+}

@@ -1,0 +1,12 @@
+{
+	"title": "Dialog",
+	"position": "centered",
+	"height": "200",
+	"width": "300",
+	"icons": {
+		"small": "system/components/dialog/icons/icon@16.png",
+		"medium": "system/components/dialog/icons/icon@32.png",
+		"large": "system/components/dialog/icons/icon@48.png",
+		"Xlarge": "system/components/dialog/icons/icon@64.png"
+	}
+}

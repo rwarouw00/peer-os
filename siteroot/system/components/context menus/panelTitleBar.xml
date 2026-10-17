@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<contextmenu>
+	<item value="close">
+		System.closePanel(System.selected.parentNode.getAttribute('app-id'));
+	</item>
+</contextmenu>

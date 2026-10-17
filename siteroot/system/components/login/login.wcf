@@ -1,0 +1,63 @@
+<div class="appData">
+{
+	"title": "Login",
+	"position": "centered",
+	"height": "300px",
+	"width": "500px",
+	"draggable": "false",
+	"icons": {
+		"16": "system/windows/login/icon@16.png"
+	}
+}
+</div>
+<style rel="stylesheet">
+
+#loginImg {
+	position: absolute;
+	width: 100px;
+	height: 100px;
+	top: 10px;
+	left: 10px;
+}
+
+#loginUsername {
+	position: absolute;
+	top: 120px;
+	text-align: center;
+}
+
+#loginFormContainer {
+	position: absolute;
+	top: 250px;
+	left: 120px;
+}
+
+</style>
+
+<img id="loginImg" src=""/>
+<div id="loginUsername"></div>
+<div id="loginFormContainer">
+	<input type="password" id="loginPasswordInput" placeholder="Password"/>
+	<button id="systemLoginButton">Log in</button>
+</div>
+
+<script>
+var username = System.getUsername();
+var password = System.getPassword();
+var usernameHolder = document.getElementById('loginUsername');
+var passwordInput = document.getElementById('loginPasswordInput');
+var loginButton = document.getElementById('systemLoginButton');
+
+if (password == 'Permission Denied') {
+	System.showDialog('The Login window needs permission to access your password.');
+	password = System.getPassword();
+}
+
+loginButton.onclick = function () {
+	if (passwordInput === password) {
+		System.renderDesktop();
+		System.closeWindow('Login');
+	}
+}
+
+</script>

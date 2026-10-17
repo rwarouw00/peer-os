@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="../../../system/css/ui.css"/>
+<link rel="stylesheet" href="css/custom.css"/>
+<script src="../../../system/js/app.js"></script>
+<title>Terminal</title>
+</head>
+<body>
+
+<div id="terminalButtonContainer">
+<button id="terminalRunButton">Run</button>
+<button id="terminalSaveButtom">Save Script</button>
+</div>
+<textarea id="terminalContainer"></textarea>
+
+<script>
+var terminal = document.getElementById('terminalContainer');
+var runButton = document.getElementById('terminalRunButton');
+var save = document.getElementById('terminalSaveButton');
+
+runButton.onclick = function () {
+	try {
+		if (terminal.value != 'qwerty') {
+			eval(terminal.value);
+		} else {
+			App.openDialog('Hey, ever heard of an <a href="http://en.wikipedia.org/wiki/Easter_egg_%28media%29">easter egg</a>?');
+		}
+	} catch (error) {
+		terminal.value += '\n/* ' + error + ' */\n';
+		terminal.focus();
+	}
+}
+
+window.onresize = function () {
+	terminal.style.width = window.innerWidth - 25 + 'px';
+	terminal.style.left = '5px';
+	terminal.style.height = window.innerHeight - 70 + 'px';
+	terminal.style.bottom = '5px';
+}
+
+</script>
+</body>
+</html>

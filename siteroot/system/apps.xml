@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<apps>
+	<app path="apps/default/terminal/"/>
+	<app path="system/components/dialog/"/>
+	<app path="apps/default/settings/"/>
+	<app path="system/components/save dialog/"/>
+	<app path="apps/default/web browser/"/>
+</apps>

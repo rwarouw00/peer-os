@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<!--
+	
+	Skylight OS Arctic Eagle v1.00.00 Copyright 2013 SkySoft Software Group.
+	
+	
+	-->
+	<title>Skylight OS Arctic Eagle</title>
+	<link href="system/css/system.css" rel="stylesheet"/>
+	<link href="system/css/ui.css" rel="stylesheet"/>
+	<script src="system/js/system.js"></script>
+	
+	<meta charset="utf-8"/>
+</head>
+<body>
+
+<script>
+window.onload = function () {
+
+	var user = '';
+	
+	//var settings = System.openFile('system/settings/users.xml');
+	//settings = System.parseXml(settings);
+	
+	// Show the login screen.  This will automatically render the desktop when the password is correct
+	
+	var loginWindow = document.getElementById('loginWindow');
+	loginWindow.style.visibility = 'visible';
+	
+	
+	var halfTop = 210 / 2;
+	var halfLeft = 240 / 2;
+	
+	loginWindow.style.top = window.innerHeight / 2 - halfTop + 'px';
+	loginWindow.style.left = window.innerWidth / 2 - halfLeft + 'px';
+	
+	document.getElementById('loginButton').onclick = function (event) {
+		//var users = settings.getElementsByTagName('user');
+		
+			var username = document.getElementById('usernameLoginBox');
+			var password = document.getElementById('passwordLoginBox');
+			
+			var xhr = new XMLHttpRequest();
+			xhr.open('post', 'system/server/auth.php', false);
+			xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+			xhr.send('username=' + username.value + '&password=' + password.value);
+			document.getElementById('loginErrorContainer').innerHTML = '<center><img src="system/images/throbber.gif"/></center>';
+			var response = JSON.parse(xhr.responseText);
+			if (response.error == 'none') {
+				user = username.value;
+				localStorage.setItem('Skylight.user', user);
+				init();
+			} else {
+				document.getElementById('loginErrorContainer').innerHTML = 'Either the username or password is incorrect.  Try Again.';
+				password.value = '';
+			}
+			/*var i = 0;
+			
+			do {
+				if (username.value == users[i].getAttribute('username')) {
+					if (password.value == users[i].getAttribute('password')) {
+						user = username.value;
+						init();
+						//break;
+					}
+				}
+				i++;
+			} while (i < users.length);*/
+			
+			// This runs if there is an error.
+			//document.getElementById('loginErrorContainer').innerHTML = 'Either the username or password is incorrect.  Try Again.';
+			//password.value = '';
+		
+	}
+	
+	// Initialize the desktop
+	
+	var init = function () {
+		
+		document.getElementById('loginWindow').style.visibility = 'hidden';
+		document.getElementById('desktop').style.visibility = 'visible';
+		System.username = user;
+		
+		// Initialize Settings
+		var userSettings = System.openFile('system/settings/' + System.username + '.xml');
+		userSettings = System.parseXml(userSettings);
+		
+		System.background = userSettings.getElementsByTagName('background')[0].getAttribute('src');
+		System.displayNotificationsFor = userSettings.getElementsByTagName('displayNotificationsFor')[0].getAttribute('value');
+
+		document.getElementById('desktop').style.backgroundImage = 'url(' + System.background + ')';
+		
+
+		// this block is for dragging windows.
+		var dragging = null;
+		var diffX = 0;
+		var diffY = 0;
+		
+		function handleDragEvent (event) {
+			target = event.target;
+			
+			switch (event.type) {
+				case 'mousedown':
+					if (target.parentNode.className.indexOf('draggable') > -1 || target.parentNode.parentNode.className.indexOf('draggable') > -1) {
+						if (target.parentNode.className.indexOf('draggable') > -1) {
+							dragging = target.parentNode;
+							diffX = event.clientX - target.parentNode.offsetLeft;
+							diffY = event.clientY - target.parentNode.offsetTop;
+						} else if (target.parentNode.parentNode.className.indexOf('draggable') > -1) {
+							dragging = target.parentNode.parentNode;
+							diffX = event.clientX - target.parentNode.parentNode.offsetLeft;
+							diffY = event.clientY - target.parentNode.parentNode.offsetTop;
+						}
+					}
+					break;
+					
+				case 'mousemove':
+					if (dragging !== null) {
+						
+						dragging.style.left = (event.clientX - diffX) + 'px';
+						dragging.style.top = (event.clientY - diffY) + 'px';
+					}
+					
+					break;
+				
+				case 'mouseup':
+					
+					dragging = null;
+					
+					// This is for shortcuts
+					if (target.className == 'shortcutCover') {
+						var shortcutContainer = target.parentNode;
+						var xhr = new XMLHttpRequest();
+						var shortcutInfo = {
+							action: 'edit',
+							path: path,
+							top: shortcutContainer.style.top,
+							left: shortcutContainer.style.left
+						}
+						
+						xhr.open('post', 'system/server/shortcuts.php', false);
+						xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+						xhr.send('contents=' + encodeURIComponent(shortcutInfo));
+						
+						if (xhr.responseText != 'NO ERROR') {
+							System.openDialog('There was an error creating the shortcut.<br/>' + xhr.responseText);
+						}
+					}
+					
+					break;
+					
+			}
+		}
+		
+		var handleContextmenuEvent = function (event) {
+			System.selected = target;
+			if (target.parentNode.className.indexOf('taskBarAppUnit') > -1) {
+				event.preventDefault();
+				event.stopPropagation();
+				var menuXmlString = System.openFile('system/components/context menus/taskbarItem.xml');
+				System.renderContextMenu(event, menuXmlString);
+			} else if (target.parentNode.className.indexOf('appItem') > -1) {
+				event.preventDefault();
+				event.stopPropagation();
+				
+				var menuXmlString = System.openFile('system/components/context menus/appItem.xml');
+				System.renderContextMenu(event, menuXmlString);
+			} else if (target.className.indexOf('panelTitleBar') > -1) {
+				event.preventDefault();
+				event.stopPropagation();
+				
+				var menuXmlString = System.openFile('system/components/context menus/panelTitleBar.xml');
+				System.renderContextMenu(event, menuXmlString);
+			}
+		}
+		
+		var handleClickEvent = function (event) {
+			target = event.target;
+			
+			if (target.parentNode.className.indexOf('taskBarAppUnit') > -1) {
+				System.selected = target;
+				if (document.getElementById(target.parentNode.getAttribute('data-appID')).style.visibility == 'hidden') {
+					System.showWindow(target.parentNode.getAttribute('data-appID'));
+				} else {
+					System.hideWindow(target.parentNode.getAttribute('data-appID'));
+				}
+			} 
+			
+			if (target.id == 'programBoxButtonApps') {
+				document.getElementById('notifications').style.visibility = 'hidden';
+				document.getElementById('apps').style.visibility = 'visible';
+			} else if (target.id == 'programBoxButtonNotifications') {
+				document.getElementById('apps').style.visibility = 'hidden';
+				document.getElementById('notifications').style.visibility = 'visible';
+			}
+			
+			
+			if (target.id !== 'homeButton' && target.id !== 'programBoxButtonApps' && target.id !== 'programBoxButtonNotifications' && target.parentNode.id !== 'programBox' && target.className !== 'notificationCloseButton' && target.id !== 'clearNotifications') {
+				// This hides the program menu when the screen is clicked
+				var programContainer = document.getElementById('programBox');
+				programContainer.style.visibility = 'hidden';
+				document.getElementById('notifications').style.visibility = 'hidden';
+				document.getElementById('apps').style.visibility = 'hidden';
+				programContainer.setAttribute('data-state', 'hidden');
+			}
+			
+			if (document.getElementById('contextmenu')) {
+				document.getElementById('contextmenu').outerHTML = '';
+			}
+			
+			if (target.className.indexOf('notificationCloseButton') > -1) {
+				event.stopPropagation();
+				target.parentNode.outerHTML = '';
+			}
+			
+			if (target.id == 'homeButton') {
+				var programContainer = document.getElementById('programBox');
+				var state = programContainer.getAttribute('data-state');
+
+				if (state == 'visible') {
+					programContainer.style.visibility = 'hidden';
+					programContainer.setAttribute('data-state', 'hidden');
+					document.getElementById('notifications').style.visibility = 'hidden';
+					document.getElementById('apps').style.visibility = 'hidden';
+				} else {
+					programContainer.style.visibility = 'visible';
+					document.getElementById('apps').style.visibility = 'visible';
+					programContainer.setAttribute('data-state', 'visible');
+				}
+			}
+			
+			if (target.className.indexOf('windowActionButtonMinimize') > -1) {
+				var state = target.parentNode.parentNode.parentNode.getAttribute('data-state');
+				var windowObj = target.parentNode.parentNode.parentNode;
+				if (state == 'default') {
+					windowObj.setAttribute('data-width', windowObj.style.width);
+					windowObj.setAttribute('data-height', windowObj.style.height);
+					windowObj.setAttribute('data-top', windowObj.style.top);
+					windowObj.setAttribute('data-left', windowObj.style.left);
+					windowObj.setAttribute('data-iframeHeight', windowObj.getElementsByTagName('iframe')[0].style.height);
+					windowObj.style.width = '100%';
+					windowObj.style.height = '100%';
+					windowObj.style.top = '0px';
+					windowObj.style.left = '0px';
+					windowObj.getElementsByTagName('iframe')[0].style.height = window.innerHeight - 30 + 'px';
+					target.parentNode.parentNode.style.backgroundImage = 'linear-gradient(rgba(190, 190, 190, 1), rgba(160, 160, 160, 1))';
+					windowObj.className = 'window';
+					state = 'max';
+				} else if (state == 'max'){
+					windowObj.style.width = windowObj.getAttribute('data-width');
+					windowObj.style.height = windowObj.getAttribute('data-height');
+					windowObj.style.top = windowObj.getAttribute('data-top');
+					windowObj.style.left = windowObj.getAttribute('data-left');
+					windowObj.getElementsByTagName('iframe')[0].style.height = windowObj.getAttribute('data-iframeHeight');
+					target.parentNode.parentNode.style.backgroundImage = 'linear-gradient(rgba(190, 190, 190, 0.4), rgba(160, 160, 160, 0.2))';
+					windowObj.className = 'window draggable';
+					state = 'default';
+				}
+				
+				windowObj.setAttribute('data-state', state);
+			}
+			
+			if (target.className.indexOf('windowActionButtonClose') > -1) {
+				System.closeWindow(target.parentNode.parentNode.parentNode.getAttribute('data-appid'));
+			}
+			
+			if (target.id == 'logoutButton') {
+				System.logoutUser();
+			}
+		}
+		
+/*		var programContainerEventHandler = function () {
+			var programContainer = document.getElementById('programBox');
+			var state = programContainer.getAttribute('data-state');
+			
+			if (state == 'visible') {
+				programContainer.style.visibility = 'hidden';
+				programContainer.setAttribute('data-state', 'hidden');
+				document.getElementById('notifications').style.visibility = 'hidden';
+				document.getElementById('apps').style.visibility = 'hidden';
+			} else {
+				programContainer.style.visibility = 'visible';
+				document.getElementById('apps').style.visibility = 'visible';
+				programContainer.setAttribute('data-state', 'visible');
+			}
+		}
+		
+		var programButtonContainerEventHandler = function (event) {
+			if (target.id == 'programBoxButtonApps') {
+				document.getElementById('notifications').style.visibility = 'hidden';
+				document.getElementById('apps').style.visibility = 'visible';
+			} else if (target.id == 'programBoxButtonNotifications') {
+				document.getElementById('apps').style.visibility = 'hidden';
+				document.getElementById('notifications').style.visibility = 'visible';
+			}
+		}*/
+		
+		window.addEventListener('message', System.handleAppEvent, false);
+		document.addEventListener('mouseup', handleDragEvent, false);
+		document.addEventListener('mousedown', handleDragEvent, false);
+		document.addEventListener('mousemove', handleDragEvent, false);
+		document.addEventListener('contextmenu', handleContextmenuEvent, false);
+		document.addEventListener('click', handleClickEvent, false);
+		//document.getElementById('homeButton').addEventListener('click', programContainerEventHandler);
+		//document.getElementsByClassName('programBoxButtonContainer')[0].addEventListener('click', programButtonContainerEventHandler);
+		
+		
+		// set value of timeBox
+		var time = document.getElementById('timeBox');
+		setInterval(function () {
+			var date = new Date();
+			var hours = date.getHours();
+			var minutes = date.getMinutes();
+			
+			if (minutes <= 9) {minutes = '0' + minutes;}
+			
+			if (hours >= 13) {
+				if (hours != 0) {
+					hours = hours - 12;
+					time.innerHTML = hours + ':' + minutes + ' pm' + ' ' + System.username;
+				} else {
+					time.innerHTML = '12:' + minutes + ' am' + ' ' + System.username;
+				}
+			} else {
+				if (hours == 12) {
+					time.innerHTML = hours + ':' + minutes + ' pm' + ' ' + System.username;
+				} else {
+					time.innerHTML = hours + ':' + minutes + ' am' + ' ' + System.username;
+				}
+			}
+
+		}, 500);
+		
+		// set up app manager entries
+		
+		var appXmlString = System.openFile('system/apps.xml');
+		
+		var appXmlDom = System.parseXml(appXmlString);
+		
+		var appList = appXmlDom.getElementsByTagName('app');
+		
+		var i = 0;
+		do {
+			var path = appList[i].getAttribute('path');
+			System.addAppIcon(path);
+			i++;
+		} while (i < appList.length);
+	}
+}
+</script>
+<div style="background-color: rgb(50, 50, 50); position: absolute; width: 100%; height: 100%; top: 0px; left: 0px;">
+	<div id="loginWindow">
+		Log In: <br/><br/>
+		<input type="text" placeholder="Username" id="usernameLoginBox"/>
+		<br/>
+		<br/>
+		<input type="password" placeholder="Password" id="passwordLoginBox"/>
+		<br/>
+		<br/>
+		<button id="loginButton">Log In</button>
+		<br/>
+		<br/>
+		<div id="loginErrorContainer"></div>
+	</div>
+	<span style="position: absolute; font-size: 14pt; color: #fff; bottom: 20px; left: 20px;">Skylight OS Arctic Eagle</span>
+</div>
+
+<!-- Start desktop -->
+<div id="desktop" style="visibility: hidden;">
+
+	<div class="taskbar">
+		<img class="homeButton" id="homeButton" src="system/images/home.png"/>
+	</div>
+	
+	<div id="shortcutContainer">
+	<!-- Shortcut Container -->
+	</div>
+	
+	<div id="windowContainer">
+		<!-- Window Container -->
+	</div>
+	
+	<div id="programBox" data-state="hidden" style="visibility: hidden;">
+		<div id="apps">
+		
+		</div>
+		
+		<div id="notifications">
+			<div class="notifActionBar">
+				<button id="clearNotifications" onclick="document.getElementById('notificationArea').innerHTML = '';">Clear</button>
+			</div>
+			<table id="notificationArea" class="notificationArea"></table>
+		</div>
+		<span class="programBoxButtonContainer">
+			<button id="programBoxButtonApps">Apps</button>
+			<button id="programBoxButtonNotifications">Notifications</button>
+		</span>
+		<img src="system/images/power.png" id="logoutButton"/>
+	</div>
+	
+	<div id="timeBox"></div>
+	<div id="toastContainer"></div>
+</div>
+<!-- End desktop -->
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+	"title": "Terminal",
+	"position": "centered",
+	"height": "300",
+	"width": "500",
+	"icons": {
+		"small": "apps/default/terminal/icons/icon@16.png",
+		"medium": "apps/default/terminal/icons/icon@32.png",
+		"large": "apps/default/terminal/icons/icon@48.png",
+		"Xlarge": "apps/default/terminal/icons/icon@64.png"
+	}
+}

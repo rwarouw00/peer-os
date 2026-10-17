@@ -1,0 +1,18 @@
+#urlTextBox {
+	position: absolute;
+	height: 30px;
+	margin-left: 10px;
+	width: 80%;
+	font-size: 12pt;
+}
+
+.pageFrame {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	right: 10px;
+	border: none;
+	height: 88%;
+	width: 97.5%;
+	background-color: #fff;
+}

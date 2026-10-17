@@ -1,0 +1,39 @@
+<html>
+<head>
+<link rel="stylesheet" href="../../../system/css/ui.css"/>
+<link rel="stylesheet" href="css/custom.css"/>
+<script src="../../../system/js/app.js"></script>
+</head>
+<body>
+
+<img src="images/back.png" id="backButton"/>
+<img src="images/forward.png" id="forwardButton"/>
+<input type="text" id="urlTextBox"/>
+<iframe class="pageFrame" id="pageFrame" name="pageFrame"></iframe>
+
+<script>
+var url = document.getElementById('urlTextBox');
+var frame = document.getElementById('pageFrame');
+
+var handleKeyup = function (event) {
+	target = event.target;
+	if (target.id == 'urlTextBox' && event.keyCode == 13) {
+		frame.src = url.value;
+	}
+}
+
+var handleClick = function (event) {
+	target = event.target;
+	if (target.id == 'backButton') {
+		frame.contentWindow.history.back();
+	} else if (target.id == 'forwardButton') {
+		frame.contentWindow.history.forward();
+	}
+}
+
+document.addEventListener('keyup', handleKeyup);
+document.addEventListener('click', handleClick);
+</script>
+
+</body>
+</html>

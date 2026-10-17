@@ -1,0 +1,9 @@
+.backgroundPreview {
+	text-align: center;
+	width: 80px;
+	cursor: pointer;
+}
+
+#notifDisplayTime {
+	width: 25px;
+}

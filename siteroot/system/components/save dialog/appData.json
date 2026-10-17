@@ -1,0 +1,12 @@
+{
+	"title": "Save File",
+	"position": "centered",
+	"height": "400",
+	"width": "300",
+	"icons": {
+		"small": "system/components/save dialog/icons/icon@16.png",
+		"medium": "system/components/save dialog/icons/icon@32.png",
+		"large": "system/components/save dialog/icons/icon@48.png",
+		"Xlarge": "system/components/save dialog/icons/icon@64.png"
+	}
+}

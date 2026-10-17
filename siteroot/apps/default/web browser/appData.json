@@ -1,0 +1,12 @@
+{
+	"title": "Web Browser",
+	"position": "centered",
+	"height": "500",
+	"width": "800",
+	"icons": {
+		"small": "apps/default/web browser/icons/icon@16.png",
+		"medium": "apps/default/web browser/icons/icon@32.png",
+		"large": "apps/default/web browser/icons/icon@48.png",
+		"Xlarge": "apps/default/web browser/icons/icon@64.png"
+	}
+}

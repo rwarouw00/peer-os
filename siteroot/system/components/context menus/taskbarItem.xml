@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<contextmenu>
+	<item value="Pin/Unpin">
+		var appID = System.selected.parentNode.getAttribute('data-appID');
+		var state = System.getPinnedState(appID);
+		
+		if (state == 'pinned') {
+			System.unpinAppIcon(appID);
+		} else {
+			System.pinAppIcon(appID);
+		}
+	</item>
+	<item value="Close">
+		//System.openDialog(target.innerHTML);
+		System.closeWindow(System.selected.parentNode.getAttribute('data-appID'));
+	</item>
+</contextmenu>

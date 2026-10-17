@@ -1,0 +1,479 @@
+/* Generic */
+
+html {
+	font-family: 'Arial', sans-serif;
+	color: #000;
+}
+
+#desktop {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	background-size: cover;
+}
+
+/*#panelContainer {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+}*/
+
+.taskbar {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 52px;
+	/*background-image: linear-gradient(rgba(190, 190, 190, 0.4), rgba(160, 160, 160, 0.2));*/
+	background-color: rgba(160, 160, 160, 0);
+	padding-left: 30px;
+}
+
+#timeBox {
+	position: absolute;
+	bottom: 20px;
+	right: 20px;
+	min-width: 50px;
+	height: 20px;
+	text-align: center;
+	color: #fff;
+	background-color: rgba(30, 30, 30, 0.8);
+	border-radius: 3px;
+	padding: 3px;
+}
+
+/* Window */
+
+.window {
+	position: absolute;
+	/*background-color: rgb(230, 230, 230);*/
+	border: 1.5px solid rgb(100, 100, 100);
+	border-radius: 5px 5px 5px 5px;
+	box-shadow: 0px 0px 5px 1px rgb(0, 0, 0);
+}
+
+.windowBanner {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 30px;
+	background-image: linear-gradient(rgba(190, 190, 190, 0.4), rgba(160, 160, 160, 0.2));
+	/*border-bottom: 2px solid rgb(120, 120, 120);*/
+}
+
+.windowActionButtonHolder {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 60px;
+}
+
+.windowActionButtonClose {
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	top: -3px;
+	right: 0px;
+	background-image: url(../images/cmd_buttons/close_button.png);
+}
+
+.windowActionButtonClose:hover {
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	top: -3px;
+	right: 0px;
+	background-image: url(../images/cmd_buttons/close_button-hover.png);
+}
+
+.windowActionButtonMinimize {
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	top: -2px;
+	left: 0px;
+	background-image: url(../images/cmd_buttons/max_button.png);
+}
+
+.windowActionButtonMinimize:hover {
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	top: -2px;
+	left: 0px;
+	background-image: url(../images/cmd_buttons/max_button-hover.png);
+}
+
+.windowContent {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+	border: none;
+	background-color: rgb(240, 240, 240);
+}
+
+.windowTitle {
+	position: relative;
+	top: 5px;
+	/*text-align: center;*/
+	font-size: 10pt;
+	margin-left: 35px;
+	color: #fff;
+}
+
+.windowIcon {
+	position: absolute;
+	top: 7px;
+	left: 10px;
+	width: 16px;
+	height: 16px;
+}
+
+/* Taskbar */
+
+.taskBarAppUnit {
+	position: relative;
+	height: 18px;
+	/*margin-left: 2px;
+	margin-right: 2px;*/
+	top: 5px;
+	margin-bottom: 2px;
+	padding-left: 10px;
+	padding-right: 2px;
+	/*min-width: 50px;
+	box-shadow: 0px 0px 5px 0px black;
+	border-radius: 40px;*/
+	cursor: pointer;
+}
+
+.homeButton {
+	position: absolute;
+	top: 7px;
+	left: 7px;
+	cursor: pointer;
+}
+
+
+/* login */
+
+#loginWindow {
+	position: absolute;
+	/*background-color: rgb(230, 230, 230);*/
+	border: 1.5px solid rgb(100, 100, 100);
+	border-radius: 5px 5px 5px 5px;
+	box-shadow: 0px 0px 5px 1px rgb(0, 0, 0);
+	padding: 20px;
+	width: 150px;
+	height: 200px;
+	color: #fff;
+}
+
+#loginErrorContainer {
+	color: white;
+	font-size: 8pt;
+}
+
+/* Shortcut */
+
+.shortcut {
+	position: absolute;
+	top: 30px;
+	left: 10px;
+	text-align: center;
+	color: #fff;
+}
+
+.shortcutContainer {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+}
+
+.shortcutCover {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+}
+
+/* Program Box */
+
+#programBox {
+	position: fixed;
+	top: 45px;
+	left: 15px;
+	width: 430px;
+	height: 470px;
+	background-color: rgb(240, 240, 240);
+	border: 1px solid black;
+	border-radius: 5px;
+	box-shadow: 0px 0px 20px 1px rgb(0, 0, 0);
+}
+
+#apps {
+	position: absolute;
+	width: 90%;
+	height: 80%;
+	top: 0px;
+	left: 0px;
+	border-bottom: 1px solid black;
+	overflow-y: scroll;
+	padding: 20px;
+}
+
+#notifications {
+	position: absolute;
+	width: 90%;
+	height: 80%;
+	top: 0px;
+	left: 0px;
+	border-bottom: 1px solid black;
+	overflow-y: scroll;
+	padding: 20px;
+	visibility: hidden;
+}
+
+#notificationArea {
+	position: absolute;
+	width: 89%;
+	min-height: 100px;
+	top: 50px;
+	left: 0px;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.programBoxButtonContainer {
+	position: absolute;
+	bottom: 15px;
+	left: 10px;
+}
+
+.appItem {
+	position: relative;
+	margin: 20px;
+	height: 60px;
+	width: 60px;
+	text-align: center;
+	cursor: pointer;
+}
+
+#logoutButton {
+	position: absolute;
+	right: 10px;
+	bottom: 10px;
+}
+
+/* Notification */
+
+/*.notificationElement {
+	position: relative;
+	width: 100%;
+	margin: 20px;
+	min-height: 35px;
+}*/
+
+.notificationElement {
+	width: 100%;
+	min-height: 50px;
+	font-size: 10pt;
+}
+
+.notificationHeader {
+	font-size: 14pt;
+}
+
+.notificationCloseButton {
+	position: absolute;
+	/*top: 4px;*/
+	right: 6px;
+	width: 16px;
+	cursor: pointer;
+}
+
+#clearNotifications {
+	position: absolute;
+	top: 7px;
+	right: 10px;
+}
+
+.notifActionBar {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 40px;
+	background-color: rgb(200, 200, 200);
+}
+
+.toastAnimState0 {
+	position: relative;
+	border-radius: 5px;
+	border-color: rgb(0, 0, 0);
+	border-width: 0px;
+	border-style: solid;
+	width: 300px;
+	height: 60px;
+	top: 10px;
+	right: 20px;
+	margin-left: 77%;
+	margin-right: 30px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	opacity: 0.0;
+	background-image: linear-gradient(rgba(190, 190, 190, 1), rgba(160, 160, 160, 1));
+	transition-property: opacity;
+	transition-duration: 1s;
+}
+
+.toastAnimState1 {
+	position: relative;
+	border-radius: 5px;
+	border-color: rgb(0, 0, 0);
+	border-width: 0px;
+	border-style: solid;
+	width: 300px;
+	height: 60px;
+	top: 10px;
+	right: 20px;
+	margin-left: 77%;
+	margin-right: 30px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	opacity: 1.0;
+	background-image: linear-gradient(rgba(190, 190, 190, 1), rgba(160, 160, 160, 1));
+	transition-property: opacity;
+	transition-duration: 1s;
+}
+
+.toastCloseButton {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	cursor: pointer;
+	background-image: url('data:png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAABGdBTUEAALGOfPtRkwAAACBjSFJNAAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAACC0lEQVR42qSTzWoTURiGn5kmTav2x+ZkccJAhkCDdZvm5wrcFIobNxVFIiIiQegUai8g3bYX4RWIi95BID+4cOWs3NQM2DgTnZicMslxk4Y2LQj2g7P5+M738/C+ptaa2zxDa81tIjabMAxjDtgEHgASGAOnwFfgs9Z6dKX+8gaGYSwDO8B9YAAoILo07BfwUWv9++KPOTP5KbC8v7/ftW27B/SBvpSyX6vVhkAC2JrUXjthE1g9ODjoHh4eph3H6ReLxa5Satxut1NSypWFhYVTx3HuAQ+BL1dOMAzjBbBq23av2WwKIcRdz/P+RFE0sixrKQiCYalUGriuOwROtdafZhu8B3pA37btWKPREKlU6g6A7/uqXC5HrutqIACGWusPVxiYpqknwCKl1LlSakp7MBiMwzBkwkTF4/HoGsRkMukDSClpt9spy7KWfN9XnucN0+n0YqvVMjOZzBjQQoj+tQYbGxvfgJjjOAkp5UoQBMNyuRzl8/mR53kDKeXi7u7uHJAoFAo/p+gvJNnpdKy1tbWXQOXo6OhVLpd7B+wBbzKZzOvj4+O3wJ4Q4pnnedZNUjbr9Xpxe3s7d3Z2Ng/MAaOJmADmhRDnJycnbj6fb04Uyqw5EmEYFiqVylY2m30CPAd21tfXH1er1UdhGBa01ol/mckE0oAAVie5HvAD+D6dfJMX/if+DgC3ySh13L0wFwAAAABJRU5ErkJggg==');
+}
+
+.toastCloseButton:hover {
+	background-image: url('data:png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAANbY1E9YMgAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHrSURBVHjapFK/S0JRFPZpEog+FQvBEEEKRIeGUiSJFBz6Exyc2qO1JUIkagwpKLDVQcQlcGwJStSGCKEfoFHQoPE0tUzzZd+p+6J6EYQHPu65955f3zmH6/f7ikFEqRhQhn4+cBxHb0FgEhgDqMQb4Aw4QMW9b/ZfKcDZhGMRGAE6QBcQ2bcKEIA9+AgyCizzEmCMxWIKl8v1DL1NsNvtnXg8roGuBRaY7YdQBayKeWALso37UbPZzCDIGpxXBUHYp7dEIrEDmygwJ/l9UkDUZRyjlDmbzU5ptVq+0Wg8iKLYMxqNpna7/ej3+4u5XO6RegK/3Z9TsBDnYrHY8Xq9J61Wq8HzvJ6cnyBwvoQz2b1SIlkPlMp3lRomIlv3BSL9Qe3V6/U+60lXpVL1ZAF0Ot09neCsLBQK01Jm0Gjq9Xo+n8+PO51OjmxA70EWwGazndOoIpGIWeIcCAQu3G73FQUBHT4ajdJ41Q6H41Y2hVKpZEXkFTxFksnkjsfj2YROWEfmjVQqtUd3VLpcLpetsilQNZlMZiYUCs1ihBpW3StbJhI1nJ/S6fRhMBg8Zn/fNxEyXKvVJsPh8AT6YKpUKgZqqtlsrvt8viqW6Rr0TtmWKn4LIPXFwtbZwN6oaVXgTsr8V4B/yZsAAwD+dPaBp1N9RQAAAABJRU5ErkJggg==');
+}
+
+.toastCloseButton:active {
+	background-image: url('data:png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAABGdBTUEAALGOfPtRkwAAACBjSFJNAAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAACEElEQVR42qSTsWtTURTGf+816X1TUfogaholKRVDxjbqGocILRQdXCo4NN1KaUMyhi75A7I0f0MyFgXtJl0swcGhpaBQcGhrxSSi5rW5Ly85Li+SJkiHHjjLPeee73zfOccUEa7jhohwHQsMPxiGMQbMAQ+A20APOAE+A59EpHspf7ADwzAmgCXgJnABaMAbAPsNvBaRP/0/5hDyS2BiY2PDmJ6ePgccwIlEIrpQKEwACljwcy93YBjGI+BJLpcz0+n0c631cTabfee6rt7a2pq3LCtWq9XebG5ungA1Edkf1iAOXGxvb5+nUqkTpdRUqVSaFxFtWVbM87xGtVo9B8aAe8D+JQrALUAfHR2119fX32qtT5VSYcuyYp1Op5HL5XYPDw8F6AI3RjQwTVN8wTzXdbWItPuxXq/XdhxHfE10MBj0RgpMTk7+BIhEIoE+506n09Baf1NKhcvl8uNoNGoCYtu2M1IgHo9/BQIrKyvhPud8Pr+7urr6oV8kk8mEAZVMJpsjUzg7O5tKJBJPm82mFIvFu5VKxfE5O9Fo1MxkMuFCodC0bfv7wcHB+1AodDy8SObe3t7DxcXF+/V6fdxXu+svE8C4bdvuzs7Ol9nZ2Y/+hjJ8HKrVaiWXl5cXYrHYC+AVsDQzM/NsbW0t3Wq1kiKirjomE7gD2APj+gX8AE7/If/vmPyEY9+vtL8DAEUcKAteHp7uAAAAAElFTkSuQmCC');
+}
+
+.toastHeader {
+	position: relative;
+	left: 20px;
+	font-size: 10pt;
+	font-weight: 800;
+}
+
+.toastText {
+	position: relative;
+	left: 20px;
+	font-size: 8pt;
+	width: 270px;
+}
+
+.toastTextContainer {
+	position: absolute;
+	height: 50px;
+	width: 290px;
+	margin-bottom: 5px;
+	margin-right: 10px;
+	padding-top: 5px;
+	padding-right: 10px;
+	padding-bottom: 5px;
+	overflow: hidden;
+	color: #fff;
+	/*text-shadow: 0px 1px 1px rgba(220, 220, 220, 0.9)*/
+}
+
+#toastContainer {
+	position: absolute;
+	right: 20px;
+}
+
+/* Context Menu */
+
+.contextmenu {
+	position: absolute;
+	/*border: solid 2px black;
+	border-radius: 10px;*/
+	width: 150px;
+	opacity: 1.0;
+	background-color: #fff;
+	transition-property: opacity;
+	transition-duration: 0.3s;
+	border: 1.5px solid rgb(100, 100, 100);
+	border-radius: 5px 5px 5px 5px;
+	box-shadow: 0px 0px 5px 1px rgb(0, 0, 0);
+}
+
+.contextmenuItem {
+	width: 100%;
+	padding-left: 10px;
+	overflow: hidden;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	margin-top: 1px;
+	margin-bottom: 1px;
+	cursor: default;
+}
+	
+.contextmenuItem:hover {
+	background-color: gray;
+	transition-property: background-color;
+	transition-duration: 0.2s;
+}
+
+.contextmenuItem:active {
+	background-color: #000;
+	color: #fff;
+}
+
+/* Panel */
+/*
+.panel {
+	color: #000;
+	background-color: #fff;
+	width: 240px;
+	min-height: 290px;
+	box-shadow: 0px 0px 5px 1px rgb(0, 0, 0);
+	border-radius: 4px;
+	border: 1px solid rgba(0, 0, 0, 0.33);
+	visibility: hidden;
+	position: relative;
+	float: right;
+	margin: 6px;
+}
+
+.panelTitleBar {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 24px;
+	background-image: linear-gradient(#ffffff, #e7edf1);
+	border-bottom: 1px solid #bebebe;
+}
+
+.panelFrame {
+	position: absolute;
+	width: 100%;
+	top: 25px;
+	bottom: 0px;
+	height: 90%;
+	border: none;
+	overflow-y: scroll;
+}*/

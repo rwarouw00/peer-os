@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<contextmenu>
+	<item value="Remove">
+		System.removeAppFromList(target.parentNode.getAttribute('title'));
+	</item>
+	
+	<item value="Delete App">
+		System.deleteApp(target.parentNode.getAttribute('title'));
+	</item>
+</contextmenu>

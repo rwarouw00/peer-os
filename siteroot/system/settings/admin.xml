@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<settings>
+	<background src="system/images/desktop/desktop_3.jpg"/>
+	<displayNotificationsFor value="7000"/>
+</settings>
