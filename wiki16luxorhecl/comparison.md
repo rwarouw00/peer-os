@@ -1,6 +1,6 @@
 # Compared with the other versions
 
-Skylight OS exists in several restructured forms, all with the same design and App API names: the browser version ([`../wiki3`](../wiki3/README.md)), PHP-GTK2 ([`../wiki4phpgtk`](../wiki4phpgtk/README.md)), Java 8 with JavaFX 8 ([`../wiki5jfx`](../wiki5jfx/README.md)), C# 5 with Windows Forms ([`../wiki6cs`](../wiki6cs/README.md)), Java 7 with JavaFX 2.2 ([`../wiki7java7`](../wiki7java7/README.md)), Python 2.7 with Tkinter ([`../wiki8py27tk`](../wiki8py27tk/README.md)), CouchDB couchapps ([`../wiki9couchdb`](../wiki9couchdb/README.md), [`../wiki10couchdb16`](../wiki10couchdb16/README.md), [`../wiki14couchsky`](../wiki14couchsky/README.md)), JavaFX FXML ([`../wiki11fxml`](../wiki11fxml/README.md), [`../wiki12fxmlcouch`](../wiki12fxmlcouch/README.md)), Luxor XUL with Python ([`../wiki13luxor`](../wiki13luxor/README.md)), an improved Luxor XUL with Tcl ([`../wiki15luxorplus`](../wiki15luxorplus/README.md)), and this one, site16luxorhecl: the improved Luxor XUL with Hecl.
+Skylight OS exists in several restructured forms, all with the same design and App API names: the browser version ([`../wiki03`](../wiki03/README.md)), PHP-GTK2 ([`../wiki04phpgtk`](../wiki04phpgtk/README.md)), Java 8 with JavaFX 8 ([`../wiki05jfx`](../wiki05jfx/README.md)), C# 5 with Windows Forms ([`../wiki06cs`](../wiki06cs/README.md)), Java 7 with JavaFX 2.2 ([`../wiki07java7`](../wiki07java7/README.md)), Python 2.7 with Tkinter ([`../wiki08py27tk`](../wiki08py27tk/README.md)), CouchDB couchapps ([`../wiki09couchdb`](../wiki09couchdb/README.md), [`../wiki10couchdb16`](../wiki10couchdb16/README.md), [`../wiki14couchsky`](../wiki14couchsky/README.md)), JavaFX FXML ([`../wiki11fxml`](../wiki11fxml/README.md), [`../wiki12fxmlcouch`](../wiki12fxmlcouch/README.md)), Luxor XUL with Python ([`../wiki13luxor`](../wiki13luxor/README.md)), an improved Luxor XUL with Tcl ([`../wiki15luxorplus`](../wiki15luxorplus/README.md)), and this one, site16luxorhecl: the improved Luxor XUL with Hecl.
 
 ## The same Save button, in Tcl and in Hecl
 
@@ -81,10 +81,10 @@ Hecl was made small for phones, and it shows: its Java bridge was the least fini
 
 | Version | An app is | Layout in | Logic in |
 | --- | --- | --- | --- |
-| site3, site9, site10, site14 (browser) | An HTML page | HTML and CSS | JavaScript |
-| site4phpgtk | A PHP class | PHP | PHP |
-| site5jfx, site7java7 | A Java class | Java | Java |
-| site8py27tk | A Python class | Python | Python |
+| site03, site09, site10, site14 (browser) | An HTML page | HTML and CSS | JavaScript |
+| site04phpgtk | A PHP class | PHP | PHP |
+| site05jfx, site07java7 | A Java class | Java | Java |
+| site08py27tk | A Python class | Python | Python |
 | site11fxml, site12fxmlcouch | An FXML file | FXML and CSS | JavaScript |
 | site13luxor | A XUL file and a Python file | XUL | Python |
 | site15luxorplus | A XUL file and a Tcl file | XUL | Tcl |

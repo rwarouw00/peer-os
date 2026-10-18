@@ -1,6 +1,6 @@
 # Security
 
-The pages are the PHP version's, with its [protections](../wiki3/security.md): text from apps is shown with `textContent`, only the desktop's own iframes on the same origin can send it messages (so a site shown in the Web Browser can't control it), and the dialog passes no code around. This page covers what CouchDB changes.
+The pages are the PHP version's, with its [protections](../wiki03/security.md): text from apps is shown with `textContent`, only the desktop's own iframes on the same origin can send it messages (so a site shown in the Web Browser can't control it), and the dialog passes no code around. This page covers what CouchDB changes.
 
 ## What CouchDB protects
 

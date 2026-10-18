@@ -35,7 +35,7 @@ run.bat            (Windows: starts with javaw, no console window)
 ./run.sh           (Linux, macOS)
 ```
 
-or `java -jar skylight.jar` from the `site11fxml` folder. Skylight looks for `apps/`, `images/`, `ui/` and `data/` in the current folder; to start it from elsewhere, add `-Dskylight.home=C:\path\to\site5jfx`.
+or `java -jar skylight.jar` from the `site11fxml` folder. Skylight looks for `apps/`, `images/`, `ui/` and `data/` in the current folder; to start it from elsewhere, add `-Dskylight.home=C:\path\to\site05jfx`.
 
 ## Log in
 

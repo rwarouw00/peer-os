@@ -56,7 +56,7 @@ http://127.0.0.1:5984/skylight/_design/skylight/_rewrite/
 
 ![The login page](images/login.png)
 
-Use the `_rewrite/` address: the apps are reached through the rewrite rules, so `.../_design/skylight/index.html` (which worked in site9couchdb) shows the desktop with an empty home menu and no shortcuts here. Log in with a user you added. You stay logged in across reloads until you log out, or until 10 minutes pass without Skylight asking CouchDB anything (CouchDB's default; see [Data and configuration](data-and-configuration.md#couchdb-settings)).
+Use the `_rewrite/` address: the apps are reached through the rewrite rules, so `.../_design/skylight/index.html` (which worked in site09couchdb) shows the desktop with an empty home menu and no shortcuts here. Log in with a user you added. You stay logged in across reloads until you log out, or until 10 minutes pass without Skylight asking CouchDB anything (CouchDB's default; see [Data and configuration](data-and-configuration.md#couchdb-settings)).
 
 ## Next steps
 

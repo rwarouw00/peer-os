@@ -174,7 +174,7 @@ To change the app later, edit it, try it locally, and push it again. Users get t
 
 ## Writing an app in Java instead
 
-For apps with a lot of logic, Java may be clearer. Set `class=` instead of `fxml=` in `app.properties`, and extend `skylight.App` as in the [Java 8 version's tutorial](../wiki5jfx/building-apps.md). Compile it into `app.jar` in the app's folder; `push-apps` uploads the jar (but not `src/` or `classes/`), and Skylight loads the classes from the store. The class can still use FXML for its layout: `loadFxml("app.fxml")` loads a file from the app's folder with the class as its controller, so `onAction="#save"` calls a Java method `save()` and `fx:id="note"` fills an `@FXML` field called `note` (see [App API](app-api.md#loadfxml)).
+For apps with a lot of logic, Java may be clearer. Set `class=` instead of `fxml=` in `app.properties`, and extend `skylight.App` as in the [Java 8 version's tutorial](../wiki05jfx/building-apps.md). Compile it into `app.jar` in the app's folder; `push-apps` uploads the jar (but not `src/` or `classes/`), and Skylight loads the classes from the store. The class can still use FXML for its layout: `loadFxml("app.fxml")` loads a file from the app's folder with the class as its controller, so `onAction="#save"` calls a Java method `save()` and `fx:id="note"` fills an `@FXML` field called `note` (see [App API](app-api.md#loadfxml)).
 
 ## Troubleshooting
 

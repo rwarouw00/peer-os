@@ -1,12 +1,12 @@
 # Compared with the other versions
 
-Skylight OS exists in several restructured forms, all with the same design and App API names: the browser version ([`../wiki3`](../wiki3/README.md)), PHP-GTK2 ([`../wiki4phpgtk`](../wiki4phpgtk/README.md)), Java 8 with JavaFX 8 ([`../wiki5jfx`](../wiki5jfx/README.md)), C# 5 with Windows Forms ([`../wiki6cs`](../wiki6cs/README.md)), Java 7 with JavaFX 2.2 ([`../wiki7java7`](../wiki7java7/README.md)), Python 2.7 with Tkinter ([`../wiki8py27tk`](../wiki8py27tk/README.md)), CouchDB 2.3.1 ([`../wiki9couchdb`](../wiki9couchdb/README.md)) and CouchDB 1.6 ([`../wiki10couchdb16`](../wiki10couchdb16/README.md)) couchapps, and this one, site11fxml.
+Skylight OS exists in several restructured forms, all with the same design and App API names: the browser version ([`../wiki03`](../wiki03/README.md)), PHP-GTK2 ([`../wiki04phpgtk`](../wiki04phpgtk/README.md)), Java 8 with JavaFX 8 ([`../wiki05jfx`](../wiki05jfx/README.md)), C# 5 with Windows Forms ([`../wiki06cs`](../wiki06cs/README.md)), Java 7 with JavaFX 2.2 ([`../wiki07java7`](../wiki07java7/README.md)), Python 2.7 with Tkinter ([`../wiki08py27tk`](../wiki08py27tk/README.md)), CouchDB 2.3.1 ([`../wiki09couchdb`](../wiki09couchdb/README.md)) and CouchDB 1.6 ([`../wiki10couchdb16`](../wiki10couchdb16/README.md)) couchapps, and this one, site11fxml.
 
 ## Next to the Java 8 version
 
 Same runtime, same look, same App API and data. What moved from Java into FXML:
 
-| | site5jfx (Java 8) | site11fxml (FXML) |
+| | site05jfx (Java 8) | site11fxml (FXML) |
 | --- | --- | --- |
 | An app is | A Java class, compiled into a jar | An `app.fxml`, with JavaScript inside it or beside it |
 | Changing an app | Edit, compile, rebuild the jar, restart Skylight | Edit, open the app again |
@@ -22,7 +22,7 @@ Same runtime, same look, same App API and data. What moved from Java into FXML:
 
 Some, but the bigger gain is in *what kind* of code it is:
 
-| | site5jfx | site11fxml |
+| | site05jfx | site11fxml |
 | --- | --- | --- |
 | Java | ~1,070 lines, 9 files | ~910 lines, 7 files |
 | Desktop windows in FXML | — | ~80 lines, 4 files |
@@ -45,9 +45,9 @@ Several versions describe apps as files rather than compiled code:
 
 | Version | An app is | Layout in | Logic in |
 | --- | --- | --- | --- |
-| site3, site9, site10 (browser) | An HTML page | HTML and CSS | JavaScript |
-| site4phpgtk | A PHP class | PHP | PHP |
-| site8py27tk | A Python class | Python | Python |
+| site03, site09, site10 (browser) | An HTML page | HTML and CSS | JavaScript |
+| site04phpgtk | A PHP class | PHP | PHP |
+| site08py27tk | A Python class | Python | Python |
 | site11fxml | An FXML file | FXML and CSS | JavaScript |
 
 site11fxml is the closest of the desktop versions to the browser one: markup for the window and JavaScript for the behaviour, but with real windows and JavaFX's controls instead of HTML.

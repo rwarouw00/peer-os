@@ -1,6 +1,6 @@
 # Skylight OS as a CouchDB app store
 
-The [CouchDB 2.3.1 couchapp](../site9couchdb) refactored so that each app is its own document in CouchDB, with its `app.json` as the document's `manifest` and its files as attachments. The desktop stays in the design document `_design/skylight`; rewrite rules make the app documents look like the old `apps/<name>/` folders, and a view builds the home menu from the apps' `menu` numbers. Documentation: [`../wiki14couchsky`](../wiki14couchsky/README.md).
+The [CouchDB 2.3.1 couchapp](../site09couchdb) refactored so that each app is its own document in CouchDB, with its `app.json` as the document's `manifest` and its files as attachments. The desktop stays in the design document `_design/skylight`; rewrite rules make the app documents look like the old `apps/<name>/` folders, and a view builds the home menu from the apps' `menu` numbers. Documentation: [`../wiki14couchsky`](../wiki14couchsky/README.md).
 
 ## Quick start
 

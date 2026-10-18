@@ -1,6 +1,6 @@
 # FXML primer
 
-A short guide to FXML, JavaFX's XML format for user interfaces, and to its scripts, as Skylight uses them. Oracle's "Introduction to FXML" for JavaFX 8 covers the rest. For the JavaFX controls themselves, see the [Java 8 version's primer](../wiki5jfx/javafx-primer.md).
+A short guide to FXML, JavaFX's XML format for user interfaces, and to its scripts, as Skylight uses them. Oracle's "Introduction to FXML" for JavaFX 8 covers the rest. For the JavaFX controls themselves, see the [Java 8 version's primer](../wiki05jfx/javafx-primer.md).
 
 ## Elements, attributes and imports
 

@@ -1,6 +1,6 @@
 # Skylight OS with JavaFX FXML
 
-The [Java 8 and JavaFX 8 version](../site5jfx) rebuilt around FXML, JavaFX's XML format for user interfaces. Apps are files: an `app.fxml` for the window and JavaScript for what it does, with nothing to compile. The desktop's own windows are FXML files in `ui/` that can be changed without rebuilding. Documentation: [`../wiki11fxml`](../wiki11fxml/README.md).
+The [Java 8 and JavaFX 8 version](../site05jfx) rebuilt around FXML, JavaFX's XML format for user interfaces. Apps are files: an `app.fxml` for the window and JavaScript for what it does, with nothing to compile. The desktop's own windows are FXML files in `ui/` that can be changed without rebuilding. Documentation: [`../wiki11fxml`](../wiki11fxml/README.md).
 
 ## Quick start
 

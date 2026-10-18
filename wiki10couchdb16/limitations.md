@@ -2,7 +2,7 @@
 
 ## Behaviour
 
-The pages are the PHP version's, so its [limitations](../wiki3/limitations.md) about windows, the Terminal and apps apply here too. Because of CouchDB:
+The pages are the PHP version's, so its [limitations](../wiki03/limitations.md) about windows, the Terminal and apps apply here too. Because of CouchDB:
 
 * **The login lasts 10 minutes without activity**, CouchDB's default cookie timeout. Skylight only talks to CouchDB when you log in, save or open something, so after a quiet spell the next save says you're not logged in. Raise `[couch_httpd_auth] timeout` (see [Data and configuration](data-and-configuration.md#couchdb-settings)).
 * **Only administrators manage accounts**, with `tools/add-user`. Users can't sign up, and can't change their own password, because the `_users` check refuses all their writes (see [Security](security.md)).
@@ -14,7 +14,7 @@ The pages are the PHP version's, so its [limitations](../wiki3/limitations.md) a
 
 ## Moving to a newer CouchDB
 
-The `attachments/`, `design/` and `userdb/` folders are the same as in the [CouchDB 2.3.1 version](../wiki9couchdb/README.md), so moving up means using that version's tools and `users/` check. Replicate the `userdb-…` databases and `_users` accounts across; the database names are the ones couch_peruser uses, so users keep their data. Then run that version's `tools/add-user` for each user, to set up their database as couch_peruser expects.
+The `attachments/`, `design/` and `userdb/` folders are the same as in the [CouchDB 2.3.1 version](../wiki09couchdb/README.md), so moving up means using that version's tools and `users/` check. Replicate the `userdb-…` databases and `_users` accounts across; the database names are the ones couch_peruser uses, so users keep their data. Then run that version's `tools/add-user` for each user, to set up their database as couch_peruser expects.
 
 ## How it was tested
 

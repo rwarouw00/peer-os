@@ -65,7 +65,7 @@ site14couchsky/
 
 ## Windows
 
-App windows work exactly as in the PHP version: each is an `iframe` showing the app's `index.html`, with its AppID and the username in the address, inside a window the desktop draws. See the [PHP version's architecture](../wiki3/architecture.md#windows) for the details.
+App windows work exactly as in the PHP version: each is an `iframe` showing the app's `index.html`, with its AppID and the username in the address, inside a window the desktop draws. See the [PHP version's architecture](../wiki03/architecture.md#windows) for the details.
 
 ## Messages between apps and the desktop
 

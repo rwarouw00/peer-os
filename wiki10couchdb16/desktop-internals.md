@@ -1,6 +1,6 @@
 # Desktop internals
 
-The desktop and the apps are the PHP version's, so its [desktop internals](../wiki3/desktop-internals.md) page applies as written: the `Desktop` object, its state, how events are handled, and how to extend it. This page covers what's different.
+The desktop and the apps are the PHP version's, so its [desktop internals](../wiki03/desktop-internals.md) page applies as written: the `Desktop` object, its state, how events are handled, and how to extend it. This page covers what's different.
 
 ## What changed from the PHP version
 

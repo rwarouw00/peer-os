@@ -2,21 +2,21 @@
 
 Skylight OS exists in several restructured forms, all with the same design and App API names:
 
-* **site3**: browser version: ES5 JavaScript, HTML and CSS with a PHP server ([`../wiki3`](../wiki3/README.md))
-* **site4phpgtk**: desktop program in PHP 5.2 with PHP-GTK2 ([`../wiki4phpgtk`](../wiki4phpgtk/README.md))
-* **site5jfx**: desktop program in Java 8 with JavaFX 8 ([`../wiki5jfx`](../wiki5jfx/README.md))
-* **site6cs**: desktop program in C# 5 with Windows Forms ([`../wiki6cs`](../wiki6cs/README.md))
-* **site7java7**: desktop program in Java 7 with JavaFX 2.2 ([`../wiki7java7`](../wiki7java7/README.md))
-* **site8py27tk**: desktop program in Python 2.7 with Tkinter ([`../wiki8py27tk`](../wiki8py27tk/README.md))
-* **site9couchdb**: the browser version as a CouchDB 2.3.1 couchapp ([`../wiki9couchdb`](../wiki9couchdb/README.md)), and **site10couchdb16** for CouchDB 1.6 ([`../wiki10couchdb16`](../wiki10couchdb16/README.md))
+* **site03**: browser version: ES5 JavaScript, HTML and CSS with a PHP server ([`../wiki03`](../wiki03/README.md))
+* **site04phpgtk**: desktop program in PHP 5.2 with PHP-GTK2 ([`../wiki04phpgtk`](../wiki04phpgtk/README.md))
+* **site05jfx**: desktop program in Java 8 with JavaFX 8 ([`../wiki05jfx`](../wiki05jfx/README.md))
+* **site06cs**: desktop program in C# 5 with Windows Forms ([`../wiki06cs`](../wiki06cs/README.md))
+* **site07java7**: desktop program in Java 7 with JavaFX 2.2 ([`../wiki07java7`](../wiki07java7/README.md))
+* **site08py27tk**: desktop program in Python 2.7 with Tkinter ([`../wiki08py27tk`](../wiki08py27tk/README.md))
+* **site09couchdb**: the browser version as a CouchDB 2.3.1 couchapp ([`../wiki09couchdb`](../wiki09couchdb/README.md)), and **site10couchdb16** for CouchDB 1.6 ([`../wiki10couchdb16`](../wiki10couchdb16/README.md))
 * **site11fxml** and **site12fxmlcouch**: the Java 8 version with FXML apps, read from files or from a CouchDB app store ([`../wiki11fxml`](../wiki11fxml/README.md), [`../wiki12fxmlcouch`](../wiki12fxmlcouch/README.md))
-* **site14couchsky**: site9couchdb with each app in its own CouchDB document (this one)
+* **site14couchsky**: site09couchdb with each app in its own CouchDB document (this one)
 
-## Next to site9couchdb
+## Next to site09couchdb
 
 The same pages, users and data; only where the apps live changed.
 
-| | site9couchdb | site14couchsky |
+| | site09couchdb | site14couchsky |
 | --- | --- | --- |
 | Apps are | Folders of attachments in `_design/skylight`, with the desktop | One document each, named after the app |
 | The home menu | `system/apps.json`, a list edited by hand | A view of the app documents, ordered by `menu` in each `app.json` |
@@ -37,11 +37,11 @@ Both keep each app in a CouchDB document with its files attached, and both read 
 | The home menu | `apps.txt`, attached to `_design/store` | A CouchDB view |
 | Users' data | `.properties` files on each computer | A private CouchDB database per user |
 
-## site9couchdb next to the PHP browser version
+## site09couchdb next to the PHP browser version
 
-The pages are site3's, so for users and app developers the two are the same: the same desktop, apps, `App` API and tutorial. The difference is the server.
+The pages are site03's, so for users and app developers the two are the same: the same desktop, apps, `App` API and tutorial. The difference is the server.
 
-| | site3 (PHP) | site9couchdb (CouchDB) |
+| | site03 (PHP) | site09couchdb (CouchDB) |
 | --- | --- | --- |
 | Server | Any web server with PHP 5.3.7+ | CouchDB 2.3.1, nothing else |
 | Server code | ~210 lines of PHP in 5 files | Three `validate_doc_update` functions and two rewrite rules (~90 lines); `core.js` grew by ~180 lines instead |
@@ -57,7 +57,7 @@ The pages are site3's, so for users and app developers the two are the same: the
 
 ## All versions side by side
 
-| | site3 | site4phpgtk | site5jfx | site6cs | site7java7 | site8py27tk | site9couchdb |
+| | site03 | site04phpgtk | site05jfx | site06cs | site07java7 | site08py27tk | site09couchdb |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Runs in | Browser + PHP | PHP-GTK2 | Java 8 | .NET (WinForms) | Java 7 | Python 2.7 | Browser + CouchDB |
 | Apps are | Pages in iframes | PHP classes | Java classes | C# classes | Java classes | Python classes | Pages in iframes |

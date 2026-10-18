@@ -1,6 +1,6 @@
 # Skylight OS as a CouchDB 1.6 couchapp
 
-Skylight OS running inside Apache CouchDB 1.6 (1.6.1), with no other server. It's the [CouchDB 2.3.1 version](../site9couchdb) adapted to 1.6: the same pages (the browser version's, from [`../site3`](../site3)), documents and checks, with tools that create each user's database themselves (1.6 has no couch_peruser) and a `_users` check that blocks CouchDB 1.6.1's admin-escalation bug, CVE-2017-12635. Documentation: [`../wiki10couchdb16`](../wiki10couchdb16/README.md).
+Skylight OS running inside Apache CouchDB 1.6 (1.6.1), with no other server. It's the [CouchDB 2.3.1 version](../site09couchdb) adapted to 1.6: the same pages (the browser version's, from [`../site03`](../site03)), documents and checks, with tools that create each user's database themselves (1.6 has no couch_peruser) and a `_users` check that blocks CouchDB 1.6.1's admin-escalation bug, CVE-2017-12635. Documentation: [`../wiki10couchdb16`](../wiki10couchdb16/README.md).
 
 ## Quick start
 
@@ -16,7 +16,7 @@ On Windows, use `powershell -ExecutionPolicy Bypass -File tools\push.ps1 ...` an
 ## Layout
 
 ```
-site9couchdb/
+site09couchdb/
 ├── attachments/     the pages: uploaded as attachments of _design/skylight
 │   ├── index.html
 │   ├── apps/        terminal/, settings/, web-browser/

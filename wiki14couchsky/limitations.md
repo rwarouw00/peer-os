@@ -2,7 +2,7 @@
 
 ## Behaviour
 
-The pages are the PHP version's, so its [limitations](../wiki3/limitations.md) about windows, the Terminal and apps apply here too. Because of CouchDB:
+The pages are the PHP version's, so its [limitations](../wiki03/limitations.md) about windows, the Terminal and apps apply here too. Because of CouchDB:
 
 * **The login lasts 10 minutes without activity**, CouchDB's default cookie timeout. Skylight only talks to CouchDB when you log in, save or open something, so after a quiet spell the next save says you're not logged in. Raise `[couch_httpd_auth] timeout` (see [Data and configuration](data-and-configuration.md#couchdb-settings)).
 * **Adding users needs an administrator**, with `tools/add-user`; there's no sign-up page, and no page for changing a password.
@@ -45,7 +45,7 @@ CouchDB's side was tested with `curl`: writes to the `skylight` database by anon
 
 What wasn't tested:
 
-* **CouchDB 1.6 and 3.x.** The rewrites, the view and the validation function use features those versions have (3.x marks rewrite rules as deprecated but still runs them), but the push tools use 2.x's `_node` configuration address, like site9couchdb's.
+* **CouchDB 1.6 and 3.x.** The rewrites, the view and the validation function use features those versions have (3.x marks rewrite rules as deprecated but still runs them), but the push tools use 2.x's `_node` configuration address, like site09couchdb's.
 
 * **The Windows and macOS builds of CouchDB 2.3.1**, and Windows PowerShell 5.1. The pages and tools only use CouchDB's HTTP API, which is the same on every platform.
 * **Browsers other than Chromium**, although the pages are the PHP version's, which use only ES5 and long-standing browser features.

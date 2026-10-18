@@ -1,6 +1,6 @@
 # Skylight OS with JavaFX FXML
 
-This is the [Java 8 and JavaFX 8 version](../wiki5jfx/README.md) of Skylight OS, rebuilt so that windows are described in **FXML**, JavaFX's XML format for user interfaces, instead of being built in Java code. The code is in [`../site11fxml`](../site11fxml).
+This is the [Java 8 and JavaFX 8 version](../wiki05jfx/README.md) of Skylight OS, rebuilt so that windows are described in **FXML**, JavaFX's XML format for user interfaces, instead of being built in Java code. The code is in [`../site11fxml`](../site11fxml).
 
 * **Apps are just files.** An app is an `app.fxml` describing its window, with its behaviour in JavaScript, either inside the FXML or in a `.js` file beside it. There's no Java to write and nothing to compile: edit the file and open the app again. All three built-in apps, and the Notes tutorial, are written this way.
 * **The desktop's own windows are FXML too.** The login window, the panel, the home menu and the notifications are files in `ui/`, next to the stylesheet, so they can be rearranged and restyled without rebuilding Skylight.

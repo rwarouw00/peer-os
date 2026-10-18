@@ -12,7 +12,7 @@ Apps use the App API to talk to Skylight. In an FXML app, scripts reach it throu
 </StackPane>
 ```
 
-A Java app extends `skylight.App` ([`App.java`](../site11fxml/src/skylight/App.java)) and calls the same methods on itself, as in the [Java 8 version](../wiki5jfx/app-api.md). The method names match the other versions' App APIs (see [Compared with the other versions](comparison.md)).
+A Java app extends `skylight.App` ([`App.java`](../site11fxml/src/skylight/App.java)) and calls the same methods on itself, as in the [Java 8 version](../wiki05jfx/app-api.md). The method names match the other versions' App APIs (see [Compared with the other versions](comparison.md)).
 
 The examples below are in JavaScript, for FXML apps; in Java, leave out `app.` and use lambdas for the functions.
 

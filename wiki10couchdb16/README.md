@@ -1,10 +1,10 @@
 # Skylight OS as a CouchDB 1.6 couchapp
 
-This is Skylight OS running entirely inside **Apache CouchDB 1.6** (1.6.1), as a *couchapp*: the web pages are attachments of a CouchDB design document, and CouchDB itself is the server. There's no PHP and no web server. The code is in [`../site9couchdb`](../site9couchdb).
+This is Skylight OS running entirely inside **Apache CouchDB 1.6** (1.6.1), as a *couchapp*: the web pages are attachments of a CouchDB design document, and CouchDB itself is the server. There's no PHP and no web server. The code is in [`../site09couchdb`](../site09couchdb).
 
-The pages are the browser version's ([`../site3`](../site3), documented in [`../wiki3`](../wiki3/README.md)): the same desktop, windows, apps and App API, in plain ES5 JavaScript. What changed is everything behind them:
+The pages are the browser version's ([`../site03`](../site03), documented in [`../wiki03`](../wiki03/README.md)): the same desktop, windows, apps and App API, in plain ES5 JavaScript. What changed is everything behind them:
 
-| site3 (PHP) | site10couchdb16 (CouchDB 1.6) |
+| site03 (PHP) | site10couchdb16 (CouchDB 1.6) |
 | --- | --- |
 | `api/login.php`, `api/logout.php` | CouchDB's `/_session` (cookie login) |
 | `data/users.json`, `tools/add-user.php` | CouchDB's `_users` database, `tools/add-user` |
@@ -15,7 +15,7 @@ The pages are the browser version's ([`../site3`](../site3), documented in [`../
 
 Each user's database (`userdb-<name in hex>`) is created by `tools/add-user`, because CouchDB 1.6 has no couch_peruser feature, and can only be read by that user.
 
-It's the same couchapp as the [CouchDB 2.3.1 version](../wiki9couchdb/README.md): the same pages, documents and checks. The differences are in how users and their databases are set up, and in one serious CouchDB 1.6.1 bug that the `_users` check has to block (see [Security](security.md)).
+It's the same couchapp as the [CouchDB 2.3.1 version](../wiki09couchdb/README.md): the same pages, documents and checks. The differences are in how users and their databases are set up, and in one serious CouchDB 1.6.1 bug that the `_users` check has to block (see [Security](security.md)).
 
 ![Skylight OS served by CouchDB 1.6.1](images/terminal-desktop.png)
 

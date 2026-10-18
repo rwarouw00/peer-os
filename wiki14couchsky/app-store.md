@@ -1,6 +1,6 @@
 # The app store
 
-In [site9couchdb](../wiki9couchdb/README.md), Skylight and all its apps were one design document: changing any app meant pushing everything again, and the home menu was a file, `apps.json`, edited by hand. Here, **each app is its own document** in the `skylight` database, and CouchDB itself works out the home menu:
+In [site09couchdb](../wiki09couchdb/README.md), Skylight and all its apps were one design document: changing any app meant pushing everything again, and the home menu was a file, `apps.json`, edited by hand. Here, **each app is its own document** in the `skylight` database, and CouchDB itself works out the home menu:
 
 * **Install or update one app** with `tools/push-app.sh <address> <app>`, without touching the desktop or the other apps.
 * **No list to keep up to date.** An app's `app.json` says where it goes in the home menu (`"menu": 4`), and a CouchDB view collects them.
@@ -38,7 +38,7 @@ The `skylight` database then holds the desktop and the apps side by side:
 
 ## Addresses
 
-The app pages haven't changed since site3: they load `../../system/js/core.js`, and the desktop opens `apps/notes/index.html` and reads `apps/notes/app.json`. The design document's rewrite rules keep all those addresses working, so the pages don't know their files now live in different documents:
+The app pages haven't changed since site03: they load `../../system/js/core.js`, and the desktop opens `apps/notes/index.html` and reads `apps/notes/app.json`. The design document's rewrite rules keep all those addresses working, so the pages don't know their files now live in different documents:
 
 | Address under `.../_design/skylight/_rewrite/` | Rule | Served from |
 | --- | --- | --- |
@@ -98,7 +98,7 @@ It leaves the menu at the next login. Desktop shortcuts to it stay in users' set
 
 ## Who can change apps
 
-The `skylight` database's `validate_doc_update` function refuses every change from anyone who isn't a CouchDB administrator, as in site9couchdb, and now also checks app documents, even from administrators:
+The `skylight` database's `validate_doc_update` function refuses every change from anyone who isn't a CouchDB administrator, as in site09couchdb, and now also checks app documents, even from administrators:
 
 * the name (`_id`) may use only lowercase letters, digits and `-`, so it works as a folder name in `apps/<name>/`;
 * `type` must be `"app"`, and `manifest` must have a `title`.
