@@ -3,6 +3,7 @@ package myxul.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -22,7 +23,8 @@ import myxul.XulWindow;
  * Notifications as Skylight OS shows them (scripts call it Notifications):
  * a small window at the top right of the screen with a header and a body,
  * which closes itself after the time set in Settings, or when its × is
- * clicked. Several stack downwards.
+ * clicked. Several stack downwards. On the desktop they appear at the top
+ * right of the desktop, below its panel, and go into its notification tray.
  */
 public class NotificationService implements XulService {
 
@@ -30,8 +32,28 @@ public class NotificationService implements XulService {
 	private static final double GAP = 8;
 	private static final List<Stage> SHOWING = new ArrayList<>();
 	private static final List<String> POSTED = new ArrayList<>();
+	private static final List<NotificationService> LISTENING = new ArrayList<>();
+	private static Supplier<Rectangle2D> area;
+
+	private final XulWindow window;
+	private Object onPost;
 
 	public NotificationService(XulWindow window) {
+		this.window = window;
+		window.addCloseListener(() -> LISTENING.remove(this));
+	}
+
+	/** Calls the function with (header, body) whenever any window posts a notification. */
+	public void setOnPost(Object function) {
+		onPost = function;
+		if (!LISTENING.contains(this)) {
+			LISTENING.add(this);
+		}
+	}
+
+	/** Where notifications appear (the desktop's area, below its panel), or null for the screen. Not for scripts. */
+	public static void setArea(Supplier<Rectangle2D> where) {
+		area = where;
 	}
 
 	public void post(String header) {
@@ -69,6 +91,9 @@ public class NotificationService implements XulService {
 		toast.show();
 		restack();
 		wait.play();
+		for (NotificationService listener : new ArrayList<>(LISTENING)) {
+			listener.window.call(listener.onPost, header, body == null ? "" : body);
+		}
 	}
 
 	private static void hide(Stage toast) {
@@ -78,7 +103,10 @@ public class NotificationService implements XulService {
 	}
 
 	private static void restack() {
-		Rectangle2D screen = Screen.getPrimary().getVisualBounds();
+		Rectangle2D screen = area == null ? null : area.get();
+		if (screen == null) {
+			screen = Screen.getPrimary().getVisualBounds();
+		}
 		double y = screen.getMinY() + GAP;
 		for (Stage toast : SHOWING) {
 			toast.setX(screen.getMaxX() - WIDTH - GAP);

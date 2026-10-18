@@ -21,9 +21,10 @@ It comes with:
 
 * **Leafpad XUL** (`apps/leafpad/`), the design spec's first target: a plain-text editor in the spirit of Lubuntu's Leafpad, with menus, keyboard shortcuts, find, jump to line, word wrap and the system's own file dialogs;
 * **AbiWord XUL** (`apps/abiword/`), the spec's larger target: a word processor's shell with toolbars, a page view painted on a `<canvas>`, a sidebar with tabs, a tree and a list, a splitter, and a status bar;
-* **Terminal**, **Settings** and **Web Browser** (`apps/terminal/`, `apps/settings/`, `apps/web-browser/`), ported from Skylight OS: JavaScript run in the window's own engine; the launcher's background and how long notifications stay; and web pages in JavaFX's WebKit, through XUL's `<browser>` element;
+* **Terminal**, **Settings** and **Web Browser** (`apps/terminal/`, `apps/settings/`, `apps/web-browser/`), ported from Skylight OS: JavaScript run in the window's own engine; the background and how long notifications stay; and web pages in JavaFX's WebKit, through XUL's `<browser>` element;
 * **Gallery** (`apps/gallery/`): every element myxul knows, each doing something;
-* **the launcher** (`ui/launcher.xul`), itself a XUL file, in front of the background chosen in Settings.
+* **the launcher** (`ui/launcher.xul`), itself a XUL file, in front of the background chosen in Settings;
+* **the desktop** (`ui/desktop.xul`), Skylight OS's desktop written in XUL: a home menu of the apps, a taskbar, shortcuts, a notification tray and a clock, with every app's window framed on it. It has no login: it runs as the user who starts it.
 
 Documentation: [`../wiki17myxul`](../wiki17myxul/README.md).
 
@@ -34,6 +35,7 @@ You need a Java 8 JDK with JavaFX: Oracle JDK 8, or an OpenJDK 8 that bundles Op
 ```
 ./build.sh                                   (or build.bat)
 ./run.sh                                     the launcher (or run.bat)
+./run.sh ui/desktop.xul                      the desktop
 ./run.sh apps/leafpad/leafpad.xul notes.txt  Leafpad XUL, opening notes.txt
 ```
 
@@ -43,11 +45,15 @@ You need a Java 8 JDK with JavaFX: Oracle JDK 8, or an OpenJDK 8 that bundles Op
 site17myxul/
 ├── src/myxul/            the engine: parser, tag registry, XulBox layout, styles, scripts, events, windows
 │   ├── bootstrap.js      document, window, alert ... and the element wrappers, for every window's scripts
-│   ├── myxul.css         default look for elements JavaFX has no control for (status bars)
-│   └── service/          Java services XUL files can ask for: FileService, PageView, SettingsService, NotificationService
+│   ├── myxul.css         default look for elements JavaFX has no control for (status bars, panels), and the desktop's
+│   └── service/          Java services XUL files can ask for: FileService, PageView, SettingsService, NotificationService,
+│                         DesktopService
 ├── ui/launcher.xul       the launcher
-├── apps/                 leafpad/, abiword/, terminal/, settings/, web-browser/, gallery/: each a .xul file and its .js
+├── ui/desktop.xul, .js   the desktop
+├── apps/                 leafpad/, abiword/, terminal/, settings/, web-browser/, gallery/: each a .xul file and its .js,
+│                         an app.properties and icons/ for the desktop; apps.txt lists them for the home menu
 ├── images/backgrounds/   the six pictures Settings offers (Skylight OS's), and their thumbnails
+├── images/desktop/       the desktop's home, power and window buttons (Skylight OS's), and a plain window icon
 ├── tests/xul/            test XUL in the style of real applications, and files with mistakes in them
 ├── build.sh / build.bat  compile src/ into myxul.jar
 └── run.sh / run.bat      start myxul

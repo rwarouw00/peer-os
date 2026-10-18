@@ -25,8 +25,29 @@ var __wrap = (function () {
 		return value;
 	}
 
+	// A Java list of elements as a JS array, even when it's empty.
+	function toArray(list) {
+		var out = [];
+		for (var i = 0; i < list.size(); i++) {
+			out.push(__wrap(list.get(i)));
+		}
+		return out;
+	}
+
+	// An element's wrapper, passed to a Java method, becomes the element itself.
+	function toJava(value) {
+		if (value != null && typeof value === "object" && value.__element !== undefined) {
+			return value.__element;
+		}
+		return value;
+	}
+
 	// Calls target[name](...) with the arguments given. (Java methods have no .apply.)
-	function invoke(target, name, a) {
+	function invoke(target, name, args) {
+		var a = [];
+		for (var i = 0; i < args.length; i++) {
+			a.push(toJava(args[i]));
+		}
 		switch (a.length) {
 		case 0: return target[name]();
 		case 1: return target[name](a[0]);
@@ -49,8 +70,17 @@ var __wrap = (function () {
 				if (name === "toString") {
 					return function () { return String(el.toString()); };
 				}
+				if (name === "__element") {
+					return el;
+				}
+				if (name === "childNodes") {
+					return toArray(el.getProperty(name));
+				}
 				if (el.isProperty(name)) {
 					return toScript(el.getProperty(name));
+				}
+				if (name === "getElementsByTagName") {
+					return function (tag) { return toArray(el.getElementsByTagName(String(tag))); };
 				}
 				if (el.isMethod(name)) {
 					return function () { return toScript(invoke(el, name, arguments)); };
@@ -79,6 +109,9 @@ var __wrap = (function () {
 				var args = Array.prototype.slice.call(arguments, 1);
 				if (name === "toString") {
 					return String(el.toString());
+				}
+				if (name === "getElementsByTagName") {
+					return toArray(el.getElementsByTagName(String(args[0])));
 				}
 				if (el.isMethod(name)) {
 					return toScript(invoke(el, name, args));
@@ -120,6 +153,14 @@ var document = {
 	},
 	get documentElement() {
 		return __wrap(__document.getDocumentElement());
+	},
+	// A new element, shown once it's appended to one in the window: document.createElement("button").
+	createElement: function (tag) {
+		return __wrap(__document.createElement(String(tag)));
+	},
+	// The element a context menu was opened on.
+	get popupNode() {
+		return __wrap(__document.getPopupNode());
 	},
 	get title() {
 		return String(__window.getTitle());

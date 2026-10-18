@@ -155,6 +155,16 @@ final class XulScriptManager {
 		}
 	}
 
+	/** Calls a script function given to Java (addEventListener, setTimeout) with "this" as the element. Errors are reported. */
+	Object call(ScriptObjectMirror function, XulElement self, Object event) {
+		try {
+			return function.call(wrap(self), event);
+		} catch (RuntimeException e) {
+			window.runtimeError(e);
+			return null;
+		}
+	}
+
 	/** Calls a global function the scripts defined, if they did (onload="..." is handled as a Handler instead). */
 	Object callIfDefined(String function, Object... args) {
 		Object f = engine.get(function);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xul-service Settings myxul.service.SettingsService?>
 <?xul-service Notifications myxul.service.NotificationService?>
-<!-- Settings: the launcher's background, and how long notifications stay on
+<!-- Settings: the background (the launcher's and the desktop's), and how long notifications stay on
      screen. Ported from Skylight OS's Settings; settings.js is its logic. -->
 <window id="settings" title="Settings" width="500" height="390"
         onload="SettingsApp.load()"
@@ -11,7 +11,7 @@
 
     <vbox flex="1" spacing="10" style="padding: 14px;">
         <label value="Background" style="font-size: 14px; font-weight: bold;"/>
-        <description>The picture behind the launcher. It changes as soon as you choose one.</description>
+        <description>The picture behind the launcher and the desktop. It changes as soon as you choose one.</description>
         <grid spacing="8">
             <columns><column/><column/><column/></columns>
             <rows>

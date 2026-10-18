@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Elements made and moved by scripts, events added with addEventListener,
+     <stack>, <scrollbox>, <panel> and context menus: the XUL the desktop is
+     built with, each on its own. -->
+<window id="dom" title="DOM and popups" width="640" height="480"
+        onunload="unloaded()"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script>
+        var heard = [];
+        var unloads = 0;
+        function note(what) {
+            heard.push(what);
+            document.getElementById("status").value = heard.join(" ");
+        }
+        function unloaded() {
+            unloads++;
+        }
+        function broken() {
+            var x = 1;
+            noSuchThing();
+        }
+    </script>
+
+    <popupset>
+        <panel id="panel" width="200" height="120"
+               onpopupshown="note('shown')" onpopuphidden="note('hidden')">
+            <label id="panel-label" value="In a panel"/>
+            <button id="panel-close" label="Close" oncommand="document.getElementById('panel').hidePopup()"/>
+        </panel>
+        <menupopup id="ctx">
+            <menuitem id="ctx-copy" label="Copy" accesskey="C" oncommand="note('copy:' + document.popupNode.id)"/>
+            <menuitem id="ctx-paste" label="Paste" accesskey="P" oncommand="note('paste:' + document.popupNode.id)"/>
+        </menupopup>
+    </popupset>
+
+    <toolbar id="tools">
+        <toolbarbutton id="first-tool" label="First"/>
+    </toolbar>
+    <hbox id="row" spacing="4">
+        <button id="b1" label="One" context="ctx"/>
+    </hbox>
+    <stack id="stack" height="120" style="background-color: #ddeeff;">
+        <label id="filler" value="Fills the stack"/>
+        <button id="placed" label="Placed" left="30" top="40"/>
+    </stack>
+    <hbox>
+        <scrollbox id="scroll" orient="vertical" height="60" flex="1"/>
+        <vbox id="column" width="120">
+            <description id="wrapped" value="A long description that has to wrap onto several lines in a narrow column"/>
+        </vbox>
+        <button id="tile" label="Tile" image="icon.png" orient="vertical"/>
+    </hbox>
+    <label id="status" value=""/>
+</window>

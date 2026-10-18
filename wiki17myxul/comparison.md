@@ -47,7 +47,7 @@ FXML's tags are JavaFX classes and its attributes their properties, so an FXML f
 | Shared actions | Code | `<command>` and `<key>` elements |
 | Styles | JavaFX CSS (`-fx-...`), inline or in stylesheets | Web CSS inline, translated; no stylesheets |
 | Script engine | One Nashorn engine per FXML load, with full Java access | One per window, limited to JavaFX's UI classes, with files through services |
-| Parser | JavaFX's `FXMLLoader` | myxul's own, about 3,800 lines in all |
+| Parser | JavaFX's `FXMLLoader` | myxul's own, about 5,200 lines in all |
 | Error messages | `FXMLLoader`'s exceptions | The file, line and reason for every mistake |
 
 ## Skylight OS's apps, from FXML to XUL
@@ -57,10 +57,24 @@ The Terminal, Settings and Web Browser were ported from site11fxml's FXML versio
 | App | FXML (site11fxml), non-blank lines | XUL (myxul), non-blank lines | What changed |
 | --- | --- | --- | --- |
 | Terminal | 47 (`app.fxml`, `terminal.js`) | 61 (`terminal.xul`, `terminal.js`) | The same run logic (indirect `eval`, `print` captured). The XUL version adds Ctrl+Enter and Ctrl+L as `<key>`s, and a start-up sample |
-| Settings | 62 (`app.fxml` with its script inside) | 70 (`settings.xul`, `settings.js`) | `ToggleButton`s in a `ToggleGroup` became `<toolbarbutton type="checkbox">`s kept in step by the script; the `Spinner` became a text box checked by the script and by `SettingsService`; a **Try one** button. The background is the launcher's, not a desktop's |
+| Settings | 62 (`app.fxml` with its script inside) | 70 (`settings.xul`, `settings.js`) | `ToggleButton`s in a `ToggleGroup` became `<toolbarbutton type="checkbox">`s kept in step by the script; the `Spinner` became a text box checked by the script and by `SettingsService`; a **Try one** button. The background is the launcher's and myxul's desktop's |
 | Web Browser | 40 (`app.fxml` with its script inside) | 90 (`browser.xul`, `browser.js`) | FXML's script used the `WebEngine` directly; the XUL version uses `<browser>`'s XUL methods and events, and adds Stop, Home, keys, a status bar, buttons that disable when there's no history, and the page title in the window's |
 
 FXML's scripts can reach any Java class, which kept them short (the Web Browser's listens to the `WebEngine` itself); myxul's reach Java only through elements and services, so a little more is written out, and more was added.
+
+## Skylight OS's desktop, in Java and in XUL
+
+site11fxml's desktop is a Java class, `Desktop`, controlling four FXML files. myxul's is a XUL file and its script, with a Java service for what scripts can't do (framing other windows):
+
+| | site11fxml | myxul |
+| --- | --- | --- |
+| Written in | `Desktop.java` (488 non-blank lines) and four FXML files (80) | `ui/desktop.xul` (57) and `ui/desktop.js` (268), and `DesktopService.java` (518) |
+| Logging in | A login window, users and passwords, and a logout button | None: myxul runs as the user who started it, and the clock shows their name |
+| App windows | Each in a window with the system's frame, owned by the desktop | Each in a window drawn without the system's frame, in a Skylight frame (title bar, minimize, maximize, close, edges to resize by), kept on the desktop |
+| Taskbar | A toggle button per window: hide or show it; right-click to close | A button per window: bring it to the front, or minimize the front one; right-click to close |
+| Home menu | A `Popup`: apps, notifications, and logout | A `<panel>`: apps (right-click to add a shortcut), notifications, and a power button that closes everything |
+| Shortcuts | Per user; drag, double-click, right-click to remove | Shared by everyone using myxul; drag, double-click, right-click to open or remove, and added from the home menu |
+| Apps | `apps/apps.txt` and each app's `app.properties` | The same: `apps/apps.txt` and an `app.properties` per app |
 
 ## When to use which
 

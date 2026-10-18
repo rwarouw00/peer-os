@@ -110,12 +110,40 @@ public class XulBox extends Pane {
 
 	private double crossPref(Node c) {
 		Insets m = margin(c);
-		return horizontal() ? c.prefHeight(-1) + m.getTop() + m.getBottom() : c.prefWidth(-1) + m.getLeft() + m.getRight();
+		if (horizontal()) {
+			// A wrapping label in a row: as tall as its text is at its preferred width.
+			double height = c.getContentBias() == Orientation.HORIZONTAL ? c.prefHeight(c.prefWidth(-1)) : c.prefHeight(-1);
+			return height + m.getTop() + m.getBottom();
+		}
+		return c.prefWidth(-1) + m.getLeft() + m.getRight();
+	}
+
+	/** A child's size across the box, given the room there is. */
+	private double crossSize(Node c, double crossSpace) {
+		double pref = crossPref(c);
+		double max = limited(c) ? (horizontal() ? c.maxHeight(-1) : c.maxWidth(-1)) : Double.MAX_VALUE;
+		double size = "stretch".equals(align) ? Math.min(crossSpace, Math.max(max, pref)) : Math.min(crossSpace, pref);
+		return Math.max(size, Math.min(crossMin(c), crossSpace));
 	}
 
 	private double crossMin(Node c) {
 		Insets m = margin(c);
 		return horizontal() ? c.minHeight(-1) + m.getTop() + m.getBottom() : c.minWidth(-1) + m.getLeft() + m.getRight();
+	}
+
+	private static boolean wraps(Node c) {
+		return c.getContentBias() == Orientation.HORIZONTAL;
+	}
+
+	/** A box holding wrapped text is taller when it's narrower, so its height depends on its width. */
+	@Override
+	public Orientation getContentBias() {
+		for (Node c : getManagedChildren()) {
+			if (wraps(c)) {
+				return Orientation.HORIZONTAL;
+			}
+		}
+		return null;
 	}
 
 	private double gaps() {
@@ -140,10 +168,24 @@ public class XulBox extends Pane {
 	protected double computePrefHeight(double width) {
 		Insets in = getInsets();
 		double size = 0;
-		for (Node c : getManagedChildren()) {
-			size = horizontal() ? Math.max(size, crossPref(c)) : size + mainPref(c, -1);
+		// In a column, wrapped labels are as tall as they are at the column's width.
+		if (horizontal()) {
+			// In a row given a width, wrapped labels are as tall as they are at the width they'd get.
+			java.util.List<Node> kids = getManagedChildren();
+			double[] main = width >= 0 && getContentBias() != null
+					? mainSizes(kids, width - in.getLeft() - in.getRight() - gaps(), unknown(kids.size())) : null;
+			for (int i = 0; i < kids.size(); i++) {
+				Node c = kids.get(i);
+				double cross = main != null && wraps(c) ? c.prefHeight(main[i]) + margin(c).getTop() + margin(c).getBottom() : crossPref(c);
+				size = Math.max(size, cross);
+			}
+			return in.getTop() + in.getBottom() + size;
 		}
-		return in.getTop() + in.getBottom() + size + (horizontal() ? 0 : gaps());
+		double crossSpace = (width >= 0 ? width : prefWidth(-1)) - in.getLeft() - in.getRight();
+		for (Node c : getManagedChildren()) {
+			size += mainPref(c, crossSize(c, crossSpace));
+		}
+		return in.getTop() + in.getBottom() + size + gaps();
 	}
 
 	@Override
@@ -166,28 +208,15 @@ public class XulBox extends Pane {
 		return in.getTop() + in.getBottom() + size + (horizontal() ? 0 : gaps());
 	}
 
-	@Override
-	protected void layoutChildren() {
-		Insets in = getInsets();
-		java.util.List<Node> kids = getManagedChildren();
+	private static double[] unknown(int n) {
+		double[] sizes = new double[n];
+		java.util.Arrays.fill(sizes, -1);
+		return sizes;
+	}
+
+	/** Each child's size along the box: its preferred size, then the spare room (or shortage) shared by flex. */
+	private double[] mainSizes(java.util.List<Node> kids, double mainSpace, double[] cross) {
 		int n = kids.size();
-		if (n == 0) {
-			return;
-		}
-		double crossSpace = horizontal() ? getHeight() - in.getTop() - in.getBottom() : getWidth() - in.getLeft() - in.getRight();
-		double mainSpace = (horizontal() ? getWidth() - in.getLeft() - in.getRight() : getHeight() - in.getTop() - in.getBottom()) - gaps();
-
-		// Each child's cross size first, since a wrapped label's height depends on its width.
-		double[] cross = new double[n];
-		for (int i = 0; i < n; i++) {
-			Node c = kids.get(i);
-			double pref = crossPref(c);
-			double max = limited(c) ? (horizontal() ? c.maxHeight(-1) : c.maxWidth(-1)) : Double.MAX_VALUE;
-			cross[i] = "stretch".equals(align) ? Math.min(crossSpace, Math.max(max, pref)) : Math.min(crossSpace, pref);
-			cross[i] = Math.max(cross[i], Math.min(crossMin(c), crossSpace));
-		}
-
-		// Then sizes along the box: preferred sizes, then spare room (or shortage) shared by flex.
 		double[] main = new double[n];
 		double[] min = new double[n];
 		double[] max = new double[n];
@@ -244,6 +273,42 @@ public class XulBox extends Pane {
 				extra += give;
 			}
 		}
+		return main;
+	}
+
+	@Override
+	protected void layoutChildren() {
+		Insets in = getInsets();
+		java.util.List<Node> kids = getManagedChildren();
+		int n = kids.size();
+		if (n == 0) {
+			return;
+		}
+		double crossSpace = horizontal() ? getHeight() - in.getTop() - in.getBottom() : getWidth() - in.getLeft() - in.getRight();
+		double mainSpace = (horizontal() ? getWidth() - in.getLeft() - in.getRight() : getHeight() - in.getTop() - in.getBottom()) - gaps();
+
+		// Each child's cross size first, since a wrapped label's height depends on its width.
+		double[] cross = new double[n];
+		for (int i = 0; i < n; i++) {
+			cross[i] = crossSize(kids.get(i), crossSpace);
+		}
+
+		// Then sizes along the box: preferred sizes, then spare room (or shortage) shared by flex.
+		double[] main = mainSizes(kids, mainSpace, cross);
+		double extra = mainSpace;
+		for (double m : main) {
+			extra -= m;
+		}
+		if (horizontal()) {
+			// Now that their widths are known, wrapped labels in a row get the height their text needs.
+			for (int i = 0; i < n; i++) {
+				Node c = kids.get(i);
+				if (wraps(c) && !"stretch".equals(align)) {
+					Insets m = margin(c);
+					cross[i] = Math.min(crossSpace, c.prefHeight(main[i] - m.getLeft() - m.getRight()) + m.getTop() + m.getBottom());
+				}
+			}
+		}
 
 		double position = horizontal() ? in.getLeft() : in.getTop();
 		if (extra > 0.5) {
@@ -271,6 +336,82 @@ public class XulBox extends Pane {
 						snapSize(cross[i] - m.getLeft() - m.getRight()), snapSize(main[i] - m.getTop() - m.getBottom()));
 			}
 			position += main[i] + spacing;
+		}
+	}
+
+	/**
+	 * XUL's <stack>: children on top of each other, later ones in front. A
+	 * child with left or top (in pixels) is placed there at its preferred
+	 * size; the others fill the stack.
+	 */
+	public static final class Stack extends Pane {
+
+		private static final String LEFT = "xul-left";
+		private static final String TOP = "xul-top";
+
+		/** A child's left or top, or NaN to fill the stack. */
+		public static void setPosition(Node child, double left, double top) {
+			child.getProperties().put(LEFT, left);
+			child.getProperties().put(TOP, top);
+			if (child.getParent() != null) {
+				child.getParent().requestLayout();
+			}
+		}
+
+		private static double get(Node child, String key) {
+			Object value = child.getProperties().get(key);
+			return value instanceof Double ? (Double) value : Double.NaN;
+		}
+
+		private static boolean placed(Node child) {
+			return !Double.isNaN(get(child, LEFT)) || !Double.isNaN(get(child, TOP));
+		}
+
+		@Override
+		protected void layoutChildren() {
+			Insets in = getInsets();
+			double width = getWidth() - in.getLeft() - in.getRight();
+			double height = getHeight() - in.getTop() - in.getBottom();
+			for (Node child : getManagedChildren()) {
+				if (placed(child)) {
+					double left = get(child, LEFT);
+					double top = get(child, TOP);
+					child.autosize();
+					child.relocate(in.getLeft() + (Double.isNaN(left) ? 0 : left), in.getTop() + (Double.isNaN(top) ? 0 : top));
+				} else {
+					child.resizeRelocate(in.getLeft(), in.getTop(), width, height);
+				}
+			}
+		}
+
+		@Override
+		protected double computePrefWidth(double height) {
+			double width = 0;
+			for (Node child : getManagedChildren()) {
+				double left = placed(child) && !Double.isNaN(get(child, LEFT)) ? get(child, LEFT) : 0;
+				width = Math.max(width, left + child.prefWidth(-1));
+			}
+			return width + getInsets().getLeft() + getInsets().getRight();
+		}
+
+		@Override
+		protected double computePrefHeight(double width) {
+			double height = 0;
+			for (Node child : getManagedChildren()) {
+				double top = placed(child) && !Double.isNaN(get(child, TOP)) ? get(child, TOP) : 0;
+				height = Math.max(height, top + child.prefHeight(-1));
+			}
+			return height + getInsets().getTop() + getInsets().getBottom();
+		}
+
+		@Override
+		protected double computeMinWidth(double height) {
+			return getInsets().getLeft() + getInsets().getRight();
+		}
+
+		@Override
+		protected double computeMinHeight(double width) {
+			return getInsets().getTop() + getInsets().getBottom();
 		}
 	}
 }

@@ -55,7 +55,11 @@
                     </row>
                     <row align="center">
                         <button id="open-settings" label="Settings" accesskey="S" oncommand="launch('../apps/settings/settings.xul')"/>
-                        <label value="This window's background, and notifications"/>
+                        <label value="The background, and notifications"/>
+                    </row>
+                    <row align="center">
+                        <button id="open-desktop" label="Desktop" accesskey="D" oncommand="launch('desktop.xul')"/>
+                        <label value="Skylight OS's desktop, with every app on it"/>
                     </row>
                     <row align="center">
                         <button id="open-gallery" label="Gallery" accesskey="G" oncommand="launch('../apps/gallery/gallery.xul')"/>

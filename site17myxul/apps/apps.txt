@@ -1,0 +1,7 @@
+# The apps on the desktop's home menu, in order: folders in apps/ with an app.properties.
+leafpad
+abiword
+terminal
+web-browser
+settings
+gallery

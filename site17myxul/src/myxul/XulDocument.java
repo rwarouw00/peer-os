@@ -13,13 +13,15 @@ public final class XulDocument {
 
 	private final XulElement root;
 	private final Map<String, XulElement> ids = new HashMap<>();
+	XulWindow window;
+	XulElement popupNode;   // the element a context menu was opened on
 
 	XulDocument(XulElement root) {
 		this.root = root;
 		index(root);
 	}
 
-	private void index(XulElement e) {
+	void index(XulElement e) {
 		String id = e.attr("id");
 		if (id != null) {
 			XulElement other = ids.get(id);
@@ -31,6 +33,48 @@ public final class XulDocument {
 		for (XulElement child : e.children) {
 			index(child);
 		}
+	}
+
+	/** Forgets the ids of an element taken out of the document, and of its children. */
+	void unindex(XulElement e) {
+		String id = e.attr("id");
+		if (id != null && ids.get(id) == e) {
+			ids.remove(id);
+		}
+		for (XulElement child : e.children) {
+			unindex(child);
+		}
+	}
+
+	/** An element's id changed (setAttribute("id", ...)) while it is in the document. */
+	void renamed(XulElement e, String oldId) {
+		if (oldId != null && ids.get(oldId) == e) {
+			ids.remove(oldId);
+		}
+		String id = e.attr("id");
+		if (id != null) {
+			XulElement other = ids.get(id);
+			if (other != null && other != e) {
+				throw new IllegalArgumentException("id=\"" + id + "\" is already used by " + other.where() + ".");
+			}
+			ids.put(id, e);
+		}
+	}
+
+	/** document.createElement("button"): a new element, shown once it's appended to one in the window. */
+	public XulElement createElement(String tag) {
+		if (!tag.matches("[a-z][a-z0-9-]*")) {
+			throw new IllegalArgumentException("\"" + tag + "\" isn't a XUL tag name.");
+		}
+		XulElement e = new XulElement(tag, window.file, 0);
+		e.namespace = XulParser.XUL_NS;
+		e.document = this;
+		return e;
+	}
+
+	/** The element whose context menu (context="...") is open, or was last. */
+	public XulElement getPopupNode() {
+		return popupNode;
 	}
 
 	public XulElement getElementById(String id) {

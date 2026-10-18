@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javafx.scene.Parent;
 
 /**
  * Opens XUL files as windows. One engine runs a whole program: all its
@@ -11,8 +12,18 @@ import java.util.List;
  */
 public final class XulEngine {
 
+	/**
+	 * Something that frames windows, such as the desktop (see
+	 * myxul.service.DesktopService): it is given each new window's content
+	 * before the window is shown, and returns what the window shows instead.
+	 */
+	public interface WindowHost {
+		Parent frame(XulWindow window, Parent content);
+	}
+
 	final XulRegistry registry = new XulRegistry();
 	XulDialogs dialogs = XulDialogs.JAVAFX;
+	WindowHost host;
 	private final List<XulWindow> windows = new ArrayList<>();
 	private final List<String> errors = new ArrayList<>();
 	private final List<String> warnings = new ArrayList<>();
@@ -41,6 +52,15 @@ public final class XulEngine {
 			report(null, e);
 			return null;
 		}
+	}
+
+	/** Frames every window opened from now on (null for plain windows again). */
+	public void setWindowHost(WindowHost host) {
+		this.host = host;
+	}
+
+	public WindowHost getWindowHost() {
+		return host;
 	}
 
 	public List<XulWindow> getWindows() {

@@ -15,7 +15,7 @@ flowchart TB
         Events["XulEvents<br/>event attributes to JavaFX events"]
         Scripts["XulScriptManager<br/>the window's Nashorn engine"]
         Boot["bootstrap.js<br/>document, window, element wrappers"]
-        Services["myxul.service<br/>files, pages, settings, notifications"]
+        Services["myxul.service<br/>files, pages, settings, notifications, the desktop"]
         Engine --> Window
         Window --> Parser
         Window --> Registry
@@ -46,7 +46,7 @@ flowchart TB
 | [`XulScriptManager`](../site17myxul/src/myxul/XulScriptManager.java) | The window's own Nashorn engine, with a class filter; runs scripts, compiles event attributes, turns script errors into messages |
 | [`bootstrap.js`](../site17myxul/src/myxul/bootstrap.js) | Run first in each engine: `document`, `window`, `alert`, `confirm`, `prompt`, timers, and the element wrappers |
 | [`XulCanvas`](../site17myxul/src/myxul/XulCanvas.java), [`XulEvent`](../site17myxul/src/myxul/XulEvent.java), [`XulDialogs`](../site17myxul/src/myxul/XulDialogs.java), [`XulException`](../site17myxul/src/myxul/XulException.java) | `<canvas>`; the event object for property-change events; alert, confirm, prompt and error dialogs; an error with its file and line |
-| [`service/`](../site17myxul/src/myxul/service/) | `XulService`, and the services: `FileService` (NativeFileService), `PageView` (AbiCoreEngine), `SettingsService` (Settings) and `NotificationService` (Notifications) |
+| [`service/`](../site17myxul/src/myxul/service/) | `XulService`, and the services: `FileService` (NativeFileService), `PageView` (AbiCoreEngine), `SettingsService` (Settings), `NotificationService` (Notifications) and `DesktopService` (Desktop: the desktop's window frames, its apps and windows) |
 
 ## Opening a window
 
@@ -59,6 +59,8 @@ flowchart TB
 5. **Keys.** Each `<key>` becomes an accelerator: on the menu item that names it, or for the whole window. Keys without Ctrl, Alt or Meta are also caught by an event filter, before the focused control.
 6. **Run the scripts**, in document order.
 7. **Show** the window, then run its `onload`.
+
+Between steps 4 and 5, if the desktop is open, the window's content is handed to it to be framed (see [Engine internals](engine-internals.md#the-desktop)).
 
 If anything fails in steps 1 to 6, the window is never shown: the user gets the error with its file and line, and `openWindow` returns `null`.
 

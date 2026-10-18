@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xul-service Desktop myxul.service.DesktopService?>
+<?xul-service Settings myxul.service.SettingsService?>
+<?xul-service Notifications myxul.service.NotificationService?>
+<!-- myxul's desktop, after Skylight OS's: a panel along the top (the home
+     button, a button for each open window, the clock), shortcuts on the
+     background, and the home menu with the apps and the notification tray.
+     While it's open, every window myxul opens is framed on it by the Desktop
+     service. There is no login: the desktop belongs to whoever started it. -->
+<window id="desktop" title="myxul desktop" width="1024" height="700"
+        onload="Shell.start()" onclose="return Desktop.quit()"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script src="desktop.js"/>
+
+    <keyset>
+        <key id="key-home" key="H" modifiers="alt" oncommand="Shell.toggleMenu()"/>
+    </keyset>
+
+    <popupset>
+        <!-- The home menu: the apps, or the notification tray, chosen at the bottom -->
+        <panel id="home-menu" width="430" height="470">
+            <vbox id="apps-page" flex="1" spacing="8" style="padding: 12px;"/>
+            <vbox id="notifications-page" flex="1" hidden="true">
+                <hbox pack="end" style="padding: 6px;">
+                    <button id="clear-notifications" label="Clear" oncommand="Shell.clearNotifications()"/>
+                </hbox>
+                <scrollbox id="notification-list" orient="vertical" flex="1"/>
+            </vbox>
+            <hbox id="menu-footer" align="center" spacing="6" class="desktop-menu-footer">
+                <button id="show-apps" label="Apps" oncommand="Shell.showPage('apps')"/>
+                <button id="show-notifications" label="Notifications" oncommand="Shell.showPage('notifications')"/>
+                <spacer flex="1"/>
+                <toolbarbutton id="quit" image="../images/desktop/power.png" class="desktop-flat"
+                               tooltiptext="Close every window and leave the desktop" oncommand="Shell.quit()"/>
+            </hbox>
+        </panel>
+
+        <!-- Right-clicking a taskbar button, a shortcut, or an app in the home menu -->
+        <menupopup id="taskbar-menu">
+            <menuitem id="taskbar-close" label="Close" accesskey="C" oncommand="Shell.closeWindow(document.popupNode)"/>
+        </menupopup>
+        <menupopup id="shortcut-menu">
+            <menuitem id="shortcut-open" label="Open" accesskey="O" oncommand="Shell.launch(document.popupNode.getAttribute('app'))"/>
+            <menuitem id="shortcut-remove" label="Remove from desktop" accesskey="R" oncommand="Shell.removeShortcut(document.popupNode.getAttribute('app'))"/>
+        </menupopup>
+        <menupopup id="app-menu">
+            <menuitem id="app-open" label="Open" accesskey="O" oncommand="Shell.launch(document.popupNode.getAttribute('app'))"/>
+            <menuitem id="app-shortcut" label="Add to desktop" accesskey="A" oncommand="Shell.addShortcut(document.popupNode.getAttribute('app'))"/>
+        </menupopup>
+    </popupset>
+
+    <vbox id="background" flex="1">
+        <hbox id="panel" align="center" spacing="8" class="desktop-panel">
+            <toolbarbutton id="home" image="../images/desktop/home.png" class="desktop-flat"
+                           tooltiptext="Apps and notifications (Alt+H)" oncommand="Shell.toggleMenu()"/>
+            <hbox id="taskbar" align="center" spacing="4" flex="1"/>
+            <label id="clock" class="desktop-clock" value=""/>
+        </hbox>
+        <stack id="area" flex="1"/>
+    </vbox>
+</window>

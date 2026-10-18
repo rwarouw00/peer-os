@@ -40,6 +40,7 @@ public final class XulWindow {
 	final Map<String, List<XulElement>> observers = new HashMap<>();
 	static final String ACCESSKEY = "xul-accesskey";
 	final List<javafx.scene.control.Menu> menus = new ArrayList<>();
+	final List<javafx.scene.control.ContextMenu> popupMenus = new ArrayList<>();   // <menupopup>s in a <popupset>
 	private char swallowTyped;   // the letter of a menu access key just handled: its KEY_TYPED mustn't type it too
 	private final Map<String, XulScriptManager.Handler> commandHandlers = new HashMap<>();
 	private final Map<String, XulElement> keys = new LinkedHashMap<>();
@@ -50,6 +51,9 @@ public final class XulWindow {
 	private final List<Runnable> closeListeners = new ArrayList<>();
 	private int nextTimer = 1;
 	private boolean closed;
+	private boolean minimized;
+	private XulScriptManager.Handler onclose;
+	private XulScriptManager.Handler onunload;
 
 	XulWindow(XulEngine engine, Path file, List<String> arguments) {
 		this.engine = engine;
@@ -64,6 +68,7 @@ public final class XulWindow {
 			engine.warn(this.file, root.line, "<" + root.tag + "> should have xmlns=\"" + XulParser.XUL_NS + "\".");
 		}
 		document = new XulDocument(root);
+		document.window = this;
 		findNonVisual(root);
 		scripts = new XulScriptManager(this);
 		for (String[] pi : parsed.instructions) {
@@ -82,7 +87,9 @@ public final class XulWindow {
 		Parent content = (Parent) build(root);
 		bindKeys();
 		menuAccessKeys();
-		Scene scene = new Scene(content, root.number("width", -1), root.number("height", -1));
+		// Framed by a host (the desktop), or a window of its own at the size the XUL file asks for.
+		Parent shown = engine.host == null ? content : engine.host.frame(this, content);
+		Scene scene = shown == content ? new Scene(content, root.number("width", -1), root.number("height", -1)) : new Scene(shown);
 		scene.getStylesheets().add(XulWindow.class.getResource("myxul.css").toExternalForm());
 		stage.setScene(scene);
 		stage.setTitle(root.attr("title", file.getFileName().toString()));
@@ -96,16 +103,16 @@ public final class XulWindow {
 			}
 		}
 
-		XulScriptManager.Handler onclose = handler("onclose");
-		XulScriptManager.Handler onunload = handler("onunload");
+		onclose = handler("onclose");
+		onunload = handler("onunload");
 		stage.setOnCloseRequest(ev -> {
-			if (onclose != null && Boolean.FALSE.equals(onclose.call(root, new XulEvent("close", stage)))) {
+			if (!mayClose()) {
 				ev.consume();   // onclose returned false: stay open
 			}
 		});
 		stage.setOnHidden(ev -> {
-			if (onunload != null) {
-				onunload.call(root, new XulEvent("unload", stage));
+			if (minimized) {
+				return;   // hidden for now, not closed
 			}
 			closed();
 		});
@@ -118,6 +125,10 @@ public final class XulWindow {
 		if (onload != null) {
 			onload.call(root, new XulEvent("load", stage));
 		}
+	}
+
+	private boolean mayClose() {
+		return onclose == null || !Boolean.FALSE.equals(onclose.call(root, new XulEvent("close", stage)));
 	}
 
 	private XulScriptManager.Handler handler(String attribute) {
@@ -178,6 +189,9 @@ public final class XulWindow {
 			scripts.put(name, service);
 		} catch (ClassNotFoundException e) {
 			throw new XulException(file, line, "There is no service class " + className + ".");
+		} catch (java.lang.reflect.InvocationTargetException e) {
+			Throwable why = e.getCause();
+			throw new XulException(file, line, className + " can't be made: " + (why.getMessage() == null ? why.toString() : why.getMessage()));
 		} catch (ReflectiveOperationException e) {
 			throw new XulException(file, line, className + " can't be made: " + e);
 		}
@@ -258,11 +272,19 @@ public final class XulWindow {
 					return;
 				}
 				char letter = Character.toLowerCase(ev.getText().charAt(0));
+				List<List<MenuItem>> open = new ArrayList<>();
 				for (javafx.scene.control.Menu menu : menus) {   // submenus are built before their menus: innermost first
-					if (!menu.isShowing()) {
-						continue;
+					if (menu.isShowing()) {
+						open.add(menu.getItems());
 					}
-					for (MenuItem item : menu.getItems()) {
+				}
+				for (javafx.scene.control.ContextMenu menu : popupMenus) {
+					if (menu.isShowing()) {
+						open.add(menu.getItems());
+					}
+				}
+				for (List<MenuItem> items : open) {
+					for (MenuItem item : items) {
 						if (Character.valueOf(letter).equals(item.getProperties().get(ACCESSKEY)) && !item.isDisable() && item.isVisible()) {
 							ev.consume();
 							swallowTyped = letter;
@@ -291,6 +313,11 @@ public final class XulWindow {
 
 	private void hideMenus() {
 		for (javafx.scene.control.Menu menu : menus) {
+			if (menu.isShowing()) {
+				menu.hide();
+			}
+		}
+		for (javafx.scene.control.ContextMenu menu : popupMenus) {
 			if (menu.isShowing()) {
 				menu.hide();
 			}
@@ -415,11 +442,26 @@ public final class XulWindow {
 		engine.report(this, new XulException(where, line, (attribute == null ? "" : attribute + ": ") + XulScriptManager.message(error), error));
 	}
 
+	/** An error in a script function called from Java (a timer, a listener): reported with the file and line it happened on. */
+	void runtimeError(RuntimeException e) {
+		Path where = file;
+		if (e instanceof jdk.nashorn.api.scripting.NashornException) {
+			String name = ((jdk.nashorn.api.scripting.NashornException) e).getFileName();
+			if (name != null && name.matches("[^/\\\\ ()]+\\.(js|xul)")) {
+				where = file.resolveSibling(name);
+			}
+		}
+		scriptError(where, 0, null, e);
+	}
+
 	private void closed() {
 		if (closed) {
 			return;
 		}
 		closed = true;
+		if (onunload != null) {
+			onunload.call(root, new XulEvent("unload", stage));
+		}
 		for (Animation timer : timers.values()) {
 			timer.stop();
 		}
@@ -435,6 +477,19 @@ public final class XulWindow {
 
 	public Stage getStage() {
 		return stage;
+	}
+
+	public XulEngine getEngine() {
+		return engine;
+	}
+
+	/** The width and height the XUL file asks for, or -1. */
+	public double getRequestedWidth() {
+		return root.number("width", -1);
+	}
+
+	public double getRequestedHeight() {
+		return root.number("height", -1);
 	}
 
 	public Path getFile() {
@@ -456,8 +511,42 @@ public final class XulWindow {
 
 	/** Closes the window without asking its onclose. */
 	public void close() {
+		minimized = false;
 		stage.close();
 		closed();
+	}
+
+	/** Closes the window as its close button does: if it has an onclose, that may keep it open. Returns whether it closed. */
+	public boolean requestClose() {
+		if (closed) {
+			return true;
+		}
+		if (mayClose()) {
+			close();
+		}
+		return closed;
+	}
+
+	public boolean isClosed() {
+		return closed;
+	}
+
+	/** Hides the window without closing it (the desktop's minimize), or shows it again. */
+	public void setMinimized(boolean minimize) {
+		if (closed || minimize == minimized) {
+			return;
+		}
+		minimized = minimize;
+		if (minimize) {
+			stage.hide();
+		} else {
+			stage.show();
+			stage.toFront();
+		}
+	}
+
+	public boolean isMinimized() {
+		return minimized;
 	}
 
 	/** Opens another .xul file, relative to this one. extra holds its window.arguments, separated by \0. */
@@ -492,7 +581,7 @@ public final class XulWindow {
 			try {
 				f.call(null);
 			} catch (RuntimeException e) {
-				scriptError(file, 0, null, e);
+				runtimeError(e);
 			}
 		}));
 		timeline.setCycleCount(repeat ? Animation.INDEFINITE : 1);
@@ -507,6 +596,23 @@ public final class XulWindow {
 			if (timer != null) {
 				timer.stop();
 			}
+		}
+	}
+
+	/**
+	 * Calls a function a script gave a service (an onChange, say), on the
+	 * JavaFX thread, reporting any error as a script error in this window.
+	 * Does nothing once the window has closed.
+	 */
+	public Object call(Object function, Object... args) {
+		if (closed || !(function instanceof ScriptObjectMirror) || !((ScriptObjectMirror) function).isFunction()) {
+			return null;
+		}
+		try {
+			return ((ScriptObjectMirror) function).call(null, args);
+		} catch (RuntimeException e) {
+			runtimeError(e);
+			return null;
 		}
 	}
 

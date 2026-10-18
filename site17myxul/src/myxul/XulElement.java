@@ -42,13 +42,14 @@ public final class XulElement {
 			"getAttribute", "setAttribute", "removeAttribute", "hasAttribute",
 			"appendItem", "removeItemAt", "getRowCount", "clearItems", "focus",
 			"getElementsByTagName", "loadURI", "goBack", "goForward", "reload", "stop",
-			"canGoBack", "canGoForward"));
+			"canGoBack", "canGoForward", "appendChild", "insertBefore", "removeChild",
+			"addEventListener", "removeEventListener", "openPopup", "openPopupAtScreen", "hidePopup"));
 
 	/** XUL properties scripts can read and set: el.value, el.checked = true. */
 	private static final Set<String> PROPERTIES = new HashSet<>(Arrays.asList(
 			"id", "tagName", "localName", "node", "value", "label", "checked", "disabled",
-			"hidden", "collapsed", "selectedIndex", "parentNode", "childNodes", "textContent",
-			"currentURI", "contentTitle"));
+			"hidden", "collapsed", "selectedIndex", "parentNode", "childNodes", "firstChild", "lastChild",
+			"textContent", "currentURI", "contentTitle", "state"));
 
 	final String tag;
 	final Map<String, String> attributes = new LinkedHashMap<>();
@@ -60,7 +61,9 @@ public final class XulElement {
 	String text = "";
 	Object node;            // the JavaFX object, once built
 	XulWindow window;       // the window it belongs to, once built
+	XulDocument document;   // for elements made by document.createElement, until they're built
 	Object scriptObject;    // its script wrapper, made on first use
+	private final List<Object[]> listeners = new ArrayList<>();   // addEventListener: { type, function, remover }
 
 	XulElement(String tag, Path file, int line) {
 		this.tag = tag;
@@ -182,7 +185,13 @@ public final class XulElement {
 	/** Sets an attribute and applies it to the control: setAttribute("disabled", true). */
 	public void setAttribute(String name, Object value) {
 		String text = value == null ? "" : String.valueOf(value);
-		attributes.put(name, text);
+		if (value instanceof Double && !((Double) value).isInfinite() && (Double) value == Math.rint((Double) value) && Math.abs((Double) value) < 1e15) {
+			text = String.valueOf(((Double) value).longValue());   // setAttribute("left", 100): "100", as in XUL, not "100.0"
+		}
+		String old = attributes.put(name, text);
+		if (name.equals("id") && window != null && inDocument()) {
+			window.document.renamed(this, old);
+		}
 		if (window != null) {
 			window.engine.registry.applyAttribute(this, name, text);
 		}
@@ -209,6 +218,12 @@ public final class XulElement {
 			return parent;
 		case "childNodes":
 			return Collections.unmodifiableList(children);
+		case "firstChild":
+			return children.isEmpty() ? null : children.get(0);
+		case "lastChild":
+			return children.isEmpty() ? null : children.get(children.size() - 1);
+		case "state":
+			return node instanceof javafx.stage.PopupWindow ? (((javafx.stage.PopupWindow) node).isShowing() ? "open" : "closed") : null;
 		case "textContent":
 			return text;
 		case "checked":
@@ -238,6 +253,9 @@ public final class XulElement {
 		case "node":
 		case "parentNode":
 		case "childNodes":
+		case "firstChild":
+		case "lastChild":
+		case "state":
 		case "currentURI":
 		case "contentTitle":
 			throw new IllegalArgumentException(name + " can't be changed.");
@@ -260,6 +278,177 @@ public final class XulElement {
 		List<XulElement> found = new ArrayList<>();
 		collect(name, found);
 		return found;
+	}
+
+	// ---- Adding and removing elements: appendChild, insertBefore, removeChild ----
+
+	/** Whether this element is in its window's tree (not made by createElement and left unattached). */
+	private boolean inDocument() {
+		XulElement e = this;
+		while (e.parent != null) {
+			e = e.parent;
+		}
+		return window != null && e == window.root;
+	}
+
+	public XulElement appendChild(XulElement child) {
+		return insertBefore(child, null);
+	}
+
+	/**
+	 * Puts child (made by document.createElement, or already in the window,
+	 * which moves it) among this element's children, before ref, or at the
+	 * end when ref is null. Once this element is in the window, the child is
+	 * built and shown.
+	 */
+	public XulElement insertBefore(XulElement child, XulElement ref) {
+		if (child == null) {
+			throw new IllegalArgumentException("appendChild needs an element.");
+		}
+		for (XulElement e = this; e != null; e = e.parent) {
+			if (e == child) {
+				throw new IllegalArgumentException(child + " can't go inside itself.");
+			}
+		}
+		if (ref != null && ref.parent != this) {
+			throw new IllegalArgumentException(ref + " isn't a child of " + this + ".");
+		}
+		if (child.parent != null) {
+			child.parent.removeChild(child);
+		}
+		children.add(ref == null ? children.size() : children.indexOf(ref), child);
+		child.parent = this;
+		if (node != null && window != null && inDocument()) {
+			try {
+				window.document.index(child);
+			} catch (XulException e) {
+				children.remove(child);
+				child.parent = null;
+				throw new IllegalArgumentException(e.getMessage());
+			}
+			if (child.node == null) {
+				window.build(child);
+			}
+			XulRegistry.insert(this, child);
+		}
+		return child;
+	}
+
+	public XulElement removeChild(XulElement child) {
+		if (child == null || child.parent != this) {
+			throw new IllegalArgumentException(child + " isn't a child of " + this + ".");
+		}
+		if (window != null && inDocument()) {
+			window.document.unindex(child);
+		}
+		XulRegistry.remove(this, child);
+		children.remove(child);
+		child.parent = null;
+		return child;
+	}
+
+	// ---- Events: addEventListener("command", function (event) { ... }) ----
+
+	public void addEventListener(String type, Object function) {
+		if (!(function instanceof jdk.nashorn.api.scripting.ScriptObjectMirror) || !((jdk.nashorn.api.scripting.ScriptObjectMirror) function).isFunction()) {
+			throw new IllegalArgumentException("addEventListener needs a function.");
+		}
+		for (Object[] l : listeners) {
+			if (l[0].equals(type) && l[1].equals(function)) {
+				return;   // already listening, as in the DOM
+			}
+		}
+		if (node == null) {
+			throw new IllegalStateException("addEventListener works once " + this + " is in the window: append it first.");
+		}
+		jdk.nashorn.api.scripting.ScriptObjectMirror f = (jdk.nashorn.api.scripting.ScriptObjectMirror) function;
+		XulWindow w = window;
+		Runnable remover = XulEvents.listen(this, node, type, ev -> w.scripts.call(f, this, ev));
+		listeners.add(new Object[] { type, function, remover });
+	}
+
+	public void removeEventListener(String type, Object function) {
+		for (Object[] l : new ArrayList<>(listeners)) {
+			if (l[0].equals(type) && l[1].equals(function)) {
+				((Runnable) l[2]).run();
+				listeners.remove(l);
+			}
+		}
+	}
+
+	// ---- <panel> and <menupopup>: openPopup, openPopupAtScreen, hidePopup ----
+
+	/**
+	 * Opens a <panel> or <menupopup> next to anchor: position is XUL's
+	 * "after_start" (below, left edges lined up; the default), "after_end",
+	 * "before_start", "before_end", "end_before", "start_before" or
+	 * "overlap", then moved by x and y.
+	 */
+	public void openPopup(XulElement anchor, String position, double x, double y) {
+		if (anchor == null || !(anchor.node instanceof Node) || ((Node) anchor.node).getScene() == null) {
+			openPopupAtScreen(x, y);
+			return;
+		}
+		Node a = (Node) anchor.node;
+		javafx.geometry.Bounds b = a.localToScreen(a.getBoundsInLocal());
+		String where = position == null || position.isEmpty() || position.equals("undefined") ? "after_start" : position;
+		javafx.stage.PopupWindow popup = popup("openPopup");
+		XulRegistry.showPopup(this, popup, a, 0, 0);
+		double w = popup.getWidth();
+		double h = popup.getHeight();
+		double px;
+		double py;
+		switch (where) {
+		case "after_end":
+			px = b.getMaxX() - w;
+			py = b.getMaxY();
+			break;
+		case "before_start":
+			px = b.getMinX();
+			py = b.getMinY() - h;
+			break;
+		case "before_end":
+			px = b.getMaxX() - w;
+			py = b.getMinY() - h;
+			break;
+		case "end_before":
+			px = b.getMaxX();
+			py = b.getMinY();
+			break;
+		case "start_before":
+			px = b.getMinX() - w;
+			py = b.getMinY();
+			break;
+		case "overlap":
+			px = b.getMinX();
+			py = b.getMinY();
+			break;
+		case "after_start":
+			px = b.getMinX();
+			py = b.getMaxY();
+			break;
+		default:
+			throw new IllegalArgumentException("Unknown popup position \"" + position + "\".");
+		}
+		popup.setX(px + x);
+		popup.setY(py + y);
+	}
+
+	public void openPopupAtScreen(double x, double y) {
+		javafx.stage.PopupWindow popup = popup("openPopupAtScreen");
+		Object owner = window.root.node;
+		XulRegistry.showPopup(this, popup, (Node) owner, x, y);
+	}
+
+	public void hidePopup() {
+		popup("hidePopup").hide();
+	}
+
+	private javafx.stage.PopupWindow popup(String method) {
+		if (!(node instanceof javafx.stage.PopupWindow)) {
+			throw new UnsupportedOperationException(method + " works on <panel> and on a <menupopup> in a <popupset>, not " + this + ".");
+		}
+		return (javafx.stage.PopupWindow) node;
 	}
 
 	// ---- <browser>: XUL's loadURI, goBack, goForward, reload, stop, canGoBack, canGoForward ----

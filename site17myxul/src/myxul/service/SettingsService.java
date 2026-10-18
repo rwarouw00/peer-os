@@ -16,8 +16,9 @@ import myxul.XulWindow;
 
 /**
  * myxul's own settings, shared by every app (scripts call it Settings): the
- * launcher's background picture and how long notifications stay on screen,
- * kept in ~/.myxul/settings.properties (or in the folder -Dmyxul.data gives).
+ * background picture (the launcher's and the desktop's), how long
+ * notifications stay on screen, and the desktop's shortcuts, kept in
+ * ~/.myxul/settings.properties (or in the folder -Dmyxul.data gives).
  * Windows can ask to hear about changes, so the launcher repaints its
  * background as soon as Settings saves a new one.
  */
@@ -30,6 +31,7 @@ public class SettingsService implements XulService {
 
 	static final String DEFAULT_BACKGROUND = "images/backgrounds/3.jpg";
 	static final int DEFAULT_NOTIFICATION_TIME = 7000;
+	static final String DEFAULT_SHORTCUTS = "leafpad 24 16;terminal 24 116;web-browser 24 216";
 
 	private static final List<SettingsService> LISTENING = new ArrayList<>();
 
@@ -100,6 +102,53 @@ public class SettingsService implements XulService {
 			throw new IllegalArgumentException("Notifications can stay for 1 to 60 seconds.");
 		}
 		save("notificationTime", String.valueOf((int) ms));
+	}
+
+	/**
+	 * The desktop's shortcuts: "app x y" for each, separated by ";", where app
+	 * is a folder in apps/ (such as "terminal 24 116;settings 24 216").
+	 */
+	public String getShortcuts() {
+		String shortcuts = load().getProperty("shortcuts", DEFAULT_SHORTCUTS);
+		return checkShortcuts(shortcuts) == null ? shortcuts : DEFAULT_SHORTCUTS;
+	}
+
+	/** Saves the desktop's shortcuts. Throws if one names no app, or is badly written. */
+	public void setShortcuts(String shortcuts) throws IOException {
+		String problem = checkShortcuts(shortcuts);
+		if (problem != null) {
+			throw new IllegalArgumentException(problem);
+		}
+		save("shortcuts", shortcuts);
+	}
+
+	/** Null if the shortcuts are well written and name apps that exist, or else what's wrong. */
+	static String checkShortcuts(String shortcuts) {
+		if (shortcuts == null) {
+			return "No shortcuts were given.";
+		}
+		if (shortcuts.isEmpty()) {
+			return null;
+		}
+		List<String> seen = new ArrayList<>();
+		String[] all = shortcuts.split(";", -1);
+		if (all.length > 50) {
+			return "The desktop can have 50 shortcuts at most.";
+		}
+		for (String shortcut : all) {
+			if (!shortcut.matches("[a-z0-9-]+ \\d{1,5} \\d{1,5}")) {
+				return "\"" + shortcut + "\" isn't a shortcut: write the app's folder, then its x and y, such as \"terminal 24 116\".";
+			}
+			String app = shortcut.split(" ")[0];
+			if (!Files.isRegularFile(Main.home().resolve("apps").resolve(app).resolve("app.properties"))) {
+				return "There is no app \"" + app + "\" in apps/.";
+			}
+			if (seen.contains(app)) {
+				return app + " has two shortcuts.";
+			}
+			seen.add(app);
+		}
+		return null;
 	}
 
 	/** Calls the function (with no arguments) whenever any window saves a setting. */

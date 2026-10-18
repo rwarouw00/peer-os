@@ -21,7 +21,7 @@ myxul was built from [`myxul/designspec.txt`](../myxul/designspec.txt). This pag
 | 5.4 One script context per window | One engine per window | |
 | 5.5 ClassFilter | Yes, always on | It allows JavaFX's UI packages rather than nothing, so scripts can make `TreeItem`s and the like; files come only through services |
 | Review in 8.2: raw JavaFX nodes or XUL element wrappers? | **Both** | Elements are wrappers with XUL's properties and methods, passing anything else to the JavaFX object; `.node` gives the object itself |
-| **6. Under 15 core classes** | 12 core classes, 15 with `Main`, `XulEvent` and `XulException` | About 3,800 non-blank lines with comments, including `bootstrap.js` and the services |
+| **6. Under 15 core classes** | 12 core classes, 15 with `Main`, `XulEvent` and `XulException` | About 5,200 non-blank lines with comments, including `bootstrap.js` and the services; about 4,000 without the services |
 | **7. Testing against real-world XUL** | In stages, with test files in the style of SeaMonkey Composer and Komodo | See [Testing against real-world XUL](real-world-xul.md) |
 | **8.1 Leafpad XUL** | Yes, and more: Save As, Find, Find Next, Jump To, Word Wrap, a font option, unsaved-changes checks, a file on the command line | The spec's Delete bug (it cleared the whole text) and wrong `xmlns` were fixed as its review said |
 | **8.2 AbiWord XUL shell** | Yes | The spec's layout, with a page engine (`PageView`) painting Letter-sized pages on the canvas, a heading outline, paragraph styles, and bold and italic for the whole document. The spec styled the canvas as the page (white, 816 px wide, with a shadow). Here the canvas is the whole grey viewport, and `PageView` paints each page, with its shadow, inside it, so the canvas's style is just its grey background |
@@ -42,3 +42,11 @@ Skylight OS's **Terminal**, **Settings** and **Web Browser** were ported to myxu
 * **two services**: `SettingsService`, myxul's shared settings (the launcher's background and the notification time), which tells open windows when they change, and `NotificationService`, Skylight-style notifications at the top right of the screen;
 * **`background-image`**, `background-size`, `background-position` and `background-repeat` in the style translator, for the launcher's background;
 * **`XulWindow.addCloseListener`**, so services can forget a window when it closes.
+
+Skylight OS's **desktop** came after that, without its login (myxul runs as the user who starts it). It is `ui/desktop.xul` and `ui/desktop.js`, with a sixth service, `DesktopService`, and it needed more XUL than the spec lists (see [User guide](user-guide.md#the-desktop) and [Engine internals](engine-internals.md#the-desktop)):
+
+* **XUL's DOM methods**: `document.createElement`, `appendChild`, `insertBefore`, `removeChild`, `firstChild`, `lastChild`, and `addEventListener`/`removeEventListener`, so a script can build the home menu, the taskbar and the tray;
+* **`<stack>`** with `left` and `top`, for the shortcuts; **`<scrollbox>`**, for the tray; **`<panel>`** and **`<popupset>`**, for the home menu; context menus (`<menupopup>` and `context`, with `document.popupNode`); `onmousedown`, `onmousemove` and `onmouseup`, for dragging shortcuts; buttons with `orient="vertical"` and images by URL;
+* **a window host** in the engine: while the desktop is open it frames every new window (a title bar with minimize, maximize and close, edges to resize by), and `XulWindow` can be minimized without closing and asked to close as its close button would;
+* `SettingsService` keeps the desktop's shortcuts, and `NotificationService` tells the desktop about each notification, for its tray;
+* and a fix to `XulBox`, which cut wrapped text off after one line in some boxes.

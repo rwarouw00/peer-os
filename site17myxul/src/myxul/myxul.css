@@ -16,3 +16,146 @@
 .xul-toolbarbutton {
 	-fx-padding: 3 8 3 8;
 }
+
+/* <panel> and <scrollbox> */
+
+.xul-panel {
+	-fx-background-color: #f0f0f0;
+	-fx-border-color: #8c8c8c;
+	-fx-border-width: 1;
+}
+
+.xul-scrollbox {
+	-fx-background-color: transparent;
+	-fx-background-insets: 0;
+	-fx-padding: 0;
+}
+
+.xul-scrollbox > .viewport {
+	-fx-background-color: transparent;
+}
+
+/* The desktop (ui/desktop.xul): window frames, drawn by myxul.service.DesktopService */
+
+.desktop-frame {
+	-fx-background-color: #707070;
+	-fx-padding: 0 4 4 4;
+}
+
+.desktop-frame:active {
+	-fx-background-color: #343434;
+}
+
+.desktop-frame:maximized {
+	-fx-padding: 0;
+}
+
+.desktop-frame-bar {
+	-fx-padding: 0 0 0 6;
+	-fx-background-color: linear-gradient(#8e8e8e, #707070);
+}
+
+.desktop-frame:active .desktop-frame-bar {
+	-fx-background-color: linear-gradient(#585858, #343434);
+}
+
+.desktop-frame-content {
+	-fx-background-color: -fx-background;
+}
+
+.desktop-frame-title {
+	-fx-text-fill: white;
+	-fx-font-size: 13px;
+}
+
+.desktop-frame-button {
+	-fx-background-color: transparent;
+	-fx-background-radius: 3;
+	-fx-padding: 2;
+}
+
+.desktop-frame-button:hover {
+	-fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+.desktop-frame-close:hover {
+	-fx-background-color: #d0453a;
+}
+
+/* The desktop's panel, home menu, shortcuts and notification tray */
+
+.desktop-panel {
+	-fx-padding: 4 10 4 10;
+	-fx-background-color: rgba(20, 20, 20, 0.55);
+}
+
+.desktop-flat {
+	-fx-background-color: transparent;
+	-fx-background-radius: 3;
+	-fx-padding: 2 4 2 4;
+}
+
+.desktop-flat:hover {
+	-fx-background-color: rgba(128, 128, 128, 0.3);
+}
+
+.desktop-task {
+	-fx-background-color: rgba(255, 255, 255, 0.12);
+	-fx-background-radius: 3;
+	-fx-text-fill: white;
+	-fx-padding: 3 8 3 6;
+	-fx-graphic-text-gap: 6;
+}
+
+.desktop-task:hover {
+	-fx-background-color: rgba(255, 255, 255, 0.24);
+}
+
+.desktop-task:selected {
+	-fx-background-color: rgba(255, 255, 255, 0.4);
+}
+
+.desktop-clock {
+	-fx-text-fill: white;
+	-fx-background-color: rgba(30, 30, 30, 0.8);
+	-fx-background-radius: 3;
+	-fx-padding: 3 8 3 8;
+}
+
+.desktop-menu-app {
+	-fx-background-color: transparent;
+	-fx-pref-width: 92;
+	-fx-wrap-text: true;
+	-fx-text-alignment: center;
+	-fx-alignment: top-center;
+	-fx-graphic-text-gap: 4;
+}
+
+.desktop-menu-app:hover {
+	-fx-background-color: derive(-fx-accent, 80%);
+}
+
+.desktop-menu-footer {
+	-fx-padding: 8;
+	-fx-border-color: #b4b4b4 transparent transparent transparent;
+}
+
+.desktop-shortcut {
+	-fx-padding: 4;
+	-fx-background-radius: 4;
+}
+
+.desktop-shortcut:hover {
+	-fx-background-color: rgba(255, 255, 255, 0.18);
+}
+
+.desktop-shortcut .label {
+	-fx-text-fill: white;
+	-fx-text-alignment: center;
+	-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 4, 0.5, 0, 1);
+}
+
+.desktop-notification {
+	-fx-padding: 8 4 8 12;
+	-fx-border-color: transparent transparent #d0d0d0 transparent;
+}

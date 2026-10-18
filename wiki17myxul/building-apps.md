@@ -125,6 +125,33 @@ The launcher is `ui/launcher.xul`, a XUL file like any other. Add a row to its g
 </row>
 ```
 
+## 6. Put it on the desktop
+
+The desktop (`./run.sh ui/desktop.xul`, see the [User guide](user-guide.md#the-desktop)) shows the apps listed in `apps/apps.txt`, each a folder with an `app.properties`. Give Notes two icons, 48 and 16 pixels square (any PNGs will do; here, Leafpad's):
+
+```
+mkdir apps/notes/icons
+cp apps/leafpad/icons/48.png apps/leafpad/icons/16.png apps/notes/icons/
+```
+
+Then describe it in `apps/notes/app.properties`:
+
+```properties
+title=Notes
+xul=notes.xul
+icon=icons/48.png
+icon.small=icons/16.png
+description=One note, kept between runs
+```
+
+and add a line to `apps/apps.txt`:
+
+```
+notes
+```
+
+Notes is now in the desktop's home menu, and its window has its icon in its title bar and on its taskbar button. To give it a shortcut on the desktop, right-click it in the home menu and choose **Add to desktop**. Nothing in `notes.xul` or `notes.js` changes: an app works the same in a window of its own and on the desktop.
+
 ## Going further
 
 * **Menus and keyboard shortcuts:** `<menubar>`, `<menu>`, `<menuitem>`, with `<key>` elements for shortcuts and `<command>` elements to share one action between a menu item, a button and a key. Leafpad XUL (`apps/leafpad/`) uses all of them.

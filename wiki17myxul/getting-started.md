@@ -30,6 +30,7 @@ This compiles `src/` into `myxul.jar`, in a second or two. There is nothing to d
 
 ```
 ./run.sh                                       the launcher
+./run.sh ui/desktop.xul                        the desktop, with every app on it
 ./run.sh apps/leafpad/leafpad.xul              Leafpad XUL
 ./run.sh apps/leafpad/leafpad.xul notes.txt    Leafpad XUL, opening notes.txt
 ./run.sh apps/abiword/abiword.xul              AbiWord XUL
@@ -39,6 +40,8 @@ This compiles `src/` into `myxul.jar`, in a second or two. There is nothing to d
 On Windows, `run.bat` does the same. Underneath it is `java -jar myxul.jar [file.xul [arguments...]]`: with no file, myxul opens the launcher, `ui/launcher.xul`, from the folder `myxul.jar` is in. Arguments after the file are the window's `window.arguments`. File paths are relative to the folder you're in.
 
 myxul exits when its last window closes.
+
+The launcher and the desktop are two ways in to the same apps. The launcher is a small window that opens each app in a window of its own; the desktop fills the screen and keeps the apps' windows on it, with a taskbar, as Skylight OS does (its **Desktop** button opens it too). There's no login for either: myxul runs as you.
 
 ![The launcher](images/launcher.png)
 

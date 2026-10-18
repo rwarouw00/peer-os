@@ -13,6 +13,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
@@ -24,6 +26,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
@@ -43,12 +46,16 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.web.WebView;
+import javafx.stage.Popup;
+import javafx.stage.PopupWindow;
 
 /**
  * Maps each XUL tag to the JavaFX object made for it, and applies XUL
@@ -109,6 +116,11 @@ final class XulRegistry {
 		builders.put("tree", this::tree);
 		builders.put("tabbox", this::tabbox);
 		builders.put("grid", this::grid);
+		builders.put("stack", this::stack);
+		builders.put("scrollbox", this::scrollbox);
+		builders.put("popupset", this::popupset);
+		builders.put("panel", this::panel);
+		builders.put("menupopup", this::menupopup);
 	}
 
 	/** The tags this engine knows, for the docs and error messages. */
@@ -160,6 +172,12 @@ final class XulRegistry {
 				for (String ignored : XulStyle.apply(e, n, e.attr("style"))) {
 					w.warn(e, "style \"" + ignored + "\" isn't supported on " + n.getClass().getSimpleName() + ", so it was ignored.");
 				}
+			}
+			if (e.attributes.containsKey("left") || e.attributes.containsKey("top")) {
+				XulBox.Stack.setPosition(n, e.number("left", Double.NaN), e.number("top", Double.NaN));
+			}
+			if (e.attributes.containsKey("context")) {
+				context(e, n);
 			}
 		} else if (node instanceof MenuItem && id != null) {
 			((MenuItem) node).setId(id);
@@ -302,9 +320,25 @@ final class XulRegistry {
 				e.window.stage.setTitle(value == null ? "" : value);
 			}
 			break;
+		case "left":
+		case "top":
+			if (node instanceof Node) {
+				XulBox.Stack.setPosition((Node) node, e.number("left", Double.NaN), e.number("top", Double.NaN));
+			}
+			break;
+		case "context":
+			if (node instanceof Node && value != null) {
+				context(e, (Node) node);
+			}
+			break;
+		case "image":
+			if (node instanceof Labeled) {
+				((Labeled) node).setGraphic(value == null || value.isEmpty() ? null : new ImageView(new Image(url(e, value))));
+			}
+			break;
 		case "src":
 			if (node instanceof ImageView && value != null) {
-				((ImageView) node).setImage(new Image(e.file.resolveSibling(value).toUri().toString()));
+				((ImageView) node).setImage(new Image(url(e, value)));
 			} else if (node instanceof WebView && value != null) {
 				((WebView) node).getEngine().load(url(e, value));
 			}
@@ -379,7 +413,10 @@ final class XulRegistry {
 	private Object labeled(Labeled node, XulElement e) {
 		setLabel(node, e.attr("label", ""), e.attr("accesskey"));
 		if (e.attributes.containsKey("image")) {
-			node.setGraphic(new ImageView(new Image(e.file.resolveSibling(e.attr("image")).toUri().toString())));
+			node.setGraphic(new ImageView(new Image(url(e, e.attr("image")))));
+		}
+		if ("vertical".equals(e.attr("orient"))) {
+			node.setContentDisplay(ContentDisplay.TOP);   // the image above the label
 		}
 		if (node instanceof CheckBox) {
 			((CheckBox) node).setSelected(e.flag("checked"));
@@ -451,7 +488,7 @@ final class XulRegistry {
 	private Object image(XulElement e, XulWindow w) {
 		ImageView view = new ImageView();
 		if (e.attributes.containsKey("src")) {
-			view.setImage(new Image(e.file.resolveSibling(e.attr("src")).toUri().toString()));
+			view.setImage(new Image(url(e, e.attr("src"))));
 		}
 		if (e.attributes.containsKey("width")) {
 			view.setFitWidth(e.number("width", 0));
@@ -656,22 +693,27 @@ final class XulRegistry {
 			popup.node = menu;
 			Map<String, ToggleGroup> groups = new HashMap<>();
 			for (XulElement child : popup.children) {
-				Object item = w.build(child);
-				if (!(item instanceof MenuItem)) {
-					throw child.error("Only <menuitem>, <menu> and <menuseparator> can go inside a menu's <menupopup>.");
-				}
-				if (item instanceof RadioMenuItem) {
-					String name = child.attr("name", "");
-					((RadioMenuItem) item).setToggleGroup(groups.computeIfAbsent(name, k -> new ToggleGroup()));
-				}
-				menu.getItems().add((MenuItem) item);
-				if (child.attributes.containsKey("accesskey") && !child.attr("accesskey").isEmpty()) {
-					((MenuItem) item).getProperties().put(XulWindow.ACCESSKEY, Character.toLowerCase(child.attr("accesskey").charAt(0)));
-				}
+				menu.getItems().add(menuItem(child, w, groups));
 			}
 		}
 		w.menus.add(menu);
 		return menu;
+	}
+
+	/** Builds one item of a menu's or a context menu's <menupopup>. */
+	private static MenuItem menuItem(XulElement child, XulWindow w, Map<String, ToggleGroup> groups) {
+		Object item = w.build(child);
+		if (!(item instanceof MenuItem)) {
+			throw child.error("Only <menuitem>, <menu> and <menuseparator> can go inside a <menupopup>.");
+		}
+		if (item instanceof RadioMenuItem) {
+			String name = child.attr("name", "");
+			((RadioMenuItem) item).setToggleGroup(groups.computeIfAbsent(name, k -> new ToggleGroup()));
+		}
+		if (child.attributes.containsKey("accesskey") && !child.attr("accesskey").isEmpty()) {
+			((MenuItem) item).getProperties().put(XulWindow.ACCESSKEY, Character.toLowerCase(child.attr("accesskey").charAt(0)));
+		}
+		return (MenuItem) item;
 	}
 
 	private Object menuitem(XulElement e, XulWindow w) {
@@ -841,5 +883,192 @@ final class XulRegistry {
 			r++;
 		}
 		return grid;
+	}
+
+	// ---- Stacks, scroll boxes, popups and context menus ----
+
+	/** <stack>: children layered, each filling it, or placed with left and top. */
+	private Object stack(XulElement e, XulWindow w) {
+		XulBox.Stack stack = new XulBox.Stack();
+		addChildren(e, w, stack.getChildren());
+		stack.getStyleClass().add("xul-stack");
+		return stack;
+	}
+
+	/** <scrollbox orient="vertical">: a box that scrolls when its children don't fit. */
+	private Object scrollbox(XulElement e, XulWindow w) {
+		boolean vertical = "vertical".equals(e.attr("orient"));
+		XulBox box = new XulBox(vertical ? Orientation.VERTICAL : Orientation.HORIZONTAL);
+		box.setAlign(e.attr("align"));
+		box.setPack(e.attr("pack"));
+		if (e.attributes.containsKey("spacing")) {
+			box.setSpacing(e.number("spacing", 0));
+		}
+		addChildren(e, w, box.getChildren());
+		ScrollPane scroll = new ScrollPane(box);
+		scroll.setFitToWidth(vertical);
+		scroll.setFitToHeight(!vertical);
+		scroll.setMinSize(0, 0);
+		scroll.getStyleClass().add("xul-scrollbox");
+		return scroll;
+	}
+
+	/** <popupset>: holds panels and context menus, and shows nothing itself. */
+	private Object popupset(XulElement e, XulWindow w) {
+		for (XulElement child : e.children) {
+			Object node = w.build(child);
+			if (!(node instanceof PopupWindow)) {
+				throw child.error("Only <panel> and <menupopup> can go inside <popupset>.");
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * <panel>: a popup holding any elements, as a box (orient="horizontal"
+	 * for a row). It closes when the user clicks outside it or presses
+	 * Escape, unless noautohide="true". Opened with openPopup().
+	 */
+	private Object panel(XulElement e, XulWindow w) {
+		XulBox content = new XulBox("horizontal".equals(e.attr("orient")) ? Orientation.HORIZONTAL : Orientation.VERTICAL);
+		content.setAlign(e.attr("align"));
+		content.setPack(e.attr("pack"));
+		if (e.attributes.containsKey("spacing")) {
+			content.setSpacing(e.number("spacing", 0));
+		}
+		addChildren(e, w, content.getChildren());
+		content.getStyleClass().add("xul-panel");
+		size(content, e);
+		if (e.attributes.containsKey("style")) {
+			for (String ignored : XulStyle.apply(e, content, e.attr("style"))) {
+				w.warn(e, "style \"" + ignored + "\" isn't supported on a panel, so it was ignored.");
+			}
+		}
+		Popup popup = new Popup();
+		popup.getContent().add(content);
+		popup.setAutoHide(!e.flag("noautohide"));
+		popup.setHideOnEscape(true);
+		popup.setAutoFix(true);
+		return popup;
+	}
+
+	/** A <menupopup> outside a <menu> or <menulist> (in a <popupset>): a context menu. */
+	private Object menupopup(XulElement e, XulWindow w) {
+		ContextMenu menu = new ContextMenu();
+		Map<String, ToggleGroup> groups = new HashMap<>();
+		for (XulElement child : e.children) {
+			menu.getItems().add(menuItem(child, w, groups));
+		}
+		w.popupMenus.add(menu);
+		return menu;
+	}
+
+	/**
+	 * context="menu-id": right-clicking the element (or the menu key) opens
+	 * that <menupopup> or <panel> at the pointer, with document.popupNode
+	 * set to the element. The id is looked up each time, so it can change.
+	 */
+	private static void context(XulElement e, Node node) {
+		final String INSTALLED = "xul-context";
+		if (node.getProperties().containsKey(INSTALLED)) {
+			return;
+		}
+		node.getProperties().put(INSTALLED, Boolean.TRUE);
+		node.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, ev -> {
+			String id = e.attr("context");
+			XulElement popup = id == null || e.window == null ? null : e.window.document.getElementById(id);
+			if (popup == null || !(popup.node instanceof PopupWindow)) {
+				if (id != null && e.window != null) {
+					e.window.warn(e, "context=\"" + id + "\" names no <menupopup> or <panel> in a <popupset>.");
+				}
+				return;
+			}
+			ev.consume();
+			e.window.document.popupNode = e;
+			((PopupWindow) popup.node).hide();
+			showPopup(popup, (PopupWindow) popup.node, node, ev.getScreenX(), ev.getScreenY());
+		});
+	}
+
+	/** Shows a panel or context menu at a point on screen, with the window's styles. */
+	static void showPopup(XulElement e, PopupWindow popup, Node owner, double x, double y) {
+		if (popup instanceof ContextMenu) {
+			((ContextMenu) popup).show(owner, x, y);
+			return;
+		}
+		Node content = ((Popup) popup).getContent().get(0);
+		if (owner.getScene() != null && popup.getScene() != null) {
+			popup.getScene().getStylesheets().setAll(owner.getScene().getStylesheets());
+		}
+		popup.show(owner, x, y);
+		content.applyCss();
+		content.autosize();   // a Popup doesn't size its content itself
+		popup.sizeToScene();
+	}
+
+	// ---- Adding and removing children after the window is built (appendChild, removeChild) ----
+
+	/** Where an element's children's JavaFX objects go: a list of Nodes, or of MenuItems. */
+	private static List<?> items(XulElement parent) {
+		Object node = parent.node;
+		if (node instanceof ToolBar) {
+			return ((ToolBar) node).getItems();
+		} else if (node instanceof ScrollPane && ((ScrollPane) node).getContent() instanceof Pane) {
+			return ((Pane) ((ScrollPane) node).getContent()).getChildren();
+		} else if (node instanceof Popup) {
+			return ((Pane) ((Popup) node).getContent().get(0)).getChildren();
+		} else if (node instanceof ContextMenu) {
+			return ((ContextMenu) node).getItems();
+		} else if (node instanceof Menu) {
+			return ((Menu) node).getItems();
+		} else if (node instanceof SplitPane || node instanceof GridPane || node instanceof TitledPane) {
+			return null;
+		} else if (node instanceof Pane) {
+			return ((Pane) node).getChildren();
+		}
+		return null;
+	}
+
+	/** Shows a child just added to parent's children (insertBefore), in its place among its siblings. */
+	@SuppressWarnings("unchecked")
+	static void insert(XulElement parent, XulElement child) {
+		List<?> items = items(parent);
+		if (items == null) {
+			throw new UnsupportedOperationException("Elements can be added to boxes, stacks, toolbars, scrollboxes, panels and menupopups, not to " + parent + ".");
+		}
+		boolean menu = parent.node instanceof ContextMenu || parent.node instanceof Menu;
+		if (child.node == null) {
+			return;   // a non-visual element: nothing to show
+		}
+		if (menu != child.node instanceof MenuItem || !menu && !(child.node instanceof Node)) {
+			throw new IllegalArgumentException(child + " can't go inside " + parent + ".");
+		}
+		int at = 0;
+		for (XulElement sibling : parent.children) {
+			if (sibling == child) {
+				break;
+			}
+			if (sibling.node != null && items.contains(sibling.node)) {
+				at++;
+			}
+		}
+		if (menu) {
+			((List<MenuItem>) items).add(at, (MenuItem) child.node);
+			if (child.attributes.containsKey("accesskey") && !child.attr("accesskey").isEmpty()) {
+				((MenuItem) child.node).getProperties().put(XulWindow.ACCESSKEY, Character.toLowerCase(child.attr("accesskey").charAt(0)));
+			}
+		} else {
+			if (parent.node instanceof ToolBar && (child.tag.equals("spacer") || child.number("flex", 0) > 0)) {
+				HBox.setHgrow((Node) child.node, Priority.ALWAYS);
+			}
+			((List<Node>) items).add(at, (Node) child.node);
+		}
+	}
+
+	static void remove(XulElement parent, XulElement child) {
+		List<?> items = items(parent);
+		if (items != null && child.node != null) {
+			items.remove(child.node);
+		}
 	}
 }

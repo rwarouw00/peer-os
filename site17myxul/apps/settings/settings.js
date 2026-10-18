@@ -1,5 +1,6 @@
 // Settings: shows the current settings, and saves changes. Settings (the
-// service) checks them and tells every window that asked, such as the launcher.
+// service) checks them and tells every window that asked, such as the launcher
+// and the desktop.
 var SettingsApp = {
     load: function () {
         this.showBackground();

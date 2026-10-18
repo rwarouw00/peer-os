@@ -1,6 +1,16 @@
 package myxul;
 
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.PopupWindow;
+import javafx.stage.WindowEvent;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ComboBox;
@@ -23,6 +33,17 @@ import javafx.scene.web.WebView;
  * with "this" as the element (see XulScriptManager).
  */
 final class XulEvents {
+
+	/** Something to run when an event happens: an attribute's compiled code, or a function given to addEventListener. */
+	interface Listener {
+		void handle(Object event);
+	}
+
+	/** Event attributes that work through listen() as well: XUL's name, and the event type. */
+	private static final String[][] LISTENED = {
+		{ "onmousedown", "mousedown" }, { "onmouseup", "mouseup" }, { "onmousemove", "mousemove" },
+		{ "oncontextmenu", "contextmenu" }, { "onpopupshown", "popupshown" }, { "onpopuphidden", "popuphidden" },
+	};
 
 	static void wire(XulElement e, Object node, XulWindow w) {
 		XulScriptManager.Handler own = handler(e, "oncommand", w);
@@ -76,6 +97,13 @@ final class XulEvents {
 		XulScriptManager.Handler out = handler(e, "onmouseout", w);
 		if (out != null && node instanceof Node) {
 			((Node) node).setOnMouseExited(ev -> out.call(e, ev));
+		}
+
+		for (String[] pair : LISTENED) {
+			XulScriptManager.Handler h = handler(e, pair[0], w);
+			if (h != null) {
+				listen(e, node, pair[1], ev -> h.call(e, ev));
+			}
 		}
 
 		if (node instanceof TextInputControl) {
@@ -155,6 +183,90 @@ final class XulEvents {
 				w.warn(e, "onselect does nothing on " + node.getClass().getSimpleName() + ".");
 			}
 		}
+	}
+
+	/**
+	 * addEventListener("command", f) and the like: calls the listener when
+	 * the element's JavaFX object sends the matching event. Returns
+	 * something that stops listening (for removeEventListener).
+	 */
+	static Runnable listen(XulElement e, Object node, String type, Listener listener) {
+		switch (type) {
+		case "command":
+			EventHandler<ActionEvent> action = listener::handle;
+			if (node instanceof ButtonBase || node instanceof ComboBox || node instanceof TextField) {
+				((Node) node).addEventHandler(ActionEvent.ACTION, action);
+				return () -> ((Node) node).removeEventHandler(ActionEvent.ACTION, action);
+			} else if (node instanceof MenuItem) {
+				((MenuItem) node).addEventHandler(ActionEvent.ACTION, action);
+				return () -> ((MenuItem) node).removeEventHandler(ActionEvent.ACTION, action);
+			}
+			throw new IllegalArgumentException("command events come from buttons, menu items, menulists and one-line textboxes, not " + e + ".");
+		case "click":
+		case "dblclick":
+			int clicks = type.equals("click") ? 1 : 2;
+			return on(e, node, type, MouseEvent.MOUSE_CLICKED, ev -> {
+				if (ev.getButton() == MouseButton.PRIMARY && ev.getClickCount() == clicks) {
+					listener.handle(ev);
+				}
+			});
+		case "mousedown":
+			return on(e, node, type, MouseEvent.MOUSE_PRESSED, listener::handle);
+		case "mouseup":
+			return on(e, node, type, MouseEvent.MOUSE_RELEASED, listener::handle);
+		case "mousemove":   // moving, and dragging (JavaFX sends those to the element the button went down on)
+			Runnable moved = on(e, node, type, MouseEvent.MOUSE_MOVED, listener::handle);
+			Runnable dragged = on(e, node, type, MouseEvent.MOUSE_DRAGGED, listener::handle);
+			return () -> {
+				moved.run();
+				dragged.run();
+			};
+		case "mouseover":
+			return on(e, node, type, MouseEvent.MOUSE_ENTERED, listener::handle);
+		case "mouseout":
+			return on(e, node, type, MouseEvent.MOUSE_EXITED, listener::handle);
+		case "contextmenu":
+			return on(e, node, type, ContextMenuEvent.CONTEXT_MENU_REQUESTED, listener::handle);
+		case "keydown":
+		case "keypress":
+			return on(e, node, type, KeyEvent.KEY_PRESSED, listener::handle);
+		case "keyup":
+			return on(e, node, type, KeyEvent.KEY_RELEASED, listener::handle);
+		case "focus":
+		case "blur":
+			if (!(node instanceof Node)) {
+				throw new IllegalArgumentException(type + " events come from elements on screen, not " + e + ".");
+			}
+			boolean gained = type.equals("focus");
+			Node n = (Node) node;
+			ChangeListener<Boolean> focus = (o, was, now) -> {
+				if (now == gained) {
+					listener.handle(new XulEvent(type, n));
+				}
+			};
+			n.focusedProperty().addListener(focus);
+			return () -> n.focusedProperty().removeListener(focus);
+		case "popupshown":
+		case "popuphidden":
+			if (!(node instanceof PopupWindow)) {
+				throw new IllegalArgumentException(type + " events come from <panel> and <menupopup>, not " + e + ".");
+			}
+			EventType<WindowEvent> windowType = type.equals("popupshown") ? WindowEvent.WINDOW_SHOWN : WindowEvent.WINDOW_HIDDEN;
+			EventHandler<WindowEvent> shown = listener::handle;
+			((PopupWindow) node).addEventHandler(windowType, shown);
+			return () -> ((PopupWindow) node).removeEventHandler(windowType, shown);
+		default:
+			throw new IllegalArgumentException("myxul has no \"" + type + "\" event: it has command, click, dblclick, mousedown, mousemove, mouseup, "
+					+ "mouseover, mouseout, contextmenu, keydown, keyup, focus, blur, popupshown and popuphidden.");
+		}
+	}
+
+	private static <T extends Event> Runnable on(XulElement e, Object node, String type, EventType<T> eventType, EventHandler<T> handler) {
+		if (!(node instanceof Node)) {
+			throw new IllegalArgumentException(type + " events come from elements on screen, not " + e + ".");
+		}
+		((Node) node).addEventHandler(eventType, handler);
+		return () -> ((Node) node).removeEventHandler(eventType, handler);
 	}
 
 	private static XulScriptManager.Handler handler(XulElement e, String attribute, XulWindow w) {

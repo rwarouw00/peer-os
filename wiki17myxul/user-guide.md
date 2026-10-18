@@ -4,9 +4,51 @@
 
 ![The launcher](images/launcher.png)
 
-`./run.sh` opens the launcher. Its buttons open **Leafpad XUL**, **AbiWord XUL**, the **Terminal**, the **Web Browser**, **Settings** and the **Gallery**, each in a window of its own; Alt with the underlined letter does the same. Behind it is the background chosen in Settings, which changes as soon as a new one is chosen. **Quit** closes the launcher. myxul exits when its last window closes, so the apps you opened stay open until you close them too.
+`./run.sh` opens the launcher. Its buttons open **Leafpad XUL**, **AbiWord XUL**, the **Terminal**, the **Web Browser**, **Settings** and the **Gallery**, each in a window of its own, and the **Desktop**; Alt with the underlined letter does the same. Behind it is the background chosen in Settings, which changes as soon as a new one is chosen. **Quit** closes the launcher. myxul exits when its last window closes, so the apps you opened stay open until you close them too.
 
 The launcher is `ui/launcher.xul`, a XUL file like the apps; add your own apps to it (see [Building your first app](building-apps.md#5-add-it-to-the-launcher)).
+
+## The desktop
+
+![The desktop, with Leafpad XUL, the Terminal and a notification](images/desktop.png)
+
+`./run.sh ui/desktop.xul` (or the launcher's **Desktop** button) opens Skylight OS's desktop, filling the screen. There's no login and no logout: myxul runs as you, so the desktop is yours as soon as it opens, and the clock shows your user name.
+
+| Part | Where | What it does |
+| --- | --- | --- |
+| Background | the whole desktop | The picture chosen in Settings; a new one shows at once |
+| Home button | top left (the grid) | Opens and closes the home menu; Alt+H does the same |
+| Taskbar | along the top, after the home button | A button for each open window, with its icon and title. The window you're working in has its button pressed. Click a button to bring its window to the front; click the front window's button to minimize it, and again to bring it back. Right-click for **Close** |
+| Clock | top right | The time, then your user name |
+| Shortcuts | top left of the background | Double-click to open the app. Drag one to move it (it stays there next time); right-click for **Open** and **Remove from desktop** |
+| Notifications | top right, below the panel | Notifications appear here, and go into the tray |
+
+### The home menu
+
+![The home menu](images/desktop-menu.png)
+
+* **Apps** shows every app in `apps/apps.txt`, four to a row, with its icon; hover for what it does, click to open it. Right-click an app for **Open** and **Add to desktop**, which gives it a shortcut.
+* **Notifications** is the notification tray: every notification since the desktop opened, newest first. The **×** beside one removes it; **Clear** removes them all. The button counts them: **Notifications (2)**.
+* The red **power button** closes every window and then the desktop. A window with unsaved changes asks first, as its close button would; if you say **Cancel**, that window comes to the front and the desktop stays.
+
+Clicking anywhere outside the menu, or Escape, closes it.
+
+![The notification tray](images/desktop-tray.png)
+
+### Windows on the desktop
+
+Every app opened on the desktop, from the home menu, a shortcut, or another app (`window.open`), gets Skylight's window frame:
+
+* **The title bar** shows the app's icon and the window's title (with Leafpad's `*` for unsaved changes). Drag it to move the window; double-click it to maximize. The window you're working in has a darker frame.
+* **Minimize** hides the window; its taskbar button brings it back. **Maximize** fills the desktop below the panel; click again to put it back. **Close** closes it as the system's close button would, so Leafpad still asks about unsaved changes.
+* **The edges** resize the window: drag the left, right or bottom edge, or a bottom corner.
+* Windows stay on the desktop: they open in a cascade from the top left, no bigger than the desktop, and can't be dragged above the panel.
+
+Keys, menus and dialogs work as they do in a window of its own: each app's window is still a window, drawn without the system's frame. See [Engine internals](engine-internals.md#the-desktop) for how.
+
+![Right-clicking a taskbar button](images/desktop-taskbar-menu.png)
+
+Settings and shortcuts are kept in `~/.myxul/settings.properties`, with the other settings. To put your own app on the desktop, see [Building your first app](building-apps.md#6-put-it-on-the-desktop).
 
 ## Leafpad XUL
 
@@ -62,7 +104,7 @@ print('This window is called ' + window.title);
 
 Ported from Skylight OS.
 
-* **Background**: click a picture (hover to see its name). The launcher's background changes at once, and is remembered; the picture in use stays pressed.
+* **Background**: click a picture (hover to see its name). The launcher's and the desktop's background changes at once, and is remembered; the picture in use stays pressed.
 * **Notifications**: how many seconds notifications stay on screen (1 to 60). Click **Save**, or press Enter; **Try one** shows one.
 
 Settings are kept in `~/.myxul/settings.properties`, for every app.
@@ -71,7 +113,7 @@ Settings are kept in `~/.myxul/settings.properties`, for every app.
 
 ![A notification](images/notification.png)
 
-Apps can post notifications (the Terminal's sample does, and so does Settings when it saves). Each appears at the top right of the screen with a header and a body, and closes itself after the time set in Settings, or when its **×** is clicked. Several stack downwards.
+Apps can post notifications (the Terminal's sample does, and so does Settings when it saves). Each appears at the top right of the screen (on the desktop, of the desktop, below its panel) with a header and a body, and closes itself after the time set in Settings, or when its **×** is clicked. Several stack downwards. On the desktop they're also kept in the home menu's notification tray.
 
 ## Web Browser
 
