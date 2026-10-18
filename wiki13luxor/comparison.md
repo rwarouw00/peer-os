@@ -102,3 +102,7 @@ They're remarkably alike: markup with ids and event names, and a script in which
 | site13luxor | A XUL file and a Python file | XUL | Python |
 
 Luxor was one of several early-2000s projects that brought Mozilla's XUL idea to Java (others included Thinlet, SwiXML and XUI); JavaFX's FXML is the same idea, built into the toolkit and still maintained. For a new desktop app in Java, FXML is the practical choice. This version shows that the design was already there twenty years ago, and that it still runs.
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

@@ -93,3 +93,7 @@ Jython reads more like the Java underneath; Tcl is a better fit for XUL's `comma
 | site11fxml, site12fxmlcouch | An FXML file | FXML and CSS | JavaScript |
 | site13luxor | A XUL file and a Python file | XUL | Python |
 | site15luxorplus | A XUL file and a Tcl file | XUL | Tcl |
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

@@ -52,3 +52,7 @@ Skylight OS now exists in three restructured forms, all with the same design and
 * **A larger runtime.** Users need a Java 8 with JavaFX (around 200 MB), and not every Java 8 includes JavaFX.
 * **A build step.** Java must be compiled; the browser and PHP versions run their source directly.
 * **Java 8 limits.** Nashorn and the bundled JavaFX were removed from later Java versions, so this code is tied to Java 8 unless it's ported (see [Limitations](limitations.md)).
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

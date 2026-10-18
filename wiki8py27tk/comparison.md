@@ -53,3 +53,7 @@ The App API keeps the same method names everywhere; in Python they're called on 
 * **Pictures.** Tk 8.5 reads only GIF and PPM, so icons are GIFs with hard edges, and backgrounds are 256-colour GIF copies unless Pillow is installed.
 * **No web page widget**, as in the PHP-GTK2 version.
 * **Python 2.7 is out of support** (since January 2020); see [Security](security.md).
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

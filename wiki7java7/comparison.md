@@ -46,3 +46,7 @@ Apps written for this version also run on site5jfx (Java 8 runs Java 7 code). Th
 * **More code.** Each one-line lambda becomes a five-line anonymous class.
 * **A platform that's long out of support.** Public updates for Java 7 ended in 2015, and its JavaFX and web engine are older still. This version suits a machine that is fixed on Java 7; for anything else, the Java 8 version is the better choice.
 * **More set-up.** JavaFX 2.2 isn't on Java 7's class path, so the scripts need `JAVA_HOME`.
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

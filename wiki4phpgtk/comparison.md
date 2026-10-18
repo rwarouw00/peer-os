@@ -59,3 +59,7 @@ The PHP-GTK2 version keeps the design of the browser version ([`../site3`](../si
 | Languages | ES5 JavaScript, HTML, CSS, PHP | PHP |
 | Code files | 51 | 35 (including images) |
 | Non-blank lines of code | 1,390 | about 1,200 (1,149 of PHP) |
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

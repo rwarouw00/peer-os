@@ -51,3 +51,7 @@ Several versions describe apps as files rather than compiled code:
 | site11fxml | An FXML file | FXML and CSS | JavaScript |
 
 site11fxml is the closest of the desktop versions to the browser one: markup for the window and JavaScript for the behaviour, but with real windows and JavaFX's controls instead of HTML.
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

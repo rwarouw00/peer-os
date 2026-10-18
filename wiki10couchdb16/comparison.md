@@ -45,3 +45,7 @@ Everything said in the [CouchDB 2.3.1 version's comparison](../wiki9couchdb/comp
 ## Which CouchDB?
 
 If you have the choice, use the 2.3.1 version, or better, CouchDB 3 with the notes in its [limitations](../wiki9couchdb/limitations.md#couchdb-3). CouchDB 1.6 is useful where it's already installed and can't be changed; even then, **1.7.2**, the last 1.x release, fixes the worst of 1.6.1's security holes and has the same API (it wasn't tested here).
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

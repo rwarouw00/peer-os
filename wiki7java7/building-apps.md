@@ -9,7 +9,7 @@ You need Skylight OS built and running; see [Getting started](getting-started.md
 ## 1. Create the folder
 
 ```
-site5jfx/apps/notes/
+site7java7/apps/notes/
 ├── app.properties
 ├── src/notes/NotesApp.java
 └── icons/16.png, 32.png, 48.png, 64.png

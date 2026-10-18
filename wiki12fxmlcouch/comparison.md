@@ -81,3 +81,7 @@ Several versions describe apps as files rather than compiled code:
 | site12fxmlcouch | An FXML file, in a CouchDB document | FXML and CSS | JavaScript |
 
 site11fxml is the closest of the desktop versions to the browser one: markup for the window and JavaScript for the behaviour, but with real windows and JavaFX's controls instead of HTML. site12fxmlcouch takes the next step the browser versions already had: since an app is only text, it can be delivered from a server like a web page, while still running as a desktop program.
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

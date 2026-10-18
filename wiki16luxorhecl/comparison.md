@@ -89,3 +89,7 @@ Hecl was made small for phones, and it shows: its Java bridge was the least fini
 | site13luxor | A XUL file and a Python file | XUL | Python |
 | site15luxorplus | A XUL file and a Tcl file | XUL | Tcl |
 | site16luxorhecl | A XUL file and a Hecl file | XUL | Hecl |
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

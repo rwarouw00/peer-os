@@ -58,3 +58,7 @@ The PHP-GTK2 version uses the same names as site3, called on `$this`.
 * **C# 5 only**, since that's what Windows' built-in compiler understands (see the [primer](winforms-primer.md#c-5-the-language-cscexe-understands)).
 * **An old web engine.** The `WebBrowser` control is Internet Explorer 11, which many sites no longer support.
 * **Less styling.** Windows Forms has no stylesheets; anything beyond the system look is drawn in code.
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).

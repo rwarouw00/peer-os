@@ -78,3 +78,7 @@ The pages are site3's, so for users and app developers the two are the same: the
 * **An administrator step for every user**, since `tools/add-user` creates the account and its database checks.
 * **Weaker password hashing by default** than the PHP version's bcrypt, until you raise CouchDB's PBKDF2 iterations.
 * **Couchapps are out of fashion.** CouchDB 3 still serves attachments and rewrites, but marks rewrites as deprecated and, by default, sends attachments with a restrictive `Content-Security-Policy` that stops pages like these from running scripts; see [Limitations](limitations.md#couchdb-3).
+
+## Notes in every version
+
+The same Notes app, written for all fourteen versions, is compared side by side in [Notes, in every version](../wikicompare/README.md).
