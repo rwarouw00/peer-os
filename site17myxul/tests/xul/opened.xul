@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test: a window opened by window.open, with arguments. -->
+<window id="opened" title="Opened" width="300" height="100"
+        onload="document.getElementById('args').value = window.arguments.join(',')"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <label id="args" value=""/>
+</window>

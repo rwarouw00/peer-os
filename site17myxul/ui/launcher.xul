@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The myxul launcher: opens the apps in apps/. It is a XUL file like any app. -->
+<window id="launcher" title="myxul" width="520" height="300"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script>
+        function launch(path) {
+            window.open(path);
+            document.getElementById("status").value = "Opened " + path;
+        }
+    </script>
+
+    <vbox flex="1" spacing="10" style="padding: 16px;">
+        <label value="myxul" style="font-size: 22px; font-weight: bold;"/>
+        <description>XUL applications on Java 8, JavaFX and Nashorn. Choose one to open:</description>
+        <grid flex="1">
+            <columns>
+                <column/>
+                <column flex="1"/>
+            </columns>
+            <rows>
+                <row align="center">
+                    <button id="open-leafpad" label="Leafpad XUL" accesskey="L" oncommand="launch('../apps/leafpad/leafpad.xul')"/>
+                    <label value="A plain-text editor, as on Lubuntu"/>
+                </row>
+                <row align="center">
+                    <button id="open-abiword" label="AbiWord XUL" accesskey="A" oncommand="launch('../apps/abiword/abiword.xul')"/>
+                    <label value="A word processor's shell: toolbars, pages, sidebar"/>
+                </row>
+                <row align="center">
+                    <button id="open-gallery" label="Gallery" accesskey="G" oncommand="launch('../apps/gallery/gallery.xul')"/>
+                    <label value="Every XUL element myxul knows, working"/>
+                </row>
+            </rows>
+        </grid>
+        <hbox align="center">
+            <label id="status" value="" flex="1" style="color: #555555;"/>
+            <button label="Quit" oncommand="window.close()"/>
+        </hbox>
+    </vbox>
+</window>

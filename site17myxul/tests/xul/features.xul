@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test: the elements, attributes and script features the reference lists
+     that the apps don't already use. -->
+<dialog id="features" title="Features test" width="600" height="420"
+        onunload="window.opener_saw = 'unloaded'"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <broadcasterset><broadcaster id="ignored"/></broadcasterset>
+    <script>
+        var seen = [];
+        function saw(what) { seen.push(what); document.getElementById("seen").value = seen.join(" "); }
+        var timer = null;
+    </script>
+    <box orient="vertical" spacing="4" style="padding: 8px;">
+        <hbox spacing="4" align="center">
+            <image id="pic" src="icon.png"/>
+            <button id="imgbtn" label="With image" image="icon.png"/>
+            <separator id="vsep"/>
+            <label id="textlabel">Text inside a label</label>
+            <description id="desc">A description's text, which wraps when it has to.</description>
+        </hbox>
+        <separator id="hsep"/>
+        <hbox spacing="4">
+            <button id="dbl" label="Double-click me" ondblclick="saw('dblclick')" onclick="saw('click')"/>
+            <button id="hover" label="Hover" onmouseover="saw('over')" onmouseout="saw('out')"/>
+            <textbox id="keys" onkeyup="saw('keyup:' + event.code)" onkeydown="saw('keydown')" onfocus="saw('focus')" onblur="saw('blur')"/>
+            <menulist id="combo" editable="true">
+                <menupopup><menuitem label="one"/><menuitem label="two"/></menupopup>
+            </menulist>
+        </hbox>
+        <progressmeter id="busy" mode="undetermined"/>
+        <hbox id="parent" class="custom-class another">
+            <label id="child1" value="first"/>
+            <label id="child2" value="second" hidden="true"/>
+        </hbox>
+        <label id="seen" value=""/>
+        <label id="later" value=""/>
+    </box>
+</dialog>

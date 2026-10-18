@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Gallery: every XUL element myxul knows, each doing something, so the
+     engine can be seen (and tested) working. -->
+<window id="gallery" title="myxul Gallery" width="860" height="640"
+        onload="Gallery.loaded()"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script src="gallery.js"/>
+
+    <commandset>
+        <command id="cmd-greet" oncommand="Gallery.greet()"/>
+    </commandset>
+    <keyset>
+        <key key="G" modifiers="accel" command="cmd-greet"/>
+    </keyset>
+
+    <menubar>
+        <menu label="Gallery" accesskey="G">
+            <menupopup>
+                <menuitem label="Say hello" accesskey="S" command="cmd-greet"/>
+                <menuitem id="greet-enabled" label="Hello enabled" type="checkbox" checked="true"
+                          oncommand="Gallery.enableGreeting(this.checked)"/>
+                <menu label="Theme">
+                    <menupopup>
+                        <menuitem label="Light" type="radio" name="theme" checked="true" oncommand="Gallery.theme('#f4f4f4')"/>
+                        <menuitem label="Sand" type="radio" name="theme" oncommand="Gallery.theme('#efe6d2')"/>
+                        <menuitem label="Sky" type="radio" name="theme" oncommand="Gallery.theme('#dde9f5')"/>
+                    </menupopup>
+                </menu>
+                <menuseparator/>
+                <menuitem label="Close" oncommand="window.close()"/>
+            </menupopup>
+        </menu>
+    </menubar>
+
+    <tabbox id="pages" flex="1" onselect="Gallery.log('tab ' + this.selectedIndex)">
+        <tabs>
+            <tab label="Boxes"/>
+            <tab label="Controls"/>
+            <tab label="Lists and trees"/>
+            <tab label="Styles"/>
+        </tabs>
+        <tabpanels flex="1">
+
+            <!-- Boxes: flex in proportion, align, pack, spacing, splitters -->
+            <tabpanel id="boxes-panel" spacing="8" style="padding: 10px;">
+                <label value="flex=&quot;1&quot;, flex=&quot;2&quot; and flex=&quot;3&quot; share the spare width 1 : 2 : 3:"/>
+                <hbox id="flex-row" spacing="4">
+                    <button id="flex1" label="flex 1" flex="1"/>
+                    <button id="flex2" label="flex 2" flex="2"/>
+                    <button id="flex3" label="flex 3" flex="3"/>
+                </hbox>
+                <hbox spacing="12">
+                    <groupbox flex="1">
+                        <caption label="pack=&quot;center&quot;"/>
+                        <hbox id="packed" pack="center" spacing="4">
+                            <button label="A"/>
+                            <button label="B"/>
+                        </hbox>
+                    </groupbox>
+                    <groupbox flex="1">
+                        <caption label="align=&quot;center&quot;"/>
+                        <hbox id="aligned" align="center" height="60" spacing="4">
+                            <button label="Short"/>
+                            <button label="Tall" height="50"/>
+                        </hbox>
+                    </groupbox>
+                    <groupbox flex="1">
+                        <caption label="maxwidth=&quot;90&quot;"/>
+                        <hbox spacing="4">
+                            <textbox id="limited" flex="1" maxwidth="90" value="at most 90"/>
+                            <textbox flex="1" value="takes the rest"/>
+                        </hbox>
+                    </groupbox>
+                </hbox>
+                <label value="A &lt;splitter&gt; between boxes makes them resizable:"/>
+                <hbox id="split-row" flex="1">
+                    <vbox flex="1" style="background-color: #e8f0e8; padding: 6px;">
+                        <label value="Left pane (flex 1)"/>
+                    </vbox>
+                    <splitter/>
+                    <vbox flex="2" style="background-color: #e8e8f4; padding: 6px;">
+                        <label value="Right pane (flex 2)"/>
+                    </vbox>
+                </hbox>
+            </tabpanel>
+
+            <!-- Controls -->
+            <tabpanel spacing="8" style="padding: 10px;">
+                <grid>
+                    <columns>
+                        <column/>
+                        <column flex="1"/>
+                    </columns>
+                    <rows>
+                        <row>
+                            <label value="Name:" accesskey="N"/>
+                            <textbox id="name" placeholder="Type a name" oninput="Gallery.nameTyped(this.value)"
+                                     onchange="Gallery.log('name changed to ' + this.value)"/>
+                        </row>
+                        <row>
+                            <label value="Password:"/>
+                            <textbox id="secret" type="password"/>
+                        </row>
+                        <row>
+                            <label value="Size:"/>
+                            <menulist id="size" oncommand="Gallery.log('size ' + this.value)">
+                                <menupopup>
+                                    <menuitem label="Small"/>
+                                    <menuitem label="Medium" selected="true"/>
+                                    <menuitem label="Large"/>
+                                </menupopup>
+                            </menulist>
+                        </row>
+                        <row>
+                            <label value="Colour:"/>
+                            <radiogroup id="colour" orient="horizontal">
+                                <radio id="red" label="Red" oncommand="Gallery.log('red')"/>
+                                <radio id="green" label="Green" checked="true" oncommand="Gallery.log('green')"/>
+                                <radio id="blue" label="Blue" oncommand="Gallery.log('blue')"/>
+                            </radiogroup>
+                        </row>
+                        <row>
+                            <label value="Progress:"/>
+                            <progressmeter id="progress" value="30"/>
+                        </row>
+                    </rows>
+                </grid>
+                <hbox spacing="6" align="center">
+                    <checkbox id="agree" label="I agree" oncommand="Gallery.agreed(this.checked)"/>
+                    <button id="greet" label="Say hello" accesskey="h" command="cmd-greet"/>
+                    <button id="more" label="More progress" oncommand="Gallery.more()" disabled="true"/>
+                    <button id="ask" label="Ask a question" oncommand="Gallery.ask()"/>
+                    <spacer flex="1"/>
+                    <label id="greeting" value="" style="font-weight: bold; color: #1b5e20;"/>
+                </hbox>
+                <description>The hello button and Ctrl+G share one &lt;command&gt;: switch "Hello enabled" off in the Gallery menu and both are disabled at once. "More progress" is enabled by the checkbox, with setAttribute("disabled", ...).</description>
+            </tabpanel>
+
+            <!-- Lists and trees -->
+            <tabpanel orient="horizontal" spacing="8" style="padding: 10px;">
+                <vbox flex="1" spacing="4">
+                    <label value="&lt;listbox&gt;, with appendItem() and removeItemAt():"/>
+                    <listbox id="fruit" flex="1" onselect="Gallery.log('picked ' + this.selectedIndex)">
+                        <listitem label="Apple"/>
+                        <listitem label="Banana" selected="true"/>
+                        <listitem label="Cherry"/>
+                    </listbox>
+                    <hbox spacing="4">
+                        <textbox id="new-fruit" flex="1" placeholder="Another fruit" oncommand="Gallery.addFruit()"/>
+                        <button label="Add" oncommand="Gallery.addFruit()"/>
+                        <button label="Remove" oncommand="Gallery.removeFruit()"/>
+                    </hbox>
+                </vbox>
+                <vbox flex="1" spacing="4">
+                    <label value="&lt;tree&gt;:"/>
+                    <tree id="places" flex="1" onselect="Gallery.log('tree row ' + this.selectedIndex)">
+                        <treecols>
+                            <treecol label="Place" flex="1"/>
+                        </treecols>
+                        <treechildren>
+                            <treeitem container="true" open="true">
+                                <treerow><treecell label="Home"/></treerow>
+                                <treechildren>
+                                    <treeitem><treerow><treecell label="Documents"/></treerow></treeitem>
+                                    <treeitem><treerow><treecell label="Music"/></treerow></treeitem>
+                                </treechildren>
+                            </treeitem>
+                            <treeitem container="true">
+                                <treerow><treecell label="Network"/></treerow>
+                                <treechildren>
+                                    <treeitem><treerow><treecell label="Printer"/></treerow></treeitem>
+                                </treechildren>
+                            </treeitem>
+                        </treechildren>
+                    </tree>
+                </vbox>
+            </tabpanel>
+
+            <!-- Styles: web CSS in style="..." translated to JavaFX -->
+            <tabpanel spacing="10" style="padding: 10px;">
+                <label value="color, font-size, font-weight, font-style, font-family:"
+                       style="color: #8b1a1a; font-size: 16px; font-weight: bold; font-style: italic; font-family: serif;"/>
+                <label value="background-color, padding, border, border-radius:"
+                       style="background-color: #fff3c4; padding: 6px 12px; border: 2px solid #c9a227; border-radius: 6px;"/>
+                <hbox spacing="10">
+                    <vbox style="background-color: white; padding: 14px; box-shadow: 3px 3px 6px rgba(0,0,0,0.35);">
+                        <label value="box-shadow"/>
+                    </vbox>
+                    <vbox style="background-color: white; padding: 14px; border-left: 4px solid #3a6ea5;">
+                        <label value="border-left"/>
+                    </vbox>
+                    <vbox style="background-color: white; padding: 14px; margin: 0 0 0 30px; opacity: 0.6;">
+                        <label value="margin and opacity"/>
+                    </vbox>
+                </hbox>
+                <label value="Not every web CSS property has a JavaFX equivalent; those are ignored with a warning, such as this text-shadow:"
+                       style="text-shadow: 1px 1px 2px gray;"/>
+                <hbox spacing="6" align="center">
+                    <button label="Restyle the box below from a script" oncommand="Gallery.restyle()"/>
+                </hbox>
+                <vbox id="restyled" style="background-color: #e0e0e0; padding: 10px;">
+                    <label id="restyled-label" value="setAttribute(&quot;style&quot;, ...) changes this"/>
+                </vbox>
+            </tabpanel>
+        </tabpanels>
+    </tabbox>
+
+    <statusbar>
+        <statusbarpanel id="log" label="Ready" flex="1"/>
+        <statusbarpanel id="clock" label=""/>
+    </statusbar>
+</window>

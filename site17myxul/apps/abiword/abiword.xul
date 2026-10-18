@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xul-service NativeFileService myxul.service.FileService?>
+<?xul-service AbiCoreEngine myxul.service.PageView?>
+<!-- AbiWord XUL: the shell of a word processor (toolbars, page view, sidebar,
+     status bar) in the layout of the design spec. abiword.js is its logic;
+     AbiCoreEngine (myxul.service.PageView) lays out and paints the pages. -->
+<window id="abiword-xul" title="Untitled - AbiWord XUL" width="1000" height="700"
+        onload="FileController.start()"
+        onclose="return FileController.canClose()"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script src="abiword.js"/>
+
+    <keyset>
+        <key key="N" modifiers="accel" command="cmd-new"/>
+        <key key="O" modifiers="accel" command="cmd-open"/>
+        <key key="S" modifiers="accel" command="cmd-save"/>
+        <key key="B" modifiers="accel" oncommand="FormatController.toggleBold()"/>
+        <key key="I" modifiers="accel" oncommand="FormatController.toggleItalic()"/>
+    </keyset>
+
+    <commandset>
+        <command id="cmd-new" oncommand="FileController.newDoc()"/>
+        <command id="cmd-open" oncommand="FileController.openDoc()"/>
+        <command id="cmd-save" oncommand="FileController.saveDoc()"/>
+    </commandset>
+
+    <!-- Top formatting toolbars -->
+    <toolbox>
+        <toolbar id="main-toolbar">
+            <toolbarbutton id="cmd-new-btn" label="New" command="cmd-new" tooltiptext="New document (Ctrl+N)"/>
+            <toolbarbutton id="cmd-open-btn" label="Open" command="cmd-open" tooltiptext="Open a text file (Ctrl+O)"/>
+            <toolbarbutton id="cmd-save-btn" label="Save" command="cmd-save" tooltiptext="Save as text (Ctrl+S)"/>
+            <toolbarseparator/>
+            <toolbarbutton id="cmd-bold" label="B" type="checkbox" tooltiptext="Bold (Ctrl+B)"
+                           oncommand="FormatController.toggleBold()" style="font-weight: bold;"/>
+            <toolbarbutton id="cmd-italic" label="I" type="checkbox" tooltiptext="Italic (Ctrl+I)"
+                           oncommand="FormatController.toggleItalic()" style="font-style: italic;"/>
+            <toolbarseparator/>
+            <menulist id="font-size" oncommand="FormatController.setSize(this.value)" tooltiptext="Font size">
+                <menupopup>
+                    <menuitem label="12"/>
+                    <menuitem label="14"/>
+                    <menuitem label="16" selected="true"/>
+                    <menuitem label="20"/>
+                    <menuitem label="24"/>
+                </menupopup>
+            </menulist>
+            <spacer flex="1"/>
+            <toolbarbutton id="cmd-sidebar" label="Sidebar" type="checkbox" checked="true"
+                           oncommand="FormatController.toggleSidebar(this.checked)"/>
+        </toolbar>
+    </toolbox>
+
+    <!-- Main workspace: the document, a splitter, and the sidebar -->
+    <hbox flex="1">
+        <!-- The central document viewport: AbiCoreEngine paints the pages here -->
+        <canvas id="document-canvas" flex="3" style="background-color: #808080;"/>
+
+        <splitter id="sidebar-splitter"/>
+
+        <!-- Sidebar for the document outline and styles -->
+        <vbox id="sidebar" flex="1" minwidth="180" style="border-left: 1px solid #cccccc;">
+            <tabbox flex="1">
+                <tabs>
+                    <tab label="Navigator"/>
+                    <tab label="Styles"/>
+                </tabs>
+                <tabpanels flex="1">
+                    <tabpanel>
+                        <description>Headings in the document:</description>
+                        <tree id="outline-tree" flex="1"/>
+                    </tabpanel>
+                    <tabpanel>
+                        <description>Style of the paragraph you're typing:</description>
+                        <listbox id="style-list" flex="1" onselect="FormatController.styleChosen(this)">
+                            <listitem label="Normal" selected="true"/>
+                            <listitem label="Heading 1"/>
+                            <listitem label="Heading 2"/>
+                        </listbox>
+                    </tabpanel>
+                </tabpanels>
+            </tabbox>
+        </vbox>
+    </hbox>
+
+    <!-- Status bar at the bottom -->
+    <statusbar>
+        <statusbarpanel id="status-page" label="Page 1 of 1"/>
+        <statusbarpanel id="status-words" label="0 words"/>
+        <statusbarpanel id="status-style" label="Normal" flex="1"/>
+        <statusbarpanel id="status-mode" label="INS"/>
+    </statusbar>
+</window>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <vbox>
+    <blink label="Not a XUL tag"/>
+  </vbox>
+</window>

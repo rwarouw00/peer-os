@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<?xul-service Files java.io.File?>
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <label value="x"/>
+</window>

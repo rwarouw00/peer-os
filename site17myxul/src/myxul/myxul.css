@@ -1,0 +1,18 @@
+/* myxul's default look for XUL elements JavaFX has no control for. */
+
+.xul-statusbar {
+	-fx-padding: 2 4 2 4;
+	-fx-border-color: #c8c8c8 transparent transparent transparent;
+	-fx-border-width: 1 0 0 0;
+	-fx-background-color: #f0f0f0;
+}
+
+.xul-statusbarpanel {
+	-fx-padding: 1 6 1 6;
+	-fx-border-color: transparent #c8c8c8 transparent transparent;
+	-fx-border-width: 0 1 0 0;
+}
+
+.xul-toolbarbutton {
+	-fx-padding: 3 8 3 8;
+}

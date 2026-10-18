@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test: a Komodo-style IDE workbench (written for myxul in the style of
+     Komodo Edit's komodo.xul, not copied from it): a file tree, an editor
+     area with tabs, a bottom pane, all resizable with splitters. -->
+<window id="komodo-test" title="Workbench test" width="900" height="600"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <script>
+        function opened(tree) {
+            var row = tree.selectedIndex;
+            document.getElementById("output").appendText("selected row " + row + "\n");
+        }
+    </script>
+    <hbox id="workspace" flex="1">
+        <vbox id="workspace_left_area" flex="1" minwidth="120">
+            <label value="Places"/>
+            <tree id="places-files-tree" flex="1" onselect="opened(this)">
+                <treecols><treecol label="Name" flex="1"/></treecols>
+                <treechildren>
+                    <treeitem container="true" open="true">
+                        <treerow><treecell label="project"/></treerow>
+                        <treechildren>
+                            <treeitem><treerow><treecell label="main.py"/></treerow></treeitem>
+                            <treeitem><treerow><treecell label="util.py"/></treerow></treeitem>
+                            <treeitem container="true">
+                                <treerow><treecell label="tests"/></treerow>
+                                <treechildren>
+                                    <treeitem><treerow><treecell label="test_main.py"/></treerow></treeitem>
+                                </treechildren>
+                            </treeitem>
+                        </treechildren>
+                    </treeitem>
+                </treechildren>
+            </tree>
+        </vbox>
+        <splitter id="workspace_left_splitter"/>
+        <vbox id="workspace_center" flex="4">
+            <tabbox id="editor-tabbox" flex="3">
+                <tabs>
+                    <tab label="main.py"/>
+                    <tab label="util.py"/>
+                </tabs>
+                <tabpanels flex="1">
+                    <tabpanel><textbox id="editor-main" multiline="true" flex="1" wrap="off" value="print('hello')" style="font-family: monospace;"/></tabpanel>
+                    <tabpanel><textbox id="editor-util" multiline="true" flex="1" wrap="off" value="def helper(): pass" style="font-family: monospace;"/></tabpanel>
+                </tabpanels>
+            </tabbox>
+        </vbox>
+        <splitter id="workspace_right_splitter"/>
+        <vbox id="workspace_right_area" flex="1" minwidth="120">
+            <label value="Toolbox"/>
+            <listbox id="toolbox-list" flex="1">
+                <listitem label="Run"/>
+                <listitem label="Debug"/>
+            </listbox>
+        </vbox>
+    </hbox>
+    <vbox id="workspace_bottom_area" height="120">
+        <tabbox flex="1">
+            <tabs><tab label="Output"/><tab label="Find Results"/></tabs>
+            <tabpanels flex="1">
+                <tabpanel><textbox id="output" multiline="true" readonly="true" flex="1"/></tabpanel>
+                <tabpanel><description>No results.</description></tabpanel>
+            </tabpanels>
+        </tabbox>
+    </vbox>
+    <statusbar id="statusbar">
+        <statusbarpanel id="statusbar-message" label="Ready" flex="1"/>
+        <statusbarpanel id="statusbar-position" label="Ln 1, Col 1"/>
+    </statusbar>
+</window>

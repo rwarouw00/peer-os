@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test: a Composer-style formatting toolbar (written for myxul in the
+     style of SeaMonkey Composer's editor chrome, not copied from it).
+     Stage 1 of the design spec: core layout. Stage 2: command="cmd_bold"
+     hooks, which in Mozilla went to XPCOM, here go to <command> elements
+     running JavaScript. -->
+<window id="composer-test" title="Composer toolbar test" width="700" height="260"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <script>
+        var state = { bold: false, italic: false, size: "medium" };
+        function toggle(what) {
+            state[what] = !state[what];
+            document.getElementById("format-state").value = "bold=" + state.bold + " italic=" + state.italic + " size=" + state.size;
+        }
+    </script>
+    <commandset id="composerStyleMenuItems">
+        <command id="cmd_bold" oncommand="toggle('bold')"/>
+        <command id="cmd_italic" oncommand="toggle('italic')"/>
+        <command id="cmd_underline" disabled="true" oncommand="toggle('underline')"/>
+    </commandset>
+    <toolbox id="EditorToolbox">
+        <toolbar id="FormatToolbar" class="toolbar-primary">
+            <hbox align="center" flex="1">
+                <toolbarbutton id="bold-btn" label="Bold" tooltiptext="Bold Text" command="cmd_bold"/>
+                <toolbarbutton id="italic-btn" label="Italic" tooltiptext="Italic Text" command="cmd_italic"/>
+                <toolbarbutton id="underline-btn" label="Underline" tooltiptext="Underline (not available)" command="cmd_underline"/>
+                <vbox flex="2">
+                    <label value="Font Size:"/>
+                    <menulist id="FontSizeSelect" oncommand="state.size = this.value; toggle('none')">
+                        <menupopup>
+                            <menuitem label="small"/>
+                            <menuitem label="medium" selected="true"/>
+                            <menuitem label="large"/>
+                        </menupopup>
+                    </menulist>
+                </vbox>
+            </hbox>
+        </toolbar>
+    </toolbox>
+    <vbox flex="1" style="padding: 8px;">
+        <label id="format-state" value="bold=false italic=false size=medium"/>
+        <hbox>
+            <spacer flex="1"/>
+            <button id="close-btn" label="Close" oncommand="window.close();"/>
+        </hbox>
+    </vbox>
+</window>

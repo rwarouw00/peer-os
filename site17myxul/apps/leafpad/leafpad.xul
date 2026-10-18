@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xul-service NativeFileService myxul.service.FileService?>
+<!-- Leafpad XUL: a plain-text editor in the spirit of Lubuntu's Leafpad.
+     The window is this file; what it does is leafpad.js. -->
+<window id="leafpad-xul" title="Untitled - Leafpad XUL" width="640" height="480"
+        onload="EditorController.start()"
+        onclose="return EditorController.canClose()"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script src="leafpad.js"/>
+
+    <keyset>
+        <key id="key-new" key="N" modifiers="accel"/>
+        <key id="key-open" key="O" modifiers="accel"/>
+        <key id="key-save" key="S" modifiers="accel"/>
+        <key id="key-save-as" key="S" modifiers="accel shift"/>
+        <key id="key-quit" key="Q" modifiers="accel"/>
+        <key id="key-find" key="F" modifiers="accel"/>
+        <key id="key-find-next" keycode="VK_F3"/>
+    </keyset>
+
+    <commandset>
+        <command id="cmd-new" oncommand="EditorController.newFile()"/>
+        <command id="cmd-open" oncommand="EditorController.openFile()"/>
+        <command id="cmd-save" oncommand="EditorController.saveFile()"/>
+        <command id="cmd-save-as" oncommand="EditorController.saveFileAs()"/>
+        <command id="cmd-quit" oncommand="EditorController.quit()"/>
+        <command id="cmd-find" oncommand="EditorController.find()"/>
+        <command id="cmd-find-next" oncommand="EditorController.findNext()"/>
+    </commandset>
+
+    <menubar id="main-menubar">
+        <menu label="File" accesskey="F">
+            <menupopup>
+                <menuitem label="New" accesskey="N" key="key-new" command="cmd-new"/>
+                <menuitem label="Open..." accesskey="O" key="key-open" command="cmd-open"/>
+                <menuitem label="Save" accesskey="S" key="key-save" command="cmd-save"/>
+                <menuitem label="Save As..." accesskey="A" key="key-save-as" command="cmd-save-as"/>
+                <menuseparator/>
+                <menuitem label="Quit" accesskey="Q" key="key-quit" command="cmd-quit"/>
+            </menupopup>
+        </menu>
+        <menu label="Edit" accesskey="E">
+            <menupopup>
+                <menuitem label="Undo" accesskey="U" oncommand="EditorController.text().undo()"/>
+                <menuitem label="Redo" accesskey="R" oncommand="EditorController.text().redo()"/>
+                <menuseparator/>
+                <menuitem label="Cut" accesskey="t" oncommand="document.getElementById('editor-textarea').cut()"/>
+                <menuitem label="Copy" accesskey="C" oncommand="document.getElementById('editor-textarea').copy()"/>
+                <menuitem label="Paste" accesskey="P" oncommand="document.getElementById('editor-textarea').paste()"/>
+                <menuitem label="Delete" accesskey="D" oncommand="document.getElementById('editor-textarea').replaceSelection('')"/>
+                <menuseparator/>
+                <menuitem label="Select All" accesskey="A" oncommand="document.getElementById('editor-textarea').selectAll()"/>
+            </menupopup>
+        </menu>
+        <menu label="Search" accesskey="S">
+            <menupopup>
+                <menuitem label="Find..." accesskey="F" key="key-find" command="cmd-find"/>
+                <menuitem label="Find Next" accesskey="N" key="key-find-next" command="cmd-find-next"/>
+                <menuitem label="Jump To..." accesskey="J" oncommand="EditorController.jumpTo()"/>
+            </menupopup>
+        </menu>
+        <menu label="Options" accesskey="O">
+            <menupopup>
+                <menuitem id="opt-wrap" label="Word Wrap" accesskey="W" type="checkbox" checked="true"
+                          oncommand="EditorController.setWrap(this.checked)"/>
+                <menuitem id="opt-mono" label="Monospace Font" accesskey="M" type="checkbox" checked="true"
+                          oncommand="EditorController.setMonospace(this.checked)"/>
+            </menupopup>
+        </menu>
+        <menu label="Help" accesskey="H">
+            <menupopup>
+                <menuitem label="About" accesskey="A" oncommand="EditorController.about()"/>
+            </menupopup>
+        </menu>
+    </menubar>
+
+    <!-- The core text window: a JavaFX TextArea. -->
+    <vbox flex="1">
+        <textbox id="editor-textarea" multiline="true" flex="1" wrap="true"
+                 oninput="EditorController.markModified()"
+                 style="font-family: monospace; font-size: 14px;"/>
+    </vbox>
+
+</window>
