@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xul-service Settings myxul.service.SettingsService?>
+<?xul-service Notifications myxul.service.NotificationService?>
+<!-- Settings: the launcher's background, and how long notifications stay on
+     screen. Ported from Skylight OS's Settings; settings.js is its logic. -->
+<window id="settings" title="Settings" width="500" height="390"
+        onload="SettingsApp.load()"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script src="settings.js"/>
+
+    <vbox flex="1" spacing="10" style="padding: 14px;">
+        <label value="Background" style="font-size: 14px; font-weight: bold;"/>
+        <description>The picture behind the launcher. It changes as soon as you choose one.</description>
+        <grid spacing="8">
+            <columns><column/><column/><column/></columns>
+            <rows>
+                <row>
+                    <toolbarbutton id="bg1" type="checkbox" image="../../images/backgrounds/thumbs/1.jpg" tooltiptext="Waterfall" oncommand="SettingsApp.choose(1)"/>
+                    <toolbarbutton id="bg2" type="checkbox" image="../../images/backgrounds/thumbs/2.jpg" tooltiptext="Coast" oncommand="SettingsApp.choose(2)"/>
+                    <toolbarbutton id="bg3" type="checkbox" image="../../images/backgrounds/thumbs/3.jpg" tooltiptext="Planet" oncommand="SettingsApp.choose(3)"/>
+                </row>
+                <row>
+                    <toolbarbutton id="bg4" type="checkbox" image="../../images/backgrounds/thumbs/4.jpg" tooltiptext="Palace" oncommand="SettingsApp.choose(4)"/>
+                    <toolbarbutton id="bg5" type="checkbox" image="../../images/backgrounds/thumbs/5.jpg" tooltiptext="Castle" oncommand="SettingsApp.choose(5)"/>
+                    <toolbarbutton id="bg6" type="checkbox" image="../../images/backgrounds/thumbs/6.jpg" tooltiptext="Forest" oncommand="SettingsApp.choose(6)"/>
+                </row>
+            </rows>
+        </grid>
+
+        <label value="Notifications" style="font-size: 14px; font-weight: bold; padding: 6px 0 0 0;"/>
+        <hbox spacing="8" align="center">
+            <label value="Show notifications for"/>
+            <textbox id="seconds" size="3" oncommand="SettingsApp.saveTime()"/>
+            <label value="seconds"/>
+            <button id="save-time" label="Save" accesskey="S" oncommand="SettingsApp.saveTime()"/>
+            <button id="try" label="Try one" accesskey="T" oncommand="Notifications.post('Settings', 'This is how long notifications stay.')"/>
+        </hbox>
+        <spacer flex="1"/>
+    </vbox>
+</window>

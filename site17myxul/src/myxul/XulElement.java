@@ -22,6 +22,8 @@ import javafx.scene.control.TreeView;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.RadioMenuItem;
+import javafx.scene.web.WebHistory;
+import javafx.scene.web.WebView;
 
 /**
  * One element of a XUL file: its tag, attributes and children as parsed, and,
@@ -39,12 +41,14 @@ public final class XulElement {
 	private static final Set<String> METHODS = new HashSet<>(Arrays.asList(
 			"getAttribute", "setAttribute", "removeAttribute", "hasAttribute",
 			"appendItem", "removeItemAt", "getRowCount", "clearItems", "focus",
-			"getElementsByTagName"));
+			"getElementsByTagName", "loadURI", "goBack", "goForward", "reload", "stop",
+			"canGoBack", "canGoForward"));
 
 	/** XUL properties scripts can read and set: el.value, el.checked = true. */
 	private static final Set<String> PROPERTIES = new HashSet<>(Arrays.asList(
 			"id", "tagName", "localName", "node", "value", "label", "checked", "disabled",
-			"hidden", "collapsed", "selectedIndex", "parentNode", "childNodes", "textContent"));
+			"hidden", "collapsed", "selectedIndex", "parentNode", "childNodes", "textContent",
+			"currentURI", "contentTitle"));
 
 	final String tag;
 	final Map<String, String> attributes = new LinkedHashMap<>();
@@ -214,6 +218,10 @@ public final class XulElement {
 			return "true".equals(getAttribute(name));
 		case "selectedIndex":
 			return selectedIndex();
+		case "currentURI":
+			return node instanceof WebView ? ((WebView) node).getEngine().getLocation() : null;
+		case "contentTitle":
+			return node instanceof WebView ? ((WebView) node).getEngine().getTitle() : null;
 		default:
 			return getAttribute(name);
 		}
@@ -230,6 +238,8 @@ public final class XulElement {
 		case "node":
 		case "parentNode":
 		case "childNodes":
+		case "currentURI":
+		case "contentTitle":
 			throw new IllegalArgumentException(name + " can't be changed.");
 		case "textContent":
 			text = String.valueOf(value);
@@ -250,6 +260,49 @@ public final class XulElement {
 		List<XulElement> found = new ArrayList<>();
 		collect(name, found);
 		return found;
+	}
+
+	// ---- <browser>: XUL's loadURI, goBack, goForward, reload, stop, canGoBack, canGoForward ----
+
+	private WebView browser(String method) {
+		if (!(node instanceof WebView)) {
+			throw new UnsupportedOperationException(method + " works on <browser>, not <" + tag + ">.");
+		}
+		return (WebView) node;
+	}
+
+	/** Loads a page: a URL, or a file relative to the .xul file. */
+	public void loadURI(String uri) {
+		browser("loadURI").getEngine().load(XulRegistry.url(this, uri));
+	}
+
+	public void goBack() {
+		if (canGoBack()) {
+			browser("goBack").getEngine().getHistory().go(-1);
+		}
+	}
+
+	public void goForward() {
+		if (canGoForward()) {
+			browser("goForward").getEngine().getHistory().go(1);
+		}
+	}
+
+	public void reload() {
+		browser("reload").getEngine().reload();
+	}
+
+	public void stop() {
+		browser("stop").getEngine().getLoadWorker().cancel();
+	}
+
+	public boolean canGoBack() {
+		return browser("canGoBack").getEngine().getHistory().getCurrentIndex() > 0;
+	}
+
+	public boolean canGoForward() {
+		WebHistory history = browser("canGoForward").getEngine().getHistory();
+		return history.getCurrentIndex() < history.getEntries().size() - 1;
 	}
 
 	// ---- Lists and trees: XUL's listbox.appendItem(label), and the same for menulist and tree ----

@@ -69,6 +69,24 @@ final class XulStyle {
 			}
 			out.fx.append("-fx-background-color: ").append(value).append(";");
 			return true;
+		case "background-image":
+			if (!region) {
+				return false;
+			}
+			Matcher u = Pattern.compile("url\\(\\s*[\"']?([^\"')]*)[\"']?\\s*\\)").matcher(value);
+			if (!u.find()) {
+				return value.trim().equals("none") && out.fx.append("-fx-background-image: null;").length() > 0;
+			}
+			out.fx.append("-fx-background-image: url(\"").append(XulRegistry.url(element, u.group(1))).append("\");");
+			return true;
+		case "background-size":
+		case "background-position":
+		case "background-repeat":
+			if (!region) {
+				return false;
+			}
+			out.fx.append("-fx-").append(name).append(": ").append(value).append(";");
+			return true;
 		case "font-family":
 			out.fx.append("-fx-font-family: ").append(fontFamily(value)).append(";");
 			return true;

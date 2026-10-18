@@ -47,8 +47,20 @@ FXML's tags are JavaFX classes and its attributes their properties, so an FXML f
 | Shared actions | Code | `<command>` and `<key>` elements |
 | Styles | JavaFX CSS (`-fx-...`), inline or in stylesheets | Web CSS inline, translated; no stylesheets |
 | Script engine | One Nashorn engine per FXML load, with full Java access | One per window, limited to JavaFX's UI classes, with files through services |
-| Parser | JavaFX's `FXMLLoader` | myxul's own, about 3,000 lines in all |
+| Parser | JavaFX's `FXMLLoader` | myxul's own, about 3,800 lines in all |
 | Error messages | `FXMLLoader`'s exceptions | The file, line and reason for every mistake |
+
+## Skylight OS's apps, from FXML to XUL
+
+The Terminal, Settings and Web Browser were ported from site11fxml's FXML versions, keeping what they do:
+
+| App | FXML (site11fxml), non-blank lines | XUL (myxul), non-blank lines | What changed |
+| --- | --- | --- | --- |
+| Terminal | 47 (`app.fxml`, `terminal.js`) | 61 (`terminal.xul`, `terminal.js`) | The same run logic (indirect `eval`, `print` captured). The XUL version adds Ctrl+Enter and Ctrl+L as `<key>`s, and a start-up sample |
+| Settings | 62 (`app.fxml` with its script inside) | 70 (`settings.xul`, `settings.js`) | `ToggleButton`s in a `ToggleGroup` became `<toolbarbutton type="checkbox">`s kept in step by the script; the `Spinner` became a text box checked by the script and by `SettingsService`; a **Try one** button. The background is the launcher's, not a desktop's |
+| Web Browser | 40 (`app.fxml` with its script inside) | 90 (`browser.xul`, `browser.js`) | FXML's script used the `WebEngine` directly; the XUL version uses `<browser>`'s XUL methods and events, and adds Stop, Home, keys, a status bar, buttons that disable when there's no history, and the page title in the window's |
+
+FXML's scripts can reach any Java class, which kept them short (the Web Browser's listens to the `WebEngine` itself); myxul's reach Java only through elements and services, so a little more is written out, and more was added.
 
 ## When to use which
 

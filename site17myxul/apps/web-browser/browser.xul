@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Web Browser: XUL's <browser>, which myxul makes a JavaFX WebView (WebKit),
+     with back, forward, reload, stop and an address bar. Ported from
+     Skylight OS's Web Browser; browser.js is its logic. -->
+<window id="web-browser" title="Web Browser" width="900" height="640"
+        onload="Browser.start()"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script src="browser.js"/>
+
+    <keyset>
+        <key keycode="VK_F5" oncommand="Browser.reload()"/>
+        <key keycode="VK_LEFT" modifiers="alt" oncommand="Browser.back()"/>
+        <key keycode="VK_RIGHT" modifiers="alt" oncommand="Browser.forward()"/>
+        <key key="L" modifiers="accel" oncommand="Browser.focusAddress()"/>
+    </keyset>
+
+    <toolbar>
+        <toolbarbutton id="back" label="◀" tooltiptext="Back (Alt+Left)" oncommand="Browser.back()" disabled="true"/>
+        <toolbarbutton id="forward" label="▶" tooltiptext="Forward (Alt+Right)" oncommand="Browser.forward()" disabled="true"/>
+        <toolbarbutton id="reload" label="↻" tooltiptext="Reload (F5)" oncommand="Browser.reload()"/>
+        <toolbarbutton id="stop" label="✕" tooltiptext="Stop" oncommand="Browser.stop()" disabled="true"/>
+        <toolbarbutton id="home" label="Home" tooltiptext="The start page" oncommand="Browser.home()"/>
+        <textbox id="address" flex="1" placeholder="Type an address and press Enter" oncommand="Browser.go()"/>
+        <toolbarbutton label="Go" oncommand="Browser.go()"/>
+    </toolbar>
+
+    <browser id="page" flex="1" src="start.html"
+             onlocationchange="Browser.started()"
+             onload="Browser.loaded()"
+             onerror="Browser.failed()"/>
+
+    <statusbar>
+        <statusbarpanel id="status" label="" flex="1"/>
+    </statusbar>
+</window>

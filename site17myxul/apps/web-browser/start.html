@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>myxul Web Browser</title>
+<style>
+  body { font-family: sans-serif; color: #333; margin: 40px; max-width: 640px; }
+  h1 { font-size: 22px; color: #3a6ea5; }
+  code { background: #eef2f7; padding: 1px 4px; border-radius: 3px; }
+  .box { border: 1px solid #c9d6e6; border-radius: 6px; padding: 12px 16px; background: linear-gradient(#ffffff, #f2f6fb); }
+</style>
+</head>
+<body>
+<h1>myxul Web Browser</h1>
+<div class="box">
+<p>This window is a XUL app: a <code>&lt;toolbar&gt;</code>, a <code>&lt;textbox&gt;</code> and a
+<code>&lt;browser&gt;</code>, steered by JavaScript in <code>browser.js</code>.</p>
+<p>The page itself is drawn by JavaFX's <code>WebView</code>, a WebKit browser: it runs JavaScript and
+modern CSS. <span id="js">JavaScript isn't running.</span></p>
+</div>
+<p>Type an address above and press Enter.</p>
+<script>document.getElementById("js").textContent = "This sentence was written by the page's own JavaScript.";</script>
+</body>
+</html>

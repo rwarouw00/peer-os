@@ -7,5 +7,7 @@
   * scripts can still call any public method of the Java objects they're given, including the JavaFX controls, and through them reach other objects (a control's scene, its window).
 * **Services are only myxul's own.** `<?xul-service?>` can name only classes in the `myxul.service` package that implement `XulService`, so a XUL file can't make an arbitrary Java object (`<?xul-service F java.io.File?>` is refused).
 * **No DOCTYPEs.** The XML parser refuses DOCTYPE declarations, so a XUL file can't use external entities to pull another file's contents into the window (`<!ENTITY secret SYSTEM "file:///etc/hostname">` is refused), and has secure processing on.
+* **Web pages run in WebKit, not in myxul.** A page shown in a `<browser>` runs its JavaScript in JavaFX's `WebView`, which can't reach the XUL window's scripts or services. The XUL window's scripts can reach the page (through the `WebView`), not the other way round. A `<browser>` can show any URL it's given, including `file:` URLs of the user's files.
+* **Settings are shared.** Every app with the `Settings` service can change the launcher's background and the notification time, though only to the values Settings allows.
 * **Errors are shown, not hidden**, including the file and line, which can reveal a path.
 * **Java 8 and JavaFX 8 are old.** Use an up-to-date Java 8 build (OpenJDK 8 still gets security updates from several vendors); the test machine had 8u504.

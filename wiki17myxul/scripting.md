@@ -43,6 +43,7 @@ var area = note.node;                           // the TextArea itself
 | `parentNode`, `childNodes` | The parent element, and an array of the children |
 | `textContent` | The text inside the element in the XUL file |
 | `node` | The JavaFX object (a `Node`, or a `MenuItem` or `Tab`) |
+| `currentURI`, `contentTitle` | A `<browser>`'s page address and title (read only) |
 
 | Method | |
 | --- | --- |
@@ -50,6 +51,7 @@ var area = note.node;                           // the TextArea itself
 | `setAttribute(name, value)` | Sets it and applies it: `label`, `value`, `disabled`, `checked`, `hidden`, `collapsed`, `tooltiptext`, `style`, `flex`, `src`, `mode`, `title` (on the window). Others are kept for scripts to read |
 | `removeAttribute(name)`, `hasAttribute(name)` | |
 | `appendItem(label)`, `removeItemAt(index)`, `getRowCount()`, `clearItems()` | Rows of a listbox, menulist or tree (a tree's new rows are top-level). `appendItem`, `removeItemAt` and `getRowCount` are XUL's; `clearItems` is myxul's |
+| `loadURI(uri)`, `goBack()`, `goForward()`, `reload()`, `stop()`, `canGoBack()`, `canGoForward()` | A `<browser>`'s, as in XUL. `loadURI` takes a URL, or a file relative to the .xul file |
 | `focus()` | Gives the control the keyboard focus |
 | `getElementsByTagName(tag)` | Elements inside this one |
 
@@ -111,6 +113,21 @@ The window's scripts then have a global `NativeFileService`, whose public method
 | `getDataFile(name)` | A file of this app's own: `~/.myxul/<app folder>/name` (the folder is made) |
 
 `readFile` and `writeFile` throw with a readable reason: `the folder /x doesn't exist`, `there is no such file`, `permission denied`.
+
+### Settings (`myxul.service.SettingsService`)
+
+myxul's own settings, shared by every app, in `~/.myxul/settings.properties` (or the folder `-Dmyxul.data` names).
+
+| Method | |
+| --- | --- |
+| `getBackground()`, `setBackground(path)` | The launcher's picture: one of `getBackgrounds()`, such as `images/backgrounds/3.jpg` |
+| `getBackgroundURL()` | The same, as a URL for `background-image: url(...)` |
+| `getNotificationTime()`, `setNotificationTime(ms)` | How long notifications stay: 1000 to 60000 milliseconds, or it throws `Notifications can stay for 1 to 60 seconds.` |
+| `setOnChange(function)` | Calls the function whenever any window saves a setting (the launcher uses it to repaint); forgotten when the window closes |
+
+### Notifications (`myxul.service.NotificationService`)
+
+`post(header)` or `post(header, body)` shows a notification at the top right of the screen for the time set in Settings.
 
 ### AbiCoreEngine (`myxul.service.PageView`)
 

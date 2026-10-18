@@ -4,7 +4,7 @@
 
 ![The launcher](images/launcher.png)
 
-`./run.sh` opens the launcher. Its buttons open **Leafpad XUL**, **AbiWord XUL** and the **Gallery**, each in a window of its own; Alt with the underlined letter does the same. **Quit** closes the launcher. myxul exits when its last window closes, so the apps you opened stay open until you close them too.
+`./run.sh` opens the launcher. Its buttons open **Leafpad XUL**, **AbiWord XUL**, the **Terminal**, the **Web Browser**, **Settings** and the **Gallery**, each in a window of its own; Alt with the underlined letter does the same. Behind it is the background chosen in Settings, which changes as soon as a new one is chosen. **Quit** closes the launcher. myxul exits when its last window closes, so the apps you opened stay open until you close them too.
 
 The launcher is `ui/launcher.xul`, a XUL file like the apps; add your own apps to it (see [Building your first app](building-apps.md#5-add-it-to-the-launcher)).
 
@@ -41,6 +41,47 @@ The shell of a word processor: the layout of a real one, around a simple documen
 * **Sidebar** hides and shows the sidebar; the splitter between the page and the sidebar can be dragged.
 * The **status bar** shows the number of pages, words, and the current paragraph's style.
 * **New**, **Open** and **Save** (or Ctrl+N, Ctrl+O, Ctrl+S) work with text files: each paragraph a line, headings starting with `# ` or `## `, so a saved document opens with its headings again.
+
+## Terminal
+
+![The Terminal](images/terminal.png)
+
+Ported from Skylight OS. Type JavaScript and click **Run** (or press Ctrl+Enter). The code runs in the Terminal window's own Nashorn engine, the same as any myxul app's scripts, so it can try anything an app can:
+
+```javascript
+Notifications.post('Hello', 'Sent from the Terminal');
+print('This window is called ' + window.title);
+6 * 7
+```
+
+`print` writes to the output box, the result of the last line is shown (`=> 42`), and errors are shown as `Error: ReferenceError: "nope" is not defined`. Variables you set stay for later runs. The Terminal has the `Notifications`, `Settings` and `NativeFileService` services, and `document` and `window` are its own. **Clear output** (Ctrl+L) empties the output box; the splitter between the boxes can be dragged.
+
+## Settings
+
+![Settings](images/settings.png)
+
+Ported from Skylight OS.
+
+* **Background**: click a picture (hover to see its name). The launcher's background changes at once, and is remembered; the picture in use stays pressed.
+* **Notifications**: how many seconds notifications stay on screen (1 to 60). Click **Save**, or press Enter; **Try one** shows one.
+
+Settings are kept in `~/.myxul/settings.properties`, for every app.
+
+### Notifications
+
+![A notification](images/notification.png)
+
+Apps can post notifications (the Terminal's sample does, and so does Settings when it saves). Each appears at the top right of the screen with a header and a body, and closes itself after the time set in Settings, or when its **×** is clicked. Several stack downwards.
+
+## Web Browser
+
+![The Web Browser](images/web-browser.png)
+
+Ported from Skylight OS. Type an address and press Enter or click **Go** (`http://` is added if you leave it out). **◀** and **▶** (Alt+Left and Alt+Right) go back and forward, **↻** (F5) reloads, **✕** stops a page loading, **Home** goes back to the start page, and Ctrl+L puts the cursor in the address bar. The status bar says when a page is loading, done, or couldn't be loaded, and the title is the page's.
+
+Pages are drawn by JavaFX's `WebView`, a WebKit browser that runs JavaScript and CSS. It is JavaFX 8's WebKit (its user agent says `AppleWebKit/604.1`, the WebKit of Safari 11, from 2017), so some current websites may not work fully.
+
+![A page from a web server](images/web-browser-test.png)
 
 ## Gallery
 

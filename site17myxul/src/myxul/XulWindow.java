@@ -47,6 +47,7 @@ public final class XulWindow {
 	private final List<String> arguments;
 	private final Map<Integer, Animation> timers = new HashMap<>();
 	private final Map<String, XulService> services = new LinkedHashMap<>();
+	private final List<Runnable> closeListeners = new ArrayList<>();
 	private int nextTimer = 1;
 	private boolean closed;
 
@@ -423,6 +424,10 @@ public final class XulWindow {
 			timer.stop();
 		}
 		timers.clear();
+		for (Runnable listener : closeListeners) {
+			listener.run();
+		}
+		closeListeners.clear();
 		engine.closed(this);
 	}
 
@@ -503,6 +508,11 @@ public final class XulWindow {
 				timer.stop();
 			}
 		}
+	}
+
+	/** Runs when the window closes: services use it to forget the window. */
+	public void addCloseListener(Runnable listener) {
+		closeListeners.add(listener);
 	}
 
 	/** The element with this id, for Java code (tests, services). */

@@ -48,6 +48,7 @@ An element myxul doesn't know is an error, with the file and line, and the list 
 | `<progressmeter>` | `ProgressBar` | `value` (0 to 100), `mode="undetermined"` |
 | `<image>` | `ImageView` | `src` (relative to the .xul file), `width`, `height` |
 | `<canvas>` | `XulCanvas`: a resizable `Region` holding a `Canvas` | Flexes like any element; scripts draw on `.node.getCanvas()` |
+| `<browser>`, `<iframe>` | `WebView` (WebKit) | `src`: a URL, or a file relative to the .xul file. Methods `loadURI`, `goBack`, `goForward`, `reload`, `stop`, `canGoBack`, `canGoForward`; properties `currentURI`, `contentTitle`; events `onload`, `onerror`, `onlocationchange` |
 
 ### Menus
 
@@ -99,5 +100,6 @@ An element myxul doesn't know is an error, with the file and line, and the list 
 | `onselect` | A listbox, tree, menulist or tabbox selection changes | `XulEvent` (`select`) |
 | `onfocus`, `onblur` | Focus arrives or leaves | `XulEvent` |
 | `onload`, `onclose`, `onunload` (window) | The window has opened; is asked to close (return `false` to stay); has closed | `XulEvent` |
+| `onlocationchange`, `onload`, `onerror` (`<browser>`) | A page starts loading; has loaded; couldn't be loaded. These are myxul's: Mozilla's `<browser>` used progress listeners instead | `XulEvent` |
 
 In each, `this` is the element (`this.value`, `this.checked`), and `event.target` is the JavaFX control.

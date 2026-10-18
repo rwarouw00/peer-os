@@ -48,6 +48,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.web.WebView;
 
 /**
  * Maps each XUL tag to the JavaFX object made for it, and applies XUL
@@ -96,6 +97,8 @@ final class XulRegistry {
 		builders.put("image", this::image);
 		builders.put("progressmeter", this::progressmeter);
 		builders.put("canvas", (e, w) -> new XulCanvas());
+		builders.put("browser", this::browser);
+		builders.put("iframe", this::browser);
 		builders.put("groupbox", this::groupbox);
 		builders.put("toolbar", this::toolbar);
 		builders.put("menubar", this::menubar);
@@ -302,6 +305,8 @@ final class XulRegistry {
 		case "src":
 			if (node instanceof ImageView && value != null) {
 				((ImageView) node).setImage(new Image(e.file.resolveSibling(value).toUri().toString()));
+			} else if (node instanceof WebView && value != null) {
+				((WebView) node).getEngine().load(url(e, value));
 			}
 			break;
 		case "mode":
@@ -456,6 +461,27 @@ final class XulRegistry {
 		}
 		view.setPreserveRatio(true);
 		return view;
+	}
+
+	/**
+	 * <browser src="start.html"/> (or <iframe>): JavaFX's WebView, a WebKit
+	 * browser. A src without a scheme is a file relative to the .xul file.
+	 */
+	private Object browser(XulElement e, XulWindow w) {
+		WebView view = new WebView();
+		view.setMinSize(0, 0);
+		if (e.attributes.containsKey("src")) {
+			view.getEngine().load(url(e, e.attr("src")));
+		}
+		return view;
+	}
+
+	/** A URL as written, or for one without a scheme, a file relative to the .xul file. */
+	static String url(XulElement e, String src) {
+		if (src.matches("^[a-zA-Z][a-zA-Z0-9+.-]*:.*")) {
+			return src;
+		}
+		return e.file.resolveSibling(src).toUri().toString();
 	}
 
 	private Object progressmeter(XulElement e, XulWindow w) {

@@ -21,8 +21,9 @@ It comes with:
 
 * **Leafpad XUL** (`apps/leafpad/`), the design spec's first target: a plain-text editor in the spirit of Lubuntu's Leafpad, with menus, keyboard shortcuts, find, jump to line, word wrap and the system's own file dialogs;
 * **AbiWord XUL** (`apps/abiword/`), the spec's larger target: a word processor's shell with toolbars, a page view painted on a `<canvas>`, a sidebar with tabs, a tree and a list, a splitter, and a status bar;
+* **Terminal**, **Settings** and **Web Browser** (`apps/terminal/`, `apps/settings/`, `apps/web-browser/`), ported from Skylight OS: JavaScript run in the window's own engine; the launcher's background and how long notifications stay; and web pages in JavaFX's WebKit, through XUL's `<browser>` element;
 * **Gallery** (`apps/gallery/`): every element myxul knows, each doing something;
-* **the launcher** (`ui/launcher.xul`), itself a XUL file.
+* **the launcher** (`ui/launcher.xul`), itself a XUL file, in front of the background chosen in Settings.
 
 Documentation: [`../wiki17myxul`](../wiki17myxul/README.md).
 
@@ -43,9 +44,10 @@ site17myxul/
 ├── src/myxul/            the engine: parser, tag registry, XulBox layout, styles, scripts, events, windows
 │   ├── bootstrap.js      document, window, alert ... and the element wrappers, for every window's scripts
 │   ├── myxul.css         default look for elements JavaFX has no control for (status bars)
-│   └── service/          Java services XUL files can ask for: FileService, PageView
+│   └── service/          Java services XUL files can ask for: FileService, PageView, SettingsService, NotificationService
 ├── ui/launcher.xul       the launcher
-├── apps/                 leafpad/, abiword/, gallery/: each a .xul file and its .js
+├── apps/                 leafpad/, abiword/, terminal/, settings/, web-browser/, gallery/: each a .xul file and its .js
+├── images/backgrounds/   the six pictures Settings offers (Skylight OS's), and their thumbnails
 ├── tests/xul/            test XUL in the style of real applications, and files with mistakes in them
 ├── build.sh / build.bat  compile src/ into myxul.jar
 └── run.sh / run.bat      start myxul

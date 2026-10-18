@@ -10,6 +10,8 @@ XUL elements carry inline web CSS: `style="font-family: monospace; padding: 6px;
 | --- | --- | --- |
 | `color` | `-fx-text-fill` | Labels, buttons, text boxes |
 | `background`, `background-color` | `-fx-background-color` | Boxes and controls (any Region) |
+| `background-image: url(...)` | `-fx-background-image`; a relative URL is a file relative to the .xul file | Regions |
+| `background-size`, `background-position`, `background-repeat` | `-fx-background-size` (`cover`, `contain`, sizes), `-fx-background-position`, `-fx-background-repeat` | Regions |
 | `font-family` | `-fx-font-family`; `monospace` becomes JavaFX's `monospaced`, other names are quoted | Everything with text |
 | `font-size` | `-fx-font-size` (`14px`, `10pt`; a bare number is pixels) | |
 | `font-weight`, `font-style` | `-fx-font-weight`, `-fx-font-style` | |

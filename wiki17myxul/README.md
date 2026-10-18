@@ -5,7 +5,7 @@ myxul is a XUL engine written from scratch for **Java 8**, built from the design
 * **Windows are XUL files.** An application's windows are Mozilla-style XUL: `<window>`, `<vbox>` and `<hbox>` with `flex`, `<button>`, `<textbox>`, `<menubar>`, `<tabbox>`, `<tree>`, `<splitter>` and the rest, with inline CSS styles.
 * **JavaFX draws them.** Each XUL tag becomes a JavaFX control or pane, laid out by myxul's own box pane, which shares space by `flex` weights as XUL does.
 * **Nashorn runs their JavaScript.** Event attributes (`oncommand`, `onclick`, `oninput`, ...) and `<script>` blocks are JavaScript, run by the engine built into Java 8. Scripts see XUL's `document`, `window`, `alert` and `confirm`, and elements behave like XUL elements (`el.value`, `el.setAttribute("disabled", true)`).
-* **Nothing else to install.** myxul is about 3,000 lines of Java and JavaScript of its own, in a 73 KB jar, and needs only a Java 8 JDK that includes JavaFX.
+* **Nothing else to install.** myxul is about 3,800 lines of Java and JavaScript of its own (counting comments), in an 81 KB jar, and needs only a Java 8 JDK that includes JavaFX.
 
 ```xml
 <window title="Hello" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -22,6 +22,8 @@ myxul is a XUL engine written from scratch for **Java 8**, built from the design
 </window>
 ```
 
+It comes with Leafpad XUL and an AbiWord XUL shell (the design spec's targets), the Terminal, Settings and Web Browser apps ported from Skylight OS, a Gallery of every element, and a launcher, all written in XUL and JavaScript.
+
 ![Leafpad XUL and AbiWord XUL](images/apps.png)
 
 ## Contents
@@ -29,7 +31,7 @@ myxul is a XUL engine written from scratch for **Java 8**, built from the design
 **Using myxul**
 
 * [Getting started](getting-started.md): the Java 8 you need, building, running
-* [User guide](user-guide.md): the launcher, Leafpad XUL, AbiWord XUL and the Gallery
+* [User guide](user-guide.md): the launcher, Leafpad XUL, AbiWord XUL, the Terminal, Settings, the Web Browser and the Gallery
 
 **Building apps**
 
@@ -58,7 +60,7 @@ myxul is a XUL engine written from scratch for **Java 8**, built from the design
 | Language | Java 8 for the engine; XUL, JavaScript (Nashorn, ECMAScript 5.1) and inline CSS for apps |
 | UI | JavaFX 8 (Modena look) |
 | Runs on | Windows, Linux or macOS with a Java 8 JDK that includes JavaFX; targeted at Lubuntu |
-| Engine | 15 classes in `myxul` (12 of them the core), 3 in `myxul.service`, and `bootstrap.js`: about 3,000 non-blank lines |
+| Engine | 15 classes in `myxul` (12 of them the core), 5 in `myxul.service`, and `bootstrap.js`: about 3,800 non-blank lines, with comments |
 | Libraries | None: only what Java 8 includes |
-| Apps | Leafpad XUL, AbiWord XUL (a shell), the Gallery, the launcher |
+| Apps | Leafpad XUL, AbiWord XUL (a shell), Terminal, Settings and Web Browser (from Skylight OS), the Gallery, the launcher |
 | Tested | On Linux with OpenJDK 1.8.0 and OpenJFX 8 (see [Limitations](limitations.md#how-it-was-tested)) |

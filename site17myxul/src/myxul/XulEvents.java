@@ -12,6 +12,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseButton;
+import javafx.concurrent.Worker;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 
 /**
  * Connects an element's event attributes (oncommand="save()", onclick, ...)
@@ -106,6 +109,25 @@ final class XulEvents {
 						blur.call(e, new XulEvent("blur", n));
 					}
 				});
+			}
+		}
+		if (node instanceof WebView) {
+			// <browser>: onload when a page has loaded, onerror when one failed, onlocationchange when a new one starts.
+			WebEngine web = ((WebView) node).getEngine();
+			XulScriptManager.Handler load = handler(e, "onload", w);
+			XulScriptManager.Handler error = handler(e, "onerror", w);
+			if (load != null || error != null) {
+				web.getLoadWorker().stateProperty().addListener((o, was, state) -> {
+					if (state == Worker.State.SUCCEEDED && load != null) {
+						load.call(e, new XulEvent("load", node));
+					} else if (state == Worker.State.FAILED && error != null) {
+						error.call(e, new XulEvent("error", node));
+					}
+				});
+			}
+			XulScriptManager.Handler location = handler(e, "onlocationchange", w);
+			if (location != null) {
+				web.locationProperty().addListener((o, was, now) -> location.call(e, new XulEvent("locationchange", node)));
 			}
 		}
 		XulScriptManager.Handler select = handler(e, "onselect", w);

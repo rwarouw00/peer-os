@@ -15,7 +15,7 @@ flowchart TB
         Events["XulEvents<br/>event attributes to JavaFX events"]
         Scripts["XulScriptManager<br/>the window's Nashorn engine"]
         Boot["bootstrap.js<br/>document, window, element wrappers"]
-        Services["myxul.service<br/>FileService, PageView"]
+        Services["myxul.service<br/>files, pages, settings, notifications"]
         Engine --> Window
         Window --> Parser
         Window --> Registry
@@ -46,7 +46,7 @@ flowchart TB
 | [`XulScriptManager`](../site17myxul/src/myxul/XulScriptManager.java) | The window's own Nashorn engine, with a class filter; runs scripts, compiles event attributes, turns script errors into messages |
 | [`bootstrap.js`](../site17myxul/src/myxul/bootstrap.js) | Run first in each engine: `document`, `window`, `alert`, `confirm`, `prompt`, timers, and the element wrappers |
 | [`XulCanvas`](../site17myxul/src/myxul/XulCanvas.java), [`XulEvent`](../site17myxul/src/myxul/XulEvent.java), [`XulDialogs`](../site17myxul/src/myxul/XulDialogs.java), [`XulException`](../site17myxul/src/myxul/XulException.java) | `<canvas>`; the event object for property-change events; alert, confirm, prompt and error dialogs; an error with its file and line |
-| [`service/`](../site17myxul/src/myxul/service/) | `XulService`, and the services: `FileService` (NativeFileService) and `PageView` (AbiCoreEngine) |
+| [`service/`](../site17myxul/src/myxul/service/) | `XulService`, and the services: `FileService` (NativeFileService), `PageView` (AbiCoreEngine), `SettingsService` (Settings) and `NotificationService` (Notifications) |
 
 ## Opening a window
 

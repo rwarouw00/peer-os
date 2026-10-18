@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xul-service Notifications myxul.service.NotificationService?>
+<?xul-service Settings myxul.service.SettingsService?>
+<?xul-service NativeFileService myxul.service.FileService?>
+<!-- Terminal: runs JavaScript in this window's own Nashorn engine, where
+     document, window and the services above are what any myxul app has.
+     Ported from Skylight OS's Terminal; terminal.js is its logic. -->
+<window id="terminal" title="Terminal" width="640" height="440"
+        onload="Terminal.start()"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script src="terminal.js"/>
+
+    <keyset>
+        <key keycode="VK_ENTER" modifiers="accel" oncommand="Terminal.run()"/>
+        <key key="L" modifiers="accel" oncommand="Terminal.clear()"/>
+    </keyset>
+
+    <toolbar>
+        <toolbarbutton id="run" label="Run" accesskey="R" oncommand="Terminal.run()" tooltiptext="Run the code (Ctrl+Enter)"/>
+        <toolbarbutton label="Clear output" accesskey="C" oncommand="Terminal.clear()" tooltiptext="Clear the output (Ctrl+L)"/>
+        <spacer flex="1"/>
+        <label value="JavaScript (Nashorn). Ctrl+Enter runs it." style="color: #555555;"/>
+    </toolbar>
+
+    <vbox flex="1">
+        <textbox id="code" multiline="true" flex="3" wrap="off" style="font-family: monospace; font-size: 13px;"/>
+        <splitter/>
+        <textbox id="output" multiline="true" flex="2" readonly="true" wrap="off"
+                 style="font-family: monospace; font-size: 13px; color: #1b5e20; background-color: #f3f7f3;"/>
+    </vbox>
+</window>

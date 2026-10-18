@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	/** The folder myxul.jar is in (or the current folder, when running from classes). */
-	static Path home() {
+	public static Path home() {
 		try {
 			Path jar = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 			return jar.toString().endsWith(".jar") ? jar.getParent() : Paths.get("");
