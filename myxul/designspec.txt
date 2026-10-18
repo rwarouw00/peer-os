@@ -358,7 +358,7 @@ printing a stack trace.
       function validateAndSave(event) {
           var targetButton = event.getTarget();     // the JavaFX Button
           targetButton.setText("Processing...");
-          BackendController.saveToDatabase();       // a Java service exposed to scripts
+          FileController.saveDoc();                 // a Java service exposed to scripts
       }
   </script>
 
@@ -367,7 +367,7 @@ printing a stack trace.
 Give each window its own ScriptContext (or its own engine), so two windows
 of the same app don't share variables. Expose to each: document (that
 window's XulDocument), window (title, close(), open dialogs), and the Java
-services the app may use (file access, database), and nothing more.
+services the app may use (such as file access), and nothing more.
 
 5.5 Security note
 
@@ -564,58 +564,7 @@ Review:
 
 
 ==============================================================================
-9. DATA STORAGE: EMBEDDED HSQLDB (OR FIREBIRD)
-==============================================================================
-
-For a self-contained desktop app, use an embedded, in-process database
-reached through JDBC, rather than a NoSQL server.
-
-HSQLDB (recommended):
-
-* Pure Java. One jar on the classpath, started in-process with the app. No
-  service to install, no sockets.
-* jdbc:hsqldb:file:<path>;shutdown=true stores the database in files under
-  the user's home folder.
-* Standard JDBC, so the engine isn't tied to one vendor's API. Embedded
-  document stores (MapDB, Nitrite) have their own APIs instead of JDBC.
-* For loose data (recent files, window geometry, preferences), store JSON
-  text in a column and parse it in Nashorn:
-
-    var jsonResult = MyDatabaseService.executeQuery("SELECT preferences FROM app_settings WHERE id = 1");
-    var userPrefs = JSON.parse(jsonResult);
-
-  Review: the conversation said HSQLDB has a native JSON data type. Don't
-  rely on that. Store JSON as VARCHAR or CLOB, and do the JSON work in
-  JavaScript (JSON.parse, JSON.stringify).
-
-Review: pick an HSQLDB release that runs on Java 8. HSQLDB 2.5.x runs on
-Java 8. From 2.6 the main jar needs Java 11, and Java 8 needs the separate
-"jdk8" build (Maven classifier jdk8). Ship that jar in the app's own lib/
-folder.
-
-Loading the driver (Java 8, jar in our lib/ folder or on the classpath):
-
-  Class.forName("org.hsqldb.jdbc.JDBCDriver");
-  Connection connection = DriverManager.getConnection(
-          "jdbc:hsqldb:file:" + dbFilePath + ";shutdown=true", "SA", "");
-
-Firebird SQL with Jaybird (alternative):
-
-* A native C/C++ engine with MVCC, a strong stored-procedure language (PSQL)
-  and crash resilience, and no data on the Java heap.
-* Embedded mode (jdbc:firebirdsql:embedded:) needs the native Firebird
-  library (libfbembed.so or libfbclient.so on Linux, about 10-15 MB), either
-  installed through apt or shipped with the app and found at run time.
-* Review: Jaybird 5 runs on Java 8 (Jaybird 6 requires Java 17), so
-  Jaybird 5 is the version to use with this stack.
-
-Verdict: HSQLDB for a zero-dependency, double-click-to-run app (the Leafpad
-target). Consider Firebird only if an app grows into heavy relational
-workloads (millions of rows, triggers, stored procedures).
-
-
-==============================================================================
-10. BUILD ORDER
+9. BUILD ORDER
 ==============================================================================
 
 1. XulParser + XulRegistry for <window>, <vbox>, <hbox>, <label>, <button>,
@@ -631,5 +580,4 @@ workloads (millions of rows, triggers, stored procedures).
    proportional flex, align and pack.
 6. <splitter>, <tabbox>, <tree>, <listbox>, <toolbar>, <statusbar>;
    test against Komodo and SeaMonkey Composer snippets.
-7. HSQLDB service for app data.
-8. AbiWord XUL shell.
+7. AbiWord XUL shell.
